@@ -49,6 +49,52 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | Examples:	my-controller/index	-> my_controller/index
 |		my-controller/my-method	-> my_controller/my_method
 */
-$route['default_controller'] = 'welcome';
+$route['default_controller'] = 'customer/login';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
+
+$route['admin'] = 'admin/login';
+$route['admin/login'] = 'admin/login';
+$route['admin/logout'] = 'admin/login/logout';
+$route['admin/dashboard'] = 'admin/dashboard/index';
+$route['admin/profile'] = 'admin/profile/index';
+$route['admin/profile/update'] = 'admin/profile/update';
+$route['admin/profile/password'] = 'admin/profile/password';
+$route['admin/bookings'] = 'admin/booking/index';
+$route['admin/bookings/create'] = 'admin/booking/create';
+$route['admin/bookings/store'] = 'admin/booking/store';
+$route['admin/customers'] = 'admin/customer/index';
+$route['admin/documents'] = 'admin/document/index';
+$route['admin/documents/review/(:num)'] = 'admin/document/review/$1';
+$route['admin/documents/update-status'] = 'admin/document/update_status';
+$route['admin/vehicles'] = 'admin/vehicle/index';
+$route['admin/vehicles/create'] = 'admin/vehicle/create';
+$route['admin/vehicles/store'] = 'admin/vehicle/store';
+$route['admin/vehicles/update/(:num)'] = 'admin/vehicle/update/$1';
+$route['admin/vehicles/delete/(:num)'] = 'admin/vehicle/delete/$1';
+$route['admin/payments'] = 'admin/payment/index';
+$route['admin/payments/store'] = 'admin/payment/store';
+
+$route['customer'] = 'customer/login';
+$route['customer/login'] = 'customer/login';
+$route['register'] = 'customer/login/register';
+$route['customer/logout'] = 'customer/login/logout';
+$route['customer/dashboard'] = 'customer/dashboard/index';
+$route['customer/profile'] = 'customer/profile/index';
+$route['customer/profile/update'] = 'customer/profile/update';
+$route['customer/profile/password'] = 'customer/profile/password';
+$route['customer/bookings'] = 'customer/booking/index';
+$route['customer/bookings/create'] = 'customer/booking/create';
+$route['customer/bookings/store'] = 'customer/booking/store';
+$route['customer/documents'] = 'customer/document/index';
+$route['customer/documents/store'] = 'customer/document/store';
+$route['customer/vehicles'] = 'customer/vehicle/index';
+$route['customer/vehicles/create'] = 'customer/vehicle/create';
+
+$route['api/admin/login'] = 'api/admin_login';
+$route['api/admin/register'] = 'api/admin_register';
+$route['api/customer/login'] = 'api/customer_login';
+$route['api/customer/register'] = 'api/customer_register';
+$route['api/vehicles'] = 'api/vehicles';
+$route['api/bookings/create'] = 'api/create_booking';
+$route['api/dashboard'] = 'api/dashboard';
