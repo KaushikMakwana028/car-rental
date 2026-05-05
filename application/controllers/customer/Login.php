@@ -6,7 +6,7 @@ class Login extends MY_Controller
     public function index()
     {
         if ($this->is_logged_in() && $this->current_role() === 0) {
-            redirect('customer/dashboard');
+            redirect($this->consume_customer_intended_url());
         }
 
         if ($this->input->method() === 'post') {
@@ -16,11 +16,11 @@ class Login extends MY_Controller
             $user = $this->General_model->authenticate_user($login_id, $password, 0);
             if (!empty($user)) {
                 $this->session->set_userdata('logged_in_user', $user);
-                redirect('customer/dashboard');
+                redirect($this->consume_customer_intended_url());
             }
 
             $this->session->set_flashdata('error', 'Invalid user login details.');
-            redirect('customer');
+            redirect('customer/login');
         }
 
         $this->load->view('customer/login');
@@ -40,7 +40,7 @@ class Login extends MY_Controller
             $result = $this->General_model->create_user($payload);
             if ($result['status']) {
                 $this->session->set_flashdata('success', 'User account created. Please login.');
-                redirect('customer');
+                redirect('customer/login');
             }
 
             $this->session->set_flashdata('error', $result['message']);
@@ -53,7 +53,8 @@ class Login extends MY_Controller
     public function logout()
     {
         $this->session->unset_userdata('logged_in_user');
+        $this->session->unset_userdata('customer_intended_url');
         $this->session->set_flashdata('success', 'User logged out successfully.');
-        redirect('customer');
+        redirect('customer/dashboard');
     }
 }

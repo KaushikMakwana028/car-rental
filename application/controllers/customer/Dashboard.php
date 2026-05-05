@@ -1,15 +1,19 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Dashboard extends Customer_Controller
+class Dashboard extends MY_Controller
 {
     public function index()
     {
-        $data['page_title'] = 'Customer Dashboard';
+        $data['page_title'] = 'Home';
+        $data['page_subtitle'] = 'Explore the fleet, compare vehicles, and move into booking with a cleaner premium customer experience.';
         $data['current_user'] = $this->current_user;
-        $data['stats'] = $this->General_model->get_dashboard_counts('customer', (int) $this->current_user['id']);
-        $data['my_bookings'] = array_slice($this->General_model->get_bookings(array('bookings.customer_id' => $this->current_user['id'])), 0, 5);
-        $data['vehicles'] = array_slice($this->General_model->get_available_vehicles(), 0, 6);
-        $this->load->view('customer/dashboard', $data);
+        $data['is_customer_logged_in'] = $this->is_logged_in() && $this->current_role() === 0;
+
+        $data['vehicles'] = $this->General_model->get_available_vehicles();
+
+        $this->load->view('customer/partials/header', $data);
+        $this->load->view('customer/home_view', $data);
+        $this->load->view('customer/partials/footer', $data);
     }
 }

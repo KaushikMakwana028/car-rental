@@ -9,6 +9,6 @@ class Dashboard extends Admin_Controller
         $data['current_user'] = $this->current_user;
         $data['stats'] = $this->General_model->get_dashboard_counts('admin');
         $data['recent_bookings'] = array_slice($this->General_model->get_bookings(), 0, 5);
-        $this->load->view('admin/dashboard', $data);
+        $this->render_view('admin/dashboard', $data);
     }
 }

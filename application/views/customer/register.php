@@ -1,323 +1,349 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Create Account</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <title>Create Account | Cab Booking Fast</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+        :root{
+            --bg:#f6efe3;
+            --paper:#fffdf8;
+            --ink:#241b13;
+            --muted:#716252;
+            --line:rgba(129,96,44,.16);
+            --gold:#b98735;
+            --gold-deep:#8f6320;
+            --forest:#173b34;
+            --danger:#a73434;
+            --danger-soft:#fde8e8;
+            --shadow-lg:0 28px 60px rgba(72,52,22,.12);
         }
-
-        :root {
-            --teal: #0f766e;
-            --teal-dark: #0d6460;
-            --teal-glow: rgba(15, 118, 110, 0.13);
-            --ink: #0f172a;
-            --ink-3: #64748b;
-            --ink-4: #94a3b8;
-            --surface: #ffffff;
-            --page: #f1fdfb;
-            --border: #ccf0ec;
-            --err-bg: #fff1f2;
-            --err-border: #fecdd3;
-            --err-text: #be123c;
-            --r: 10px;
-            --t: 0.18s ease;
+        *{box-sizing:border-box}
+        body{
+            margin:0;
+            min-height:100vh;
+            font-family:'Manrope',sans-serif;
+            color:var(--ink);
+            background:
+                radial-gradient(circle at top left, rgba(185,135,53,.14), transparent 24%),
+                radial-gradient(circle at right, rgba(23,59,52,.10), transparent 22%),
+                linear-gradient(180deg,#fbf7ef 0%,#f4ebdd 100%);
+            padding:24px;
         }
-
-        body {
-            font-family: 'Roboto', sans-serif;
-            background: var(--page);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
+        a{text-decoration:none;color:inherit}
+        img{display:block;max-width:100%}
+        .page{
+            max-width:1180px;
+            margin:0 auto;
+            display:grid;
+            grid-template-columns:.92fr 1.08fr;
+            gap:22px;
+            align-items:stretch;
         }
-
-        .form-box {
-            width: 100%;
-            max-width: 430px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 18px;
-            padding: 32px 28px;
-            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+        .intro,
+        .card{
+            border-radius:30px;
+            border:1px solid var(--line);
+            background:rgba(255,253,248,.96);
+            box-shadow:var(--shadow-lg);
         }
-
-        .form-title {
-            font-size: 28px;
-            font-weight: 900;
-            color: var(--ink);
-            margin-bottom: 6px;
+        .intro{
+            padding:30px;
+            background:
+                radial-gradient(circle at top right, rgba(185,135,53,.16), transparent 28%),
+                linear-gradient(180deg,#fffaf1 0%,#f7eedf 100%);
         }
-
-        .form-sub {
-            font-size: 14px;
-            font-weight: 300;
-            color: var(--ink-3);
-            margin-bottom: 24px;
-            line-height: 1.6;
+        .brand{
+            display:flex;
+            align-items:center;
+            gap:14px;
         }
-
-        .flash {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            padding: 11px 13px;
-            border-radius: var(--r);
-            border: 1px solid var(--err-border);
-            background: var(--err-bg);
-            color: var(--err-text);
-            font-size: 13px;
-            line-height: 1.5;
-            margin-bottom: 20px;
+        .brand-logo{
+            width:68px;
+            height:68px;
+            padding:10px;
+            border-radius:22px;
+            background:linear-gradient(135deg,#fff5de,#eed29d);
+            box-shadow:0 14px 28px rgba(185,135,53,.16);
         }
-
-        .flash svg {
-            width: 14px;
-            height: 14px;
-            flex-shrink: 0;
-            margin-top: 2px;
+        .brand-copy strong{
+            display:block;
+            font-family:'Cormorant Garamond',serif;
+            font-size:38px;
+            line-height:.9;
+            color:#7a541d;
         }
-
-        .field {
-            margin-bottom: 14px;
+        .brand-copy span{
+            display:block;
+            margin-top:6px;
+            font-size:11px;
+            font-weight:800;
+            letter-spacing:.18em;
+            text-transform:uppercase;
+            color:#7a6953;
         }
-
-        .row-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 14px;
+        .eyebrow{
+            display:inline-flex;
+            align-items:center;
+            gap:10px;
+            margin-top:34px;
+            color:#8c6220;
+            font-size:11px;
+            font-weight:800;
+            letter-spacing:.16em;
+            text-transform:uppercase;
         }
-
-        @media (max-width: 480px) {
-            .row-2 {
-                grid-template-columns: 1fr;
-            }
+        .eyebrow::before{
+            content:'';
+            width:24px;
+            height:2px;
+            background:linear-gradient(90deg,var(--gold),transparent);
+            border-radius:999px;
         }
-
-        label {
-            display: block;
-            font-size: 11px;
-            font-weight: 500;
-            color: var(--ink-3);
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-            margin-bottom: 6px;
+        .intro h1{
+            margin:16px 0 0;
+            font-family:'Cormorant Garamond',serif;
+            font-size:66px;
+            line-height:.9;
+            letter-spacing:-.03em;
+            color:#2a1f14;
         }
-
-        .input-wrap {
-            position: relative;
+        .intro p{
+            margin:18px 0 0;
+            color:var(--muted);
+            font-size:15px;
+            line-height:1.9;
         }
-
-        .iico {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 14px;
-            height: 14px;
-            color: var(--ink-4);
-            pointer-events: none;
-            transition: color var(--t);
+        .intro-grid{
+            display:grid;
+            gap:14px;
+            margin-top:26px;
         }
-
-        .input-wrap:focus-within .iico {
-            color: var(--teal);
+        .intro-item{
+            padding:18px;
+            border-radius:20px;
+            background:#fffdfa;
+            border:1px solid rgba(129,96,44,.12);
         }
-
-        input[type="text"],
-        input[type="email"],
-        input[type="tel"],
-        input[type="password"] {
-            width: 100%;
-            height: 44px;
-            padding: 0 12px 0 36px;
-            background: var(--surface);
-            border: 1.5px solid var(--border);
-            border-radius: var(--r);
-            font-family: 'Roboto', sans-serif;
-            font-size: 14px;
-            font-weight: 400;
-            color: var(--ink);
-            outline: none;
-            transition: border-color var(--t), box-shadow var(--t);
-            -webkit-appearance: none;
+        .intro-item strong{
+            display:block;
+            font-size:15px;
+            color:#2b2015;
         }
-
-        input::placeholder {
-            color: var(--ink-4);
-            font-weight: 300;
+        .intro-item span{
+            display:block;
+            margin-top:6px;
+            color:var(--muted);
+            font-size:13px;
+            line-height:1.7;
         }
-
-        input:focus {
-            border-color: var(--teal);
-            box-shadow: 0 0 0 3px var(--teal-glow);
+        .card{
+            padding:30px;
         }
-
-        .btn {
-            width: 100%;
-            height: 48px;
-            background: var(--teal);
-            color: #fff;
-            border: none;
-            border-radius: var(--r);
-            font-family: 'Roboto', sans-serif;
-            font-size: 15px;
-            font-weight: 700;
-            letter-spacing: 0.04em;
-            cursor: pointer;
-            margin-top: 8px;
-            transition: background var(--t), transform var(--t), box-shadow var(--t);
+        .card h2{
+            margin:0;
+            font-family:'Cormorant Garamond',serif;
+            font-size:48px;
+            line-height:.92;
         }
-
-        .btn:hover {
-            background: var(--teal-dark);
-            box-shadow: 0 6px 20px rgba(15, 118, 110, 0.28);
-            transform: translateY(-1px);
+        .card p{
+            margin:12px 0 0;
+            color:var(--muted);
+            font-size:15px;
+            line-height:1.8;
         }
-
-        .divider {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin: 18px 0;
+        .flash{
+            margin-top:20px;
+            padding:14px 16px;
+            border-radius:18px;
+            border:1px solid #efc5c5;
+            background:var(--danger-soft);
+            color:#922e2e;
+            font-size:14px;
+            font-weight:700;
+            line-height:1.6;
         }
-
-        .divider::before,
-        .divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: var(--border);
+        .form-grid{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:16px;
+            margin-top:24px;
         }
-
-        .divider span {
-            font-size: 11px;
-            color: var(--ink-4);
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            white-space: nowrap;
+        .full{grid-column:1 / -1}
+        label{
+            display:block;
+            margin-bottom:8px;
+            font-size:11px;
+            font-weight:800;
+            letter-spacing:.12em;
+            text-transform:uppercase;
+            color:#7a6547;
         }
-
-        .back-link {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            height: 44px;
-            border: 1.5px solid var(--border);
-            border-radius: var(--r);
-            background: var(--surface);
-            font-family: 'Roboto', sans-serif;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--ink-3);
-            text-decoration: none;
-            transition: color var(--t), border-color var(--t), background var(--t);
+        .input-wrap{position:relative}
+        .input-icon{
+            position:absolute;
+            left:14px;
+            top:50%;
+            width:18px;
+            height:18px;
+            color:#9a8870;
+            transform:translateY(-50%);
+            pointer-events:none;
         }
-
-        .back-link:hover {
-            color: var(--teal);
-            border-color: var(--teal);
-            background: #eefcf9;
+        input{
+            width:100%;
+            min-height:54px;
+            padding:14px 16px 14px 46px;
+            border-radius:18px;
+            border:1px solid rgba(129,96,44,.18);
+            background:#fff;
+            color:var(--ink);
+            outline:none;
+            transition:.18s ease;
         }
-
-        .terms {
-            font-size: 11px;
-            color: var(--ink-4);
-            text-align: center;
-            line-height: 1.6;
-            margin-top: 14px;
+        input:focus{
+            border-color:rgba(185,135,53,.56);
+            box-shadow:0 0 0 4px rgba(185,135,53,.10);
         }
-
-        .terms a {
-            color: var(--teal);
-            text-decoration: none;
+        .btn{
+            width:100%;
+            min-height:52px;
+            border:none;
+            border-radius:999px;
+            background:linear-gradient(135deg,var(--gold),var(--gold-deep));
+            color:#fff;
+            font-size:14px;
+            font-weight:800;
+            cursor:pointer;
+            box-shadow:0 16px 28px rgba(185,135,53,.22);
+        }
+        .back-link{
+            margin-top:18px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            min-height:50px;
+            border-radius:999px;
+            border:1px solid var(--line);
+            background:#fff8eb;
+            color:#5f503d;
+            font-size:14px;
+            font-weight:700;
+        }
+        .terms{
+            margin-top:14px;
+            color:var(--muted);
+            font-size:12px;
+            line-height:1.7;
+            text-align:center;
+        }
+        @media (max-width:980px){
+            .page{grid-template-columns:1fr}
+        }
+        @media (max-width:640px){
+            body{padding:14px}
+            .intro,.card{padding:22px;border-radius:24px}
+            .intro h1{font-size:46px}
+            .card h2{font-size:38px}
+            .form-grid{grid-template-columns:1fr}
         }
     </style>
 </head>
-
 <body>
-    <div class="form-box">
-        <h1 class="form-title">Create your account</h1>
-        <p class="form-sub">Register with your name, email, phone and one password.</p>
-
-        <?php if ($this->session->flashdata('error')): ?>
-            <div class="flash">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="12" y1="8" x2="12" y2="12" />
-                    <line x1="12" y1="16" x2="12.01" y2="16" />
-                </svg>
-                <?php echo $this->session->flashdata('error'); ?>
-            </div>
-        <?php endif; ?>
-
-        <form method="post" action="<?php echo base_url('register'); ?>">
-            <div class="field">
-                <label for="full_name">Full Name</label>
-                <div class="input-wrap">
-                    <input type="text" id="full_name" name="full_name" placeholder="Jane Doe" autocomplete="name" required>
-                    <svg class="iico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="8" r="5" />
-                        <path d="M3 21a9 9 0 0 1 18 0" />
-                    </svg>
+    <div class="page">
+        <section class="intro">
+            <div class="brand">
+                <div class="brand-logo">
+                    <img src="<?php echo base_url('assets/home/logo.png'); ?>" alt="Cab Booking Fast logo">
+                </div>
+                <div class="brand-copy">
+                    <strong>Cab Booking Fast</strong>
+                    <span>Customer Portal</span>
                 </div>
             </div>
 
-            <div class="row-2">
-                <div class="field" style="margin-bottom:0">
-                    <label for="email">Email</label>
-                    <div class="input-wrap">
-                        <input type="email" id="email" name="email" placeholder="you@email.com" autocomplete="email" required>
-                        <svg class="iico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="2" y="4" width="20" height="16" rx="2" />
-                            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-                        </svg>
+            <div class="eyebrow">Create Account</div>
+            <h1>Start booking with a more premium customer side.</h1>
+            <p>Registration is now part of the same warm, brand-led experience, with better spacing, cleaner form styling, and mobile-friendly layout behavior.</p>
+
+            <div class="intro-grid">
+                <div class="intro-item">
+                    <strong>One customer identity</strong>
+                    <span>Register once and manage bookings, documents, and profile details from one dashboard.</span>
+                </div>
+                <div class="intro-item">
+                    <strong>Fast booking start</strong>
+                    <span>After account creation, you can sign in and continue directly into the booking flow.</span>
+                </div>
+                <div class="intro-item">
+                    <strong>Improved mobile view</strong>
+                    <span>The full registration experience now stacks cleanly on smaller screens.</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Create your account</h2>
+            <p>Register with your name, email, phone, and password to unlock the redesigned customer experience.</p>
+
+            <?php if ($this->session->flashdata('error')): ?>
+                <div class="flash"><?php echo $this->session->flashdata('error'); ?></div>
+            <?php endif; ?>
+
+            <form method="post" action="<?php echo base_url('register'); ?>">
+                <div class="form-grid">
+                    <div class="full">
+                        <label for="full_name">Full Name</label>
+                        <div class="input-wrap">
+                            <input type="text" id="full_name" name="full_name" placeholder="Enter full name" autocomplete="name" required>
+                            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="8" r="5"></circle>
+                                <path d="M3 21a9 9 0 0 1 18 0"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="email">Email</label>
+                        <div class="input-wrap">
+                            <input type="email" id="email" name="email" placeholder="Enter email" autocomplete="email" required>
+                            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="phone">Phone</label>
+                        <div class="input-wrap">
+                            <input type="tel" id="phone" name="phone" placeholder="Enter phone number" autocomplete="tel" required>
+                            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.21h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.78a16 16 0 0 0 6.29 6.29l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="full">
+                        <label for="password">Password</label>
+                        <div class="input-wrap">
+                            <input type="password" id="password" name="password" placeholder="Create a password" autocomplete="new-password" required>
+                            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="full">
+                        <button class="btn" type="submit">Create Customer Account</button>
                     </div>
                 </div>
-                <div class="field" style="margin-bottom:0">
-                    <label for="phone">Phone</label>
-                    <div class="input-wrap">
-                        <input type="tel" id="phone" name="phone" placeholder="+91 98765 43210" autocomplete="tel" required>
-                        <svg class="iico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.21h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.78a16 16 0 0 0 6.29 6.29l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
-                        </svg>
-                    </div>
-                </div>
-            </div>
+            </form>
 
-            <div class="field" style="margin-top:14px">
-                <label for="password">Password</label>
-                <div class="input-wrap">
-                    <input type="password" id="password" name="password" placeholder="Enter your password" autocomplete="new-password" required>
-                    <svg class="iico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                    </svg>
-                </div>
-            </div>
-
-            <button class="btn" type="submit">Create Account</button>
-        </form>
-
-        <div class="divider"><span>already registered?</span></div>
-
-        <a href="<?php echo base_url('customer'); ?>" class="back-link">Back to Login</a>
-
-        <p class="terms">By registering you agree to our <a href="#">Terms</a> &amp; <a href="#">Privacy Policy</a></p>
+            <a class="back-link" href="<?php echo base_url('customer/login'); ?>">Back to Login</a>
+            <div class="terms">By creating an account, you are ready to use the redesigned customer booking experience.</div>
+        </section>
     </div>
 </body>
-
 </html>

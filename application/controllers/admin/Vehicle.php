@@ -8,7 +8,7 @@ class Vehicle extends Admin_Controller
         $data['page_title'] = 'Manage Vehicles';
         $data['current_user'] = $this->current_user;
         $data['vehicles'] = $this->General_model->get_all('vehicles');
-        $this->load->view('admin/vehicles_list', $data);
+        $this->render_view('admin/vehicles_list', $data);
     }
 
     public function create()

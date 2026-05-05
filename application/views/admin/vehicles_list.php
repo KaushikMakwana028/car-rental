@@ -1,908 +1,912 @@
-<?php $this->load->view('admin/partials/header'); ?>
+<?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
 <style>
-    * {
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
+
+    :root {
+        --brand: #2563eb;
+        --brand-hover: #1d4ed8;
+        --brand-light: #eff6ff;
+        --brand-mid: #dbeafe;
+        --surface: #ffffff;
+        --surface-alt: #f8fafc;
+        --border: #e2e8f0;
+        --border-soft: #f1f5f9;
+        --text-1: #0f172a;
+        --text-2: #475569;
+        --text-3: #94a3b8;
+        --success-bg: #f0fdf4;
+        --success-bd: #bbf7d0;
+        --success-tx: #15803d;
+        --danger-bg: #fff1f2;
+        --danger-bd: #fecdd3;
+        --danger-tx: #be123c;
+        --warning-bg: #fffbeb;
+        --warning-bd: #fde68a;
+        --warning-tx: #b45309;
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+        --radius-xl: 20px;
+        --shadow-xs: 0 1px 3px rgba(15, 23, 42, .06);
+        --shadow-sm: 0 4px 16px rgba(15, 23, 42, .08);
+        --shadow-md: 0 8px 32px rgba(15, 23, 42, .12);
+        --shadow-modal: 0 24px 64px rgba(15, 23, 42, .18);
+        --font: 'DM Sans', system-ui, sans-serif;
+        --font-mono: 'DM Mono', monospace;
+    }
+
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
         margin: 0;
         padding: 0;
-        box-sizing: border-box;
     }
 
-    body {
-        background: #f8fafc;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    .vm-wrap {
+        font-family: var(--font);
+        color: var(--text-1);
     }
 
-    .page-wrapper {
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 40px 20px;
-    }
-
-    /* ===== PAGE HEADER ===== */
-    .page-header {
-        margin-bottom: 40px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 20px;
-    }
-
-    .page-header-content h1 {
-        font-size: 32px;
-        font-weight: 700;
-        color: #1e293b;
-        margin-bottom: 8px;
-    }
-
-    .page-header-content p {
-        font-size: 15px;
-        color: #64748b;
-        line-height: 1.6;
-    }
-
-    .page-header-actions {
-        display: flex;
-        gap: 12px;
-    }
-
-    .btn-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 10px;
-        border: none;
-        background: #e2e8f0;
-        color: #475569;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 18px;
-        transition: all 0.3s ease;
-    }
-
-    .btn-icon:hover {
-        background: #cbd5e1;
-        color: #1e293b;
-    }
-
-    /* ===== STATS GRID ===== */
-    .stats-grid {
+    /* ── Stats grid ── */
+    .vm-stats {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 24px;
-        margin-bottom: 40px;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+        margin-bottom: 28px;
     }
 
-    .stat-card {
-        background: white;
-        border-radius: 16px;
-        padding: 28px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-        border: 1px solid #e2e8f0;
+    .vm-stat {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 22px 24px;
+        box-shadow: var(--shadow-xs);
         position: relative;
         overflow: hidden;
     }
 
-    .stat-card::before {
+    .vm-stat::after {
         content: '';
         position: absolute;
-        top: -50%;
-        right: -50%;
-        width: 200px;
-        height: 200px;
-        background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(99, 102, 241, 0.05));
-        border-radius: 50%;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        border-radius: 0 0 var(--radius-lg) var(--radius-lg);
     }
 
-    .stat-card-content {
-        position: relative;
-        z-index: 1;
+    .vm-stat.blue::after {
+        background: #2563eb;
     }
 
-    .stat-label {
-        display: block;
-        font-size: 12px;
-        font-weight: 700;
-        letter-spacing: 0.8px;
+    .vm-stat.green::after {
+        background: #22c55e;
+    }
+
+    .vm-stat.amber::after {
+        background: #f59e0b;
+    }
+
+    .vm-stat-label {
+        font-size: 11px;
+        font-weight: 600;
         text-transform: uppercase;
-        color: #64748b;
-        margin-bottom: 12px;
+        letter-spacing: .7px;
+        color: var(--text-3);
+        margin-bottom: 10px;
     }
 
-    .stat-number {
-        display: block;
-        font-size: 36px;
-        font-weight: 700;
-        color: #1e293b;
-        margin-bottom: 12px;
+    .vm-stat-value {
+        font-size: 34px;
+        font-weight: 600;
+        color: var(--text-1);
+        line-height: 1;
+        margin-bottom: 6px;
+        letter-spacing: -1px;
     }
 
-    .stat-description {
-        font-size: 14px;
-        color: #64748b;
-        line-height: 1.6;
+    .vm-stat-desc {
+        font-size: 13px;
+        color: var(--text-2);
     }
 
-    .stat-icon {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        font-size: 32px;
-        opacity: 0.8;
-    }
-
-    .stat-card.blue {
-        border-left: 4px solid #3b82f6;
-    }
-
-    .stat-card.green {
-        border-left: 4px solid #10b981;
-    }
-
-    .stat-card.orange {
-        border-left: 4px solid #f59e0b;
-    }
-
-    /* ===== SECTION CARD ===== */
-    .section-card {
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-        border: 1px solid #e2e8f0;
+    /* ── Section card ── */
+    .vm-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-xs);
         overflow: hidden;
     }
 
-    .card-head {
-        padding: 28px;
-        border-bottom: 1px solid #e2e8f0;
+    .vm-card-head {
         display: flex;
-        justify-content: space-between;
         align-items: center;
+        justify-content: space-between;
         gap: 20px;
+        padding: 24px 28px;
+        border-bottom: 1px solid var(--border-soft);
         flex-wrap: wrap;
     }
 
-    .card-head>div {
-        flex: 1;
+    .vm-card-head h3 {
+        font-size: 17px;
+        font-weight: 600;
+        color: var(--text-1);
+        margin-bottom: 3px;
     }
 
-    .card-head h3 {
-        font-size: 20px;
-        font-weight: 700;
-        color: #1e293b;
-        margin-bottom: 8px;
+    .vm-card-head p {
+        font-size: 13.5px;
+        color: var(--text-2);
+        line-height: 1.5;
     }
 
-    .card-head p {
-        font-size: 14px;
-        color: #64748b;
-        line-height: 1.6;
-    }
-
-    /* ===== BUTTONS ===== */
-    .btn {
+    /* ── Add button ── */
+    .vm-add-btn {
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        padding: 12px 28px;
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-        color: white;
+        padding: 10px 20px;
+        background: var(--brand);
+        color: #fff;
         border: none;
-        border-radius: 10px;
-        font-size: 14px;
-        font-weight: 600;
+        border-radius: var(--radius-md);
+        font: 600 13.5px/1 var(--font);
         cursor: pointer;
-        transition: all 0.3s ease;
-        text-transform: uppercase;
-        letter-spacing: 0.3px;
-        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        white-space: nowrap;
+        transition: background .15s ease, transform .1s ease, box-shadow .15s ease;
+        box-shadow: 0 2px 8px rgba(37, 99, 235, .3);
     }
 
-    .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    .vm-add-btn:hover {
+        background: var(--brand-hover);
+        box-shadow: 0 4px 14px rgba(37, 99, 235, .4);
     }
 
-    .btn:active {
-        transform: translateY(0);
+    .vm-add-btn:active {
+        transform: scale(.98);
     }
 
-    /* ===== TABLE ===== */
-    .table-wrap {
+    .vm-add-btn svg {
+        width: 15px;
+        height: 15px;
+        flex-shrink: 0;
+    }
+
+    /* ── Table ── */
+    .vm-table-wrap {
         overflow-x: auto;
     }
 
-    .table-wrap table {
+    .vm-table {
         width: 100%;
         border-collapse: collapse;
-        min-width: 1200px;
+        min-width: 960px;
+        font-size: 13.5px;
     }
 
-    .table-wrap thead {
-        background: #f8fafc;
-        border-bottom: 2px solid #e2e8f0;
+    .vm-table thead {
+        background: var(--surface-alt);
+        border-bottom: 1px solid var(--border);
     }
 
-    .table-wrap th {
-        padding: 16px 20px;
+    .vm-table th {
+        padding: 13px 18px;
         text-align: left;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 700;
-        letter-spacing: 0.5px;
+        letter-spacing: .6px;
         text-transform: uppercase;
-        color: #64748b;
+        color: var(--text-3);
+        white-space: nowrap;
     }
 
-    .table-wrap td {
-        padding: 16px 20px;
-        border-bottom: 1px solid #e2e8f0;
-        font-size: 14px;
-        color: #1e293b;
+    .vm-table td {
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--border-soft);
+        color: var(--text-1);
+        vertical-align: middle;
     }
 
-    .table-wrap tbody tr {
-        transition: all 0.3s ease;
-    }
-
-    .table-wrap tbody tr:hover {
-        background: #f8fafc;
-    }
-
-    .table-wrap tbody tr:last-child td {
+    .vm-table tbody tr:last-child td {
         border-bottom: none;
     }
 
-    /* ===== VEHICLE CARD ===== */
-    .vehicle-id {
-        font-weight: 700;
-        color: #3b82f6;
+    .vm-table tbody tr {
+        transition: background .1s ease;
     }
 
-    .vehicle-thumb {
-        width: 80px;
-        height: 60px;
-        border-radius: 10px;
+    .vm-table tbody tr:hover {
+        background: #fafbfc;
+    }
+
+    /* ── Vehicle info cell ── */
+    .vm-vehicle-info {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .vm-thumb {
+        width: 72px;
+        height: 52px;
+        border-radius: var(--radius-sm);
         overflow: hidden;
-        border: 1.5px solid #e2e8f0;
-        background: #f8fafc;
+        border: 1px solid var(--border);
+        background: var(--surface-alt);
+        flex-shrink: 0;
         display: flex;
         align-items: center;
         justify-content: center;
     }
 
-    .vehicle-thumb img {
+    .vm-thumb img {
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        object-fit: contain;
         display: block;
     }
 
-    .vehicle-info {
-        display: flex;
-        align-items: center;
-        gap: 16px;
+    .vm-thumb-empty {
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        color: var(--text-3);
+        text-align: center;
+        padding: 4px;
     }
 
-    .vehicle-details {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
+    .vm-vehicle-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-1);
+        margin-bottom: 2px;
     }
 
-    .vehicle-name {
-        font-weight: 700;
-        color: #1e293b;
-        font-size: 15px;
+    .vm-vehicle-reg {
+        font-size: 12px;
+        color: var(--text-3);
+        font-family: var(--font-mono);
     }
 
-    .vehicle-reg {
+    .vm-row-num {
         font-size: 13px;
-        color: #64748b;
+        font-weight: 600;
+        color: var(--text-3);
+        font-family: var(--font-mono);
     }
 
-    /* ===== BADGE ===== */
-    .badge {
+    .vm-mono {
+        font-family: var(--font-mono);
+        font-size: 13px;
+    }
+
+    /* ── Badges ── */
+    .vm-badge {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
-        padding: 6px 12px;
-        border-radius: 20px;
+        gap: 5px;
+        padding: 4px 10px;
+        border-radius: 100px;
         font-size: 12px;
         font-weight: 600;
         white-space: nowrap;
+        border: 1px solid transparent;
     }
 
-    .badge-available {
-        background: #d1fae5;
-        color: #065f46;
+    .vm-badge::before {
+        content: '';
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        flex-shrink: 0;
     }
 
-    .badge-booked {
-        background: #fee2e2;
-        color: #991b1b;
+    .vm-badge.available {
+        background: var(--success-bg);
+        border-color: var(--success-bd);
+        color: var(--success-tx);
     }
 
-    .badge-service {
-        background: #fef3c7;
-        color: #92400e;
+    .vm-badge.available::before {
+        background: #22c55e;
     }
 
-    .badge::before {
-        content: '●';
-        font-size: 10px;
+    .vm-badge.booked {
+        background: var(--danger-bg);
+        border-color: var(--danger-bd);
+        color: var(--danger-tx);
     }
 
-    /* ===== TABLE ACTIONS ===== */
-    .table-actions {
+    .vm-badge.booked::before {
+        background: #ef4444;
+    }
+
+    .vm-badge.service {
+        background: var(--warning-bg);
+        border-color: var(--warning-bd);
+        color: var(--warning-tx);
+    }
+
+    .vm-badge.service::before {
+        background: #f59e0b;
+    }
+
+    /* ── Table action buttons ── */
+    .vm-actions {
         display: flex;
-        gap: 10px;
+        gap: 7px;
         flex-wrap: wrap;
     }
 
-    .btn-small {
+    .vm-btn {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
-        padding: 8px 14px;
-        border-radius: 8px;
-        font-size: 12px;
-        font-weight: 600;
+        gap: 5px;
+        padding: 7px 13px;
+        border-radius: var(--radius-sm);
+        font: 600 12px/1 var(--font);
         border: 1.5px solid;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: background .12s ease, transform .1s ease;
         white-space: nowrap;
+        text-decoration: none;
     }
 
-    .btn-edit {
+    .vm-btn svg {
+        width: 12px;
+        height: 12px;
+        flex-shrink: 0;
+    }
+
+    .vm-btn:active {
+        transform: scale(.97);
+    }
+
+    .vm-btn.edit {
+        background: #eff6ff;
+        border-color: #bfdbfe;
+        color: #1d4ed8;
+    }
+
+    .vm-btn.edit:hover {
         background: #dbeafe;
-        color: #0369a1;
-        border-color: #bae6fd;
     }
 
-    .btn-edit:hover {
-        background: #bae6fd;
+    .vm-btn.delete {
+        background: var(--danger-bg);
+        border-color: var(--danger-bd);
+        color: var(--danger-tx);
     }
 
-    .btn-danger {
-        background: #fee2e2;
-        color: #991b1b;
-        border-color: #fecaca;
+    .vm-btn.delete:hover {
+        background: #ffe4e6;
     }
 
-    .btn-danger:hover {
-        background: #fecaca;
+    .vm-actions form {
+        display: contents;
     }
 
-    /* ===== MODAL - FIXED CENTER ===== */
-    .modal-overlay {
+    /* ── Empty ── */
+    .vm-empty {
+        padding: 56px 24px;
+        text-align: center;
+        color: var(--text-3);
+    }
+
+    .vm-empty svg {
+        width: 40px;
+        height: 40px;
+        margin: 0 auto 14px;
+        display: block;
+        opacity: .4;
+    }
+
+    .vm-empty strong {
+        display: block;
+        font-size: 15px;
+        color: var(--text-2);
+        margin-bottom: 4px;
+    }
+
+    .vm-empty p {
+        font-size: 13.5px;
+    }
+
+    /* ══════════════════════════════════
+       MODAL
+    ══════════════════════════════════ */
+    .vm-modal-overlay {
         position: fixed;
         inset: 0;
-        background: rgba(15, 23, 42, 0.4);
-        backdrop-filter: blur(6px);
+        background: rgba(15, 23, 42, .45);
         display: none;
-        align-items: center;
+        align-items: flex-start;
         justify-content: center;
-        padding: 20px;
+        padding: 40px 20px 40px;
         z-index: 9999;
         overflow-y: auto;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
     }
 
-    .modal-overlay.open {
+    .vm-modal-overlay.open {
         display: flex;
     }
 
-    .modal-card {
+    .vm-modal {
         width: 100%;
-        max-width: 900px;
-        background: white;
-        border: 1px solid #e2e8f0;
-        border-radius: 20px;
-        box-shadow: 0 28px 70px rgba(15, 23, 42, 0.2);
+        max-width: 860px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-modal);
         padding: 32px;
         margin: auto;
         position: relative;
     }
 
-    .modal-head {
+    .vm-modal-head {
         display: flex;
         align-items: flex-start;
         justify-content: space-between;
         gap: 20px;
-        margin-bottom: 32px;
+        margin-bottom: 28px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--border-soft);
     }
 
-    .modal-head h3 {
-        margin: 0;
-        font-size: 26px;
-        font-weight: 700;
-        color: #1e293b;
+    .vm-modal-head h3 {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--text-1);
+        margin-bottom: 4px;
     }
 
-    .modal-head p {
-        margin: 8px 0 0;
-        color: #64748b;
-        font-size: 14px;
-        line-height: 1.6;
+    .vm-modal-head p {
+        font-size: 13.5px;
+        color: var(--text-2);
+        line-height: 1.5;
     }
 
-    .modal-close {
-        width: 40px;
-        height: 40px;
-        border-radius: 10px;
-        border: 1.5px solid #e2e8f0;
-        background: #f8fafc;
-        color: #64748b;
-        font-size: 24px;
-        line-height: 1;
+    .vm-modal-close {
+        width: 36px;
+        height: 36px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+        background: var(--surface-alt);
+        color: var(--text-2);
         cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         flex-shrink: 0;
-        transition: all 0.3s ease;
+        transition: background .12s ease, color .12s ease;
+    }
+
+    .vm-modal-close:hover {
+        background: var(--border-soft);
+        color: var(--text-1);
+    }
+
+    .vm-modal-close svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    /* Form grid */
+    .vm-form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+        margin-bottom: 20px;
+    }
+
+    .vm-form-grid .full {
+        grid-column: 1 / -1;
+    }
+
+    .vm-fg {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .vm-fg label {
+        font-size: 11.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        color: var(--text-2);
+    }
+
+    .vm-fg input,
+    .vm-fg select {
+        padding: 10px 13px;
+        border-radius: var(--radius-sm);
+        border: 1.5px solid var(--border);
+        background: var(--surface-alt);
+        color: var(--text-1);
+        font: 400 14px var(--font);
+        transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
+        appearance: none;
+    }
+
+    .vm-fg input:focus,
+    .vm-fg select:focus {
+        outline: none;
+        border-color: var(--brand);
+        background: var(--surface);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
+    }
+
+    .vm-fg .hint {
+        font-size: 12px;
+        color: var(--text-3);
+        line-height: 1.5;
+    }
+
+    /* Upload */
+    .vm-upload-box {
+        border: 2px dashed var(--border);
+        background: var(--surface-alt);
+        border-radius: var(--radius-lg);
+        padding: 28px 20px;
+        text-align: center;
+        cursor: pointer;
+        position: relative;
+        transition: border-color .15s ease, background .15s ease;
+    }
+
+    .vm-upload-box:hover,
+    .vm-upload-box.drag-over {
+        border-color: var(--brand);
+        background: var(--brand-light);
+    }
+
+    .vm-upload-box input[type="file"] {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+        width: 100%;
+        height: 100%;
+        z-index: 2;
+        border: none;
+        background: transparent;
+    }
+
+    .vm-upload-box input[type="file"]::file-selector-button {
+        display: none;
+    }
+
+    .vm-upload-content {
+        pointer-events: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .vm-upload-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--brand-mid);
+        background: var(--brand-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--brand);
+        margin-bottom: 4px;
+    }
+
+    .vm-upload-icon svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    .vm-upload-title {
+        font-size: 14.5px;
+        font-weight: 600;
+        color: var(--text-1);
+    }
+
+    .vm-upload-sub {
+        font-size: 12.5px;
+        color: var(--text-3);
+    }
+
+    .vm-preview {
+        margin-top: 14px;
+        height: 200px;
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        border: 1px solid var(--border);
+        background: var(--surface-alt);
         display: flex;
         align-items: center;
         justify-content: center;
     }
 
-    .modal-close:hover {
-        border-color: #cbd5e1;
-        color: #1e293b;
-        background: white;
-    }
-
-    .modal-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-        margin-bottom: 24px;
-    }
-
-    .modal-grid .full {
-        grid-column: 1 / -1;
-    }
-
-    .form-group {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 8px;
-        font-size: 13px;
-        font-weight: 700;
-        letter-spacing: 0.4px;
-        text-transform: uppercase;
-        color: #1e293b;
-    }
-
-    .form-group input,
-    .form-group select {
-        padding: 12px 14px;
-        border-radius: 10px;
-        border: 1.5px solid #e2e8f0;
-        background: #f8fafc;
-        color: #1e293b;
-        font: inherit;
-        transition: all 0.3s ease;
-    }
-
-    .form-group input:focus,
-    .form-group select:focus {
-        outline: none;
-        border-color: #3b82f6;
-        background: white;
-        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-    }
-
-    .form-hint {
-        font-size: 12px;
-        color: #64748b;
-        margin-top: 6px;
-        line-height: 1.5;
-    }
-
-    /* ===== FILE UPLOAD ===== */
-    .upload-box {
-        border: 2px dashed #cbd5e1;
-        background: #f8fafc;
-        border-radius: 12px;
-        padding: 24px;
-        text-align: center;
-        transition: all 0.3s ease;
-        cursor: pointer;
-    }
-
-    .upload-box:hover {
-        border-color: #3b82f6;
-        background: #f0f4ff;
-    }
-
-    .upload-box.drag-over {
-        border-color: #3b82f6;
-        background: #eff6ff;
-    }
-
-    .upload-box input[type="file"] {
+    .vm-preview img {
         width: 100%;
-        padding: 0;
-        border: none;
-        background: transparent;
-        cursor: pointer;
-    }
-
-    .upload-box input[type="file"]::file-selector-button {
+        height: 100%;
+        object-fit: contain;
         display: none;
     }
 
-    .upload-icon {
-        font-size: 32px;
-        margin-bottom: 12px;
+    .vm-preview.has-image img {
         display: block;
     }
 
-    .upload-text {
-        font-size: 14px;
-        font-weight: 600;
-        color: #1e293b;
-        margin-bottom: 4px;
+    .vm-preview-empty {
+        font-size: 13px;
+        color: var(--text-3);
+        text-align: center;
+        padding: 20px;
+        line-height: 1.6;
     }
 
-    .upload-subtext {
-        font-size: 12px;
-        color: #64748b;
+    .vm-preview.has-image .vm-preview-empty {
+        display: none;
     }
 
-    .modal-preview {
-        margin-top: 16px;
-        height: 180px;
-        border-radius: 12px;
-        overflow: hidden;
-        border: 1.5px solid #e2e8f0;
-        background: white;
-    }
-
-    .modal-preview img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-    }
-
-    /* ===== MODAL ACTIONS ===== */
-    .modal-actions {
+    /* Modal footer */
+    .vm-modal-footer {
         display: flex;
         justify-content: flex-end;
-        gap: 12px;
-        margin-top: 32px;
-        padding-top: 24px;
-        border-top: 1.5px solid #e2e8f0;
+        gap: 10px;
+        padding-top: 20px;
+        border-top: 1px solid var(--border-soft);
+        margin-top: 24px;
     }
 
-    .modal-btn {
+    .vm-mbtn {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
-        padding: 12px 24px;
-        border-radius: 10px;
-        font-weight: 600;
+        gap: 7px;
+        padding: 10px 22px;
+        border-radius: var(--radius-md);
+        font: 600 13.5px/1 var(--font);
         cursor: pointer;
-        transition: all 0.3s ease;
-        font-size: 14px;
-        text-transform: uppercase;
-        letter-spacing: 0.3px;
+        transition: background .12s ease, transform .1s ease, box-shadow .12s ease;
+        border: 1.5px solid transparent;
+        white-space: nowrap;
     }
 
-    .btn-cancel {
-        border: 1.5px solid #e2e8f0;
-        background: white;
-        color: #475569;
+    .vm-mbtn:active {
+        transform: scale(.98);
     }
 
-    .btn-cancel:hover {
-        background: #f8fafc;
-        border-color: #cbd5e1;
+    .vm-mbtn.cancel {
+        background: var(--surface);
+        border-color: var(--border);
+        color: var(--text-2);
     }
 
-    .btn-save {
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-        color: white;
-        border: none;
-        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    .vm-mbtn.cancel:hover {
+        background: var(--surface-alt);
     }
 
-    .btn-save:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    .vm-mbtn.save {
+        background: var(--brand);
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(37, 99, 235, .3);
     }
 
-    /* ===== EMPTY STATE ===== */
-    .empty-state {
-        padding: 40px;
-        text-align: center;
+    .vm-mbtn.save:hover {
+        background: var(--brand-hover);
+        box-shadow: 0 4px 14px rgba(37, 99, 235, .4);
     }
 
-    .empty-state-icon {
-        font-size: 48px;
-        margin-bottom: 16px;
-        display: block;
-    }
-
-    .empty-state-text {
-        font-size: 16px;
-        color: #64748b;
-    }
-
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 1024px) {
-        .page-wrapper {
-            padding: 24px 16px;
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+        .vm-stats {
+            grid-template-columns: 1fr 1fr;
         }
 
-        .stats-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
+        .vm-stats .vm-stat:last-child {
+            grid-column: 1 / -1;
         }
+    }
 
-        .modal-grid {
+    @media (max-width: 680px) {
+        .vm-stats {
             grid-template-columns: 1fr;
         }
 
-        .card-head {
+        .vm-stats .vm-stat:last-child {
+            grid-column: auto;
+        }
+
+        .vm-card-head {
             flex-direction: column;
             align-items: flex-start;
+            gap: 14px;
         }
 
-        .modal-card {
-            padding: 24px;
-        }
-    }
-
-    @media (max-width: 768px) {
-        .page-wrapper {
-            padding: 16px 12px;
-        }
-
-        .stats-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .page-header {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .table-wrap {
-            font-size: 12px;
-        }
-
-        .table-wrap th,
-        .table-wrap td {
-            padding: 12px 14px;
-        }
-
-        .vehicle-thumb {
-            width: 60px;
-            height: 45px;
-        }
-
-        .stat-number {
-            font-size: 28px;
-        }
-
-        .modal-overlay {
-            padding: 16px;
-        }
-
-        .modal-card {
-            padding: 20px;
-            max-width: calc(100% - 32px);
-        }
-
-        .modal-head {
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .modal-head h3 {
-            font-size: 22px;
-        }
-
-        .btn {
+        .vm-add-btn {
             width: 100%;
             justify-content: center;
         }
 
-        .modal-grid {
-            gap: 16px;
+        .vm-form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .vm-form-grid .full {
+            grid-column: 1;
+        }
+
+        .vm-modal {
+            padding: 20px;
+        }
+
+        .vm-modal-head {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .vm-modal-footer {
+            flex-direction: column-reverse;
+        }
+
+        .vm-mbtn {
+            width: 100%;
+            justify-content: center;
         }
     }
 
     @media (max-width: 480px) {
-        .page-wrapper {
-            padding: 12px 8px;
-        }
-
-        .table-wrap {
-            font-size: 11px;
-        }
-
-        .table-wrap th,
-        .table-wrap td {
-            padding: 10px 12px;
-        }
-
-        .modal-actions {
-            flex-direction: column;
-        }
-
-        .modal-btn {
-            width: 100%;
-            justify-content: center;
-        }
-
-        .stat-icon {
-            font-size: 24px;
-        }
-
-        .modal-card {
+        .vm-modal-overlay {
             padding: 16px;
         }
 
-        .modal-head {
-            margin-bottom: 20px;
+        .vm-stat-value {
+            font-size: 28px;
         }
     }
 </style>
 
-<div class="page-wrapper">
-    <!-- PAGE HEADER -->
-    <div class="page-header">
-        <div class="page-header-content">
-            <h1>🚗 Fleet Management</h1>
-            <p>Manage your rental vehicles, pricing, and availability status</p>
-        </div>
-        <div class="page-header-actions">
-            <button class="btn-icon" title="Refresh">🔄</button>
-            <button class="btn-icon" title="Help">❓</button>
-        </div>
-    </div>
+<div class="vm-wrap">
 
-    <!-- STATS GRID -->
+    <!-- Stats -->
     <?php
-    $total_vehicles = count($vehicles);
-    $available_vehicles = 0;
-    $booked_vehicles = 0;
-    $service_vehicles = 0;
-
-    foreach ($vehicles as $vehicle) {
-        if ($vehicle['status'] === 'available') {
-            $available_vehicles++;
-        } elseif ($vehicle['status'] === 'booked') {
-            $booked_vehicles++;
-        } elseif ($vehicle['status'] === 'service') {
-            $service_vehicles++;
-        }
+    $total_vehicles    = count($vehicles);
+    $available_count   = 0;
+    $booked_count      = 0;
+    $service_count     = 0;
+    foreach ($vehicles as $v) {
+        if ($v['status'] === 'available') $available_count++;
+        elseif ($v['status'] === 'booked') $booked_count++;
+        elseif ($v['status'] === 'service') $service_count++;
     }
     ?>
-    <div class="stats-grid">
-        <div class="stat-card blue">
-            <div class="stat-card-content">
-                <span class="stat-label">Total Fleet</span>
-                <span class="stat-number"><?php echo $total_vehicles; ?></span>
-                <p class="stat-description">All vehicles in your system</p>
-            </div>
-            <span class="stat-icon">🚗</span>
+    <div class="vm-stats">
+        <div class="vm-stat blue">
+            <div class="vm-stat-label">Total Fleet</div>
+            <div class="vm-stat-value"><?php echo $total_vehicles; ?></div>
+            <div class="vm-stat-desc">All vehicles in your system</div>
         </div>
-
-        <div class="stat-card green">
-            <div class="stat-card-content">
-                <span class="stat-label">Available Now</span>
-                <span class="stat-number"><?php echo $available_vehicles; ?></span>
-                <p class="stat-description">Ready for new bookings</p>
-            </div>
-            <span class="stat-icon">✅</span>
+        <div class="vm-stat green">
+            <div class="vm-stat-label">Available</div>
+            <div class="vm-stat-value"><?php echo $available_count; ?></div>
+            <div class="vm-stat-desc">Ready for new bookings</div>
         </div>
-
-        <div class="stat-card orange">
-            <div class="stat-card-content">
-                <span class="stat-label">Booked / Service</span>
-                <span class="stat-number"><?php echo $booked_vehicles + $service_vehicles; ?></span>
-                <p class="stat-description">Assigned or under maintenance</p>
-            </div>
-            <span class="stat-icon">⚙️</span>
+        <div class="vm-stat amber">
+            <div class="vm-stat-label">Booked / Service</div>
+            <div class="vm-stat-value"><?php echo $booked_count + $service_count; ?></div>
+            <div class="vm-stat-desc">Assigned or under maintenance</div>
         </div>
     </div>
 
-    <!-- VEHICLES TABLE SECTION -->
-    <div class="section-card">
-        <div class="card-head">
+    <!-- Table card -->
+    <div class="vm-card">
+        <div class="vm-card-head">
             <div>
                 <h3>Vehicles</h3>
-                <p>Add, edit or remove vehicles from your fleet. Update pricing, images, and availability status instantly.</p>
+                <p>Add, edit or remove vehicles. Update pricing, images, and availability instantly.</p>
             </div>
-            <button class="btn" type="button" id="openVehicleModal">
-                ➕ Add Vehicle
+            <button class="vm-add-btn" type="button" id="openVehicleModal">
+                <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+                Add Vehicle
             </button>
         </div>
 
-        <div class="table-wrap">
-            <table>
+        <div class="vm-table-wrap">
+            <table class="vm-table">
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th>#</th>
                         <th>Vehicle</th>
                         <th>Registration</th>
                         <th>Type</th>
                         <th>Fuel</th>
                         <th>Seats</th>
-                        <th>Rate/KM</th>
+                        <th>Rate / KM</th>
                         <th>Advance</th>
                         <th>Status</th>
-                        <th>Action</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if (!empty($vehicles)): foreach ($vehicles as $vehicle): ?>
+                    <?php if (!empty($vehicles)): ?>
+                        <?php foreach ($vehicles as $index => $vehicle): ?>
                             <?php $vehicle_image = isset($vehicle['image']) ? $vehicle['image'] : ''; ?>
                             <tr>
+                                <td><span class="vm-row-num"><?php echo (int)$index + 1; ?></span></td>
                                 <td>
-                                    <span class="vehicle-id">#<?php echo (int) $vehicle['id']; ?></span>
-                                </td>
-                                <td>
-                                    <div class="vehicle-info">
-                                        <div class="vehicle-thumb">
-                                            <img src="<?php echo app_vehicle_image_url($vehicle_image); ?>" alt="<?php echo html_escape($vehicle['name']); ?>">
+                                    <div class="vm-vehicle-info">
+                                        <div class="vm-thumb">
+                                            <?php if ($vehicle_image !== ''): ?>
+                                                <img src="<?php echo app_vehicle_image_url($vehicle_image); ?>" alt="<?php echo html_escape($vehicle['name']); ?>">
+                                            <?php else: ?>
+                                                <span class="vm-thumb-empty">No Image</span>
+                                            <?php endif; ?>
                                         </div>
-                                        <div class="vehicle-details">
-                                            <div class="vehicle-name"><?php echo html_escape($vehicle['name']); ?></div>
-                                            <div class="vehicle-reg"><?php echo html_escape($vehicle['registration_no']); ?></div>
+                                        <div>
+                                            <div class="vm-vehicle-name"><?php echo html_escape($vehicle['name']); ?></div>
+                                            <div class="vm-vehicle-reg"><?php echo html_escape($vehicle['registration_no']); ?></div>
                                         </div>
                                     </div>
                                 </td>
-                                <td><?php echo html_escape($vehicle['registration_no']); ?></td>
+                                <td class="vm-mono"><?php echo html_escape($vehicle['registration_no']); ?></td>
                                 <td><?php echo html_escape($vehicle['vehicle_type']); ?></td>
                                 <td><?php echo html_escape($vehicle['fuel_type']); ?></td>
-                                <td><?php echo (int) $vehicle['seats']; ?></td>
-                                <td>₹<?php echo number_format((float) $vehicle['rate_per_day'], 0); ?></td>
-                                <td>₹<?php echo number_format((float) $vehicle['advance_amount'], 0); ?></td>
+                                <td><?php echo (int)$vehicle['seats']; ?></td>
+                                <td class="vm-mono">₹<?php echo number_format((float)$vehicle['rate_per_day'], 0); ?></td>
+                                <td class="vm-mono">₹<?php echo number_format((float)$vehicle['advance_amount'], 0); ?></td>
                                 <td>
-                                    <span class="badge badge-<?php echo html_escape($vehicle['status']); ?>">
+                                    <span class="vm-badge <?php echo html_escape($vehicle['status']); ?>">
                                         <?php echo ucfirst(html_escape($vehicle['status'])); ?>
                                     </span>
                                 </td>
                                 <td>
-                                    <div class="table-actions">
-                                        <button
-                                            class="btn-small btn-edit edit-vehicle-btn"
-                                            type="button"
-                                            data-id="<?php echo (int) $vehicle['id']; ?>"
+                                    <div class="vm-actions">
+                                        <button class="vm-btn edit edit-vehicle-btn" type="button"
+                                            data-id="<?php echo (int)$vehicle['id']; ?>"
                                             data-name="<?php echo html_escape($vehicle['name']); ?>"
                                             data-registration="<?php echo html_escape($vehicle['registration_no']); ?>"
                                             data-type="<?php echo html_escape($vehicle['vehicle_type']); ?>"
                                             data-fuel="<?php echo html_escape($vehicle['fuel_type']); ?>"
-                                            data-seats="<?php echo (int) $vehicle['seats']; ?>"
-                                            data-rate="<?php echo (float) $vehicle['rate_per_day']; ?>"
-                                            data-advance="<?php echo (float) $vehicle['advance_amount']; ?>"
+                                            data-seats="<?php echo (int)$vehicle['seats']; ?>"
+                                            data-rate="<?php echo (float)$vehicle['rate_per_day']; ?>"
+                                            data-advance="<?php echo (float)$vehicle['advance_amount']; ?>"
                                             data-status="<?php echo html_escape($vehicle['status']); ?>"
                                             data-image="<?php echo html_escape($vehicle_image); ?>">
-                                            ✏️ Edit
+                                            <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M11.5 2.5a1.414 1.414 0 0 1 2 2L5 13 2 14l1-3 8.5-8.5Z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+                                            </svg>
+                                            Edit
                                         </button>
-                                        <form method="post" action="<?php echo base_url('admin/vehicles/delete/' . (int) $vehicle['id']); ?>" style="display: inline;" onsubmit="return confirm('Delete this vehicle?');">
-                                            <button class="btn-small btn-danger" type="submit">🗑️ Delete</button>
+                                        <form method="post" action="<?php echo base_url('admin/vehicles/delete/' . (int)$vehicle['id']); ?>" onsubmit="return confirm('Delete this vehicle?');">
+                                            <button class="vm-btn delete" type="submit">
+                                                <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M2 4h12M5 4V2.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5V4M6 7v5M10 7v5M3 4l.8 9a1 1 0 0 0 1 .9h6.4a1 1 0 0 0 1-.9L13 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+                                                </svg>
+                                                Delete
+                                            </button>
                                         </form>
                                     </div>
                                 </td>
                             </tr>
-                        <?php endforeach;
-                    else: ?>
+                        <?php endforeach; ?>
+                    <?php else: ?>
                         <tr>
                             <td colspan="10">
-                                <div class="empty-state">
-                                    <span class="empty-state-icon">📋</span>
-                                    <p class="empty-state-text">No vehicles added yet. Click "Add Vehicle" to get started!</p>
+                                <div class="vm-empty">
+                                    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <rect x="2" y="12" width="36" height="22" rx="5" stroke="currentColor" stroke-width="2" />
+                                        <path d="M8 12V9a4 4 0 0 1 4-4h16a4 4 0 0 1 4 4v3" stroke="currentColor" stroke-width="2" />
+                                        <circle cx="12" cy="29" r="3" stroke="currentColor" stroke-width="2" />
+                                        <circle cx="28" cy="29" r="3" stroke="currentColor" stroke-width="2" />
+                                    </svg>
+                                    <strong>No vehicles yet</strong>
+                                    <p>Click "Add Vehicle" to add your first vehicle to the fleet.</p>
                                 </div>
                             </td>
                         </tr>
@@ -913,81 +917,94 @@
     </div>
 </div>
 
-<!-- MODAL - CENTERED -->
-<div class="modal-overlay" id="vehicleModal">
-    <div class="modal-card">
-        <div class="modal-head">
+<!-- ══ MODAL ══ -->
+<div class="vm-modal-overlay" id="vehicleModal">
+    <div class="vm-modal">
+        <div class="vm-modal-head">
             <div>
                 <h3 id="vehicleModalTitle">Add New Vehicle</h3>
-                <p id="vehicleModalCopy">Create a new vehicle entry with all details, pricing, advance, and upload a compelling vehicle image.</p>
+                <p id="vehicleModalCopy">Fill in all details, set pricing and advance, then upload a vehicle photo.</p>
             </div>
-            <button class="modal-close" type="button" id="closeVehicleModal">&times;</button>
+            <button class="vm-modal-close" type="button" id="closeVehicleModal" aria-label="Close">
+                <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 3l10 10M13 3 3 13" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+                </svg>
+            </button>
         </div>
 
         <form method="post" action="<?php echo base_url('admin/vehicles/store'); ?>" enctype="multipart/form-data" id="vehicleForm">
-            <div class="modal-grid">
-                <div class="form-group">
+            <div class="vm-form-grid">
+
+                <div class="vm-fg">
                     <label>Vehicle Name</label>
-                    <input type="text" name="name" id="vehicle_name" placeholder="e.g., Maruti Swift Dzire" required>
+                    <input type="text" name="name" id="vehicle_name" placeholder="e.g. Maruti Swift Dzire" required>
                 </div>
 
-                <div class="form-group">
+                <div class="vm-fg">
                     <label>Registration No.</label>
-                    <input type="text" name="registration_no" id="registration_no" placeholder="GJ01-XX-XXXX" required>
+                    <input type="text" name="registration_no" id="registration_no" placeholder="GJ01-XX-1234" required>
                 </div>
 
-                <div class="form-group">
+                <div class="vm-fg">
                     <label>Vehicle Category</label>
                     <input type="text" name="vehicle_type" id="vehicle_type" placeholder="Sedan / SUV / Hatchback" required>
                 </div>
 
-                <div class="form-group">
+                <div class="vm-fg">
                     <label>Fuel Type</label>
                     <input type="text" name="fuel_type" id="fuel_type" placeholder="Petrol / Diesel / CNG" required>
                 </div>
 
-                <div class="form-group">
+                <div class="vm-fg">
                     <label>Seating Capacity</label>
                     <input type="number" name="seats" id="seats" placeholder="5" min="1" required>
                 </div>
 
-                <div class="form-group">
-                    <label>Rate per Day (₹)</label>
-                    <input type="number" step="0.01" name="rate_per_km" id="rate_per_km" placeholder="2000" required>
+                <div class="vm-fg">
+                    <label>Rate per KM (₹)</label>
+                    <input type="number" step="0.01" name="rate_per_km" id="rate_per_km" placeholder="12.00" required>
                 </div>
 
-                <div class="form-group">
+                <div class="vm-fg">
                     <label>Required Advance (₹)</label>
                     <input type="number" step="0.01" name="advance_amount" id="advance_amount" placeholder="1000" required>
                 </div>
 
-                <div class="form-group">
+                <div class="vm-fg">
                     <label>Status</label>
                     <select name="status" id="status">
-                        <option value="available">✅ Available</option>
-                        <option value="booked">❌ Booked</option>
-                        <option value="service">⚙️ Service</option>
+                        <option value="available">Available</option>
+                        <option value="booked">Booked</option>
+                        <option value="service">Service</option>
                     </select>
-                    <div class="form-hint">Mark as "Service" when vehicle is under maintenance or temporarily unavailable.</div>
+                    <span class="hint">Set to "Service" when under maintenance.</span>
                 </div>
 
-                <div class="full form-group">
+                <div class="vm-fg full">
                     <label>Vehicle Image</label>
-                    <div class="upload-box" id="uploadBox">
-                        <span class="upload-icon">🖼️</span>
-                        <p class="upload-text">Click to upload vehicle photo</p>
-                        <p class="upload-subtext">JPG, PNG or WEBP • Max 4 MB</p>
+                    <div class="vm-upload-box" id="uploadBox">
                         <input type="file" name="vehicle_image" id="vehicle_image" accept=".jpg,.jpeg,.png,.webp">
+                        <div class="vm-upload-content">
+                            <div class="vm-upload-icon">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </div>
+                            <span class="vm-upload-title" id="uploadTitle">Click to upload vehicle photo</span>
+                            <span class="vm-upload-sub" id="uploadSub">JPG, PNG or WEBP &middot; Max 4 MB</span>
+                        </div>
                     </div>
-                    <div class="modal-preview">
-                        <img src="<?php echo app_vehicle_image_url(); ?>" alt="Vehicle preview" id="vehiclePreview">
+                    <div class="vm-preview" id="vehiclePreviewWrap">
+                        <div class="vm-preview-empty" id="vehiclePreviewEmpty">No image selected yet</div>
+                        <img src="" alt="Vehicle preview" id="vehiclePreview">
                     </div>
                 </div>
-            </div>
 
-            <div class="modal-actions">
-                <button class="modal-btn btn-cancel" type="button" id="cancelVehicleModal">Cancel</button>
-                <button class="modal-btn btn-save" type="submit" id="vehicleSubmitBtn">Add Vehicle</button>
+            </div><!-- /.vm-form-grid -->
+
+            <div class="vm-modal-footer">
+                <button class="vm-mbtn cancel" type="button" id="cancelVehicleModal">Cancel</button>
+                <button class="vm-mbtn save" type="submit" id="vehicleSubmitBtn">Add Vehicle</button>
             </div>
         </form>
     </div>
@@ -1000,21 +1017,34 @@
         var title = document.getElementById('vehicleModalTitle');
         var copy = document.getElementById('vehicleModalCopy');
         var submitBtn = document.getElementById('vehicleSubmitBtn');
-        var openBtn = document.getElementById('openVehicleModal');
-        var closeBtn = document.getElementById('closeVehicleModal');
-        var cancelBtn = document.getElementById('cancelVehicleModal');
-        var editButtons = document.querySelectorAll('.edit-vehicle-btn');
         var imageInput = document.getElementById('vehicle_image');
         var preview = document.getElementById('vehiclePreview');
+        var previewWrap = document.getElementById('vehiclePreviewWrap');
+        var previewEmpty = document.getElementById('vehiclePreviewEmpty');
         var uploadBox = document.getElementById('uploadBox');
-        var baseStoreUrl = '<?php echo base_url('admin/vehicles/store'); ?>';
-        var baseUpdateUrl = '<?php echo base_url('admin/vehicles/update/'); ?>';
-        var defaultImage = '<?php echo app_vehicle_image_url(); ?>';
+        var uploadTitle = document.getElementById('uploadTitle');
+        var uploadSub = document.getElementById('uploadSub');
+        var baseStore = '<?php echo base_url('admin/vehicles/store'); ?>';
+        var baseUpdate = '<?php echo base_url('admin/vehicles/update/'); ?>';
+
+        function setPreview(src) {
+            if (src) {
+                preview.src = src;
+                previewWrap.classList.add('has-image');
+            } else {
+                preview.removeAttribute('src');
+                previewWrap.classList.remove('has-image');
+            }
+        }
+
+        function setUpload(label, sub) {
+            uploadTitle.textContent = label || 'Click to upload vehicle photo';
+            uploadSub.textContent = sub || 'JPG, PNG or WEBP \u00b7 Max 4 MB';
+        }
 
         function openModal() {
             modal.classList.add('open');
             document.body.style.overflow = 'hidden';
-            // Scroll modal to top
             modal.scrollTop = 0;
         }
 
@@ -1022,103 +1052,93 @@
             modal.classList.remove('open');
             document.body.style.overflow = '';
             form.reset();
-            form.action = baseStoreUrl;
+            form.action = baseStore;
             title.textContent = 'Add New Vehicle';
-            copy.textContent = 'Create a new vehicle entry with all details, pricing, advance, and upload a compelling vehicle image.';
+            copy.textContent = 'Fill in all details, set pricing and advance, then upload a vehicle photo.';
             submitBtn.textContent = 'Add Vehicle';
-            if (preview) {
-                preview.src = defaultImage;
-            }
+            setPreview('');
+            setUpload('', '');
         }
 
-        function setValue(id, value) {
-            var field = document.getElementById(id);
-            if (field) {
-                field.value = value || '';
-            }
+        function setVal(id, val) {
+            var el = document.getElementById(id);
+            if (el) el.value = val || '';
         }
 
-        openBtn.addEventListener('click', function() {
+        document.getElementById('openVehicleModal').addEventListener('click', function() {
             closeModal();
             openModal();
         });
 
-        closeBtn.addEventListener('click', closeModal);
-        cancelBtn.addEventListener('click', closeModal);
+        document.getElementById('closeVehicleModal').addEventListener('click', closeModal);
+        document.getElementById('cancelVehicleModal').addEventListener('click', closeModal);
 
-        // Close modal when clicking outside
-        modal.addEventListener('click', function(event) {
-            if (event.target === modal) {
-                closeModal();
-            }
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) closeModal();
         });
 
-        // File upload handling
-        if (imageInput && preview) {
-            imageInput.addEventListener('change', function(event) {
-                var file = event.target.files && event.target.files[0];
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+        });
+
+        if (imageInput) {
+            imageInput.addEventListener('change', function(e) {
+                var file = e.target.files && e.target.files[0];
                 if (!file) {
-                    preview.src = defaultImage;
+                    setPreview('');
+                    setUpload('', '');
                     return;
                 }
-                preview.src = URL.createObjectURL(file);
+                setUpload(file.name, 'Image selected — click to replace');
+                setPreview(URL.createObjectURL(file));
             });
         }
 
-        // Drag and drop
         if (uploadBox) {
             uploadBox.addEventListener('dragover', function(e) {
                 e.preventDefault();
                 uploadBox.classList.add('drag-over');
             });
-
             uploadBox.addEventListener('dragleave', function() {
                 uploadBox.classList.remove('drag-over');
             });
-
             uploadBox.addEventListener('drop', function(e) {
                 e.preventDefault();
                 uploadBox.classList.remove('drag-over');
-                if (e.dataTransfer.files.length > 0) {
+                if (e.dataTransfer.files.length) {
                     imageInput.files = e.dataTransfer.files;
-                    var event = new Event('change', {
+                    imageInput.dispatchEvent(new Event('change', {
                         bubbles: true
-                    });
-                    imageInput.dispatchEvent(event);
+                    }));
                 }
             });
         }
 
-        // Edit buttons
-        editButtons.forEach(function(button) {
-            button.addEventListener('click', function() {
-                form.action = baseUpdateUrl + button.getAttribute('data-id');
+        document.querySelectorAll('.edit-vehicle-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                form.action = baseUpdate + btn.dataset.id;
                 title.textContent = 'Edit Vehicle';
                 copy.textContent = 'Update vehicle details, rates, status, or upload a new image.';
                 submitBtn.textContent = 'Save Changes';
-                setValue('vehicle_name', button.getAttribute('data-name'));
-                setValue('registration_no', button.getAttribute('data-registration'));
-                setValue('vehicle_type', button.getAttribute('data-type'));
-                setValue('fuel_type', button.getAttribute('data-fuel'));
-                setValue('seats', button.getAttribute('data-seats'));
-                setValue('rate_per_km', button.getAttribute('data-rate'));
-                setValue('advance_amount', button.getAttribute('data-advance'));
-                setValue('status', button.getAttribute('data-status'));
-                if (preview) {
-                    var imagePath = button.getAttribute('data-image');
-                    preview.src = imagePath ? '<?php echo base_url(); ?>' + imagePath : defaultImage;
+                setVal('vehicle_name', btn.dataset.name);
+                setVal('registration_no', btn.dataset.registration);
+                setVal('vehicle_type', btn.dataset.type);
+                setVal('fuel_type', btn.dataset.fuel);
+                setVal('seats', btn.dataset.seats);
+                setVal('rate_per_km', btn.dataset.rate);
+                setVal('advance_amount', btn.dataset.advance);
+                setVal('status', btn.dataset.status);
+                var img = btn.dataset.image;
+                if (img) {
+                    var fileName = img.split('/').pop();
+                    setUpload(fileName, 'Current image loaded — choose another to replace');
+                    setPreview('<?php echo base_url(); ?>' + img);
+                } else {
+                    setUpload('', '');
+                    setPreview('');
                 }
                 openModal();
             });
         });
-
-        // Keyboard shortcut to close
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape' && modal.classList.contains('open')) {
-                closeModal();
-            }
-        });
     })();
 </script>
-
-<?php $this->load->view('admin/partials/footer'); ?>

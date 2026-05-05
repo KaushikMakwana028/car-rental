@@ -1,4 +1,3 @@
-<?php $this->load->view('admin/partials/header'); ?>
 <div class="stats-grid">
     <div class="stat-card">
         <div class="stat-top"><div class="stat-label">Total Collected</div><div class="stat-chip">This Month</div></div>
@@ -108,4 +107,3 @@
         </form>
     </div>
 </div>
-<?php $this->load->view('admin/partials/footer'); ?>

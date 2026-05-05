@@ -1,28 +1,31 @@
-<?php $this->load->view('admin/partials/header'); ?>
 <div class="section-card">
     <div class="card-head">
         <div>
             <h3>Create Booking</h3>
-            <p>Assign a customer, select an available vehicle and confirm the rental details.</p>
+            <p>Enter walk-in customer details, select an available vehicle and confirm the rental details.</p>
         </div>
     </div>
     <form method="post" action="<?php echo base_url('admin/bookings/store'); ?>">
         <div class="form-grid">
             <div>
-                <label>Customer</label>
-                <select name="customer_id" required>
-                    <option value="">Select customer</option>
-                    <?php foreach ($customers as $customer): ?>
-                        <option value="<?php echo $customer['id']; ?>"><?php echo html_escape($customer['full_name']); ?></option>
-                    <?php endforeach; ?>
-                </select>
+                <label>Customer Name</label>
+                <input type="text" name="customer_name" placeholder="Enter customer name" required>
+            </div>
+            <div>
+                <label>Customer Phone</label>
+                <input type="text" name="customer_phone" placeholder="Enter customer phone" required>
+            </div>
+            <div class="full">
+                <label>Customer Email</label>
+                <input type="email" name="customer_email" placeholder="Optional email for the customer">
+                <div class="helper">If this phone or email already exists, the system will reuse that customer automatically.</div>
             </div>
             <div>
                 <label>Vehicle</label>
                 <select name="vehicle_id" id="admin_vehicle_id" required>
                     <option value="">Select vehicle</option>
                     <?php foreach ($vehicles as $vehicle): ?>
-                        <option value="<?php echo $vehicle['id']; ?>" data-rate="<?php echo (float) $vehicle['rate_per_day']; ?>"><?php echo html_escape($vehicle['name'] . ' - ' . $vehicle['registration_no'] . ' - Rate/KM: ' . number_format((float) $vehicle['rate_per_day'], 2)); ?></option>
+                        <option value="<?php echo $vehicle['id']; ?>" data-rate="<?php echo (float) $vehicle['rate_per_day']; ?>" data-advance="<?php echo (float) $vehicle['advance_amount']; ?>"><?php echo html_escape($vehicle['name'] . ' - ' . $vehicle['registration_no'] . ' - Rate/KM: ' . number_format((float) $vehicle['rate_per_day'], 2) . ' - Advance: ' . number_format((float) $vehicle['advance_amount'], 2)); ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
@@ -35,6 +38,11 @@
                 <label>Expected Amount</label>
                 <input type="number" step="0.01" name="amount" id="admin_expected_amount" readonly required>
                 <div class="helper">This amount is auto-calculated from Estimated KM × Rate per KM.</div>
+            </div>
+            <div>
+                <label>Required Advance</label>
+                <input type="text" id="admin_advance_amount" readonly>
+                <div class="helper">Shows the advance amount for the selected vehicle.</div>
             </div>
             <div class="full">
                 <label>Status</label>
@@ -50,21 +58,23 @@
     </form>
 </div>
 <script>
-    (function () {
+    (function() {
         var vehicle = document.getElementById('admin_vehicle_id');
         var km = document.getElementById('admin_estimated_km');
         var amount = document.getElementById('admin_expected_amount');
+        var advance = document.getElementById('admin_advance_amount');
 
         function updateAmount() {
             var selected = vehicle.options[vehicle.selectedIndex];
             var rate = selected ? parseFloat(selected.getAttribute('data-rate') || '0') : 0;
+            var advanceAmount = selected ? parseFloat(selected.getAttribute('data-advance') || '0') : 0;
             var distance = parseFloat(km.value || '0');
             var total = rate * distance;
             amount.value = total ? total.toFixed(2) : '';
+            advance.value = advanceAmount ? 'Rs. ' + advanceAmount.toFixed(2) : '';
         }
 
         vehicle.addEventListener('change', updateAmount);
         km.addEventListener('input', updateAmount);
     })();
 </script>
-<?php $this->load->view('admin/partials/footer'); ?>

@@ -7,7 +7,7 @@ class Profile extends Admin_Controller
     {
         $data['page_title'] = 'My Profile';
         $data['profile_user'] = $this->General_model->get_user_by_id((int) $this->current_user['id']);
-        $this->load->view('admin/profile', $data);
+        $this->render_view('admin/profile', $data);
     }
 
     public function update()

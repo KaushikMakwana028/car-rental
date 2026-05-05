@@ -1,4 +1,3 @@
-<?php $this->load->view('admin/partials/header'); ?>
 <div class="split-grid">
     <div class="section-card">
         <div class="card-head">
@@ -42,4 +41,3 @@
         </form>
     </div>
 </div>
-<?php $this->load->view('admin/partials/footer'); ?>

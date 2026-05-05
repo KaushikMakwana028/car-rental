@@ -7,8 +7,8 @@ class Document extends Admin_Controller
     {
         $data['page_title'] = 'Documents Review';
         $data['current_user'] = $this->current_user;
-        $data['documents'] = $this->General_model->get_all_documents_for_admin();
-        $this->load->view('admin/documents_list', $data);
+        $data['document_groups'] = $this->General_model->get_document_review_groups();
+        $this->render_view('admin/documents_list', $data);
     }
 
     public function review($document_id)
@@ -21,7 +21,7 @@ class Document extends Admin_Controller
             show_404();
         }
 
-        $this->load->view('admin/document_review', $data);
+        $this->render_view('admin/document_review', $data);
     }
 
     public function update_status()

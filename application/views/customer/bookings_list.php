@@ -1,108 +1,130 @@
-<?php $this->load->view('customer/partials/header'); ?>
-<style>
-    .booking-highlight-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-bottom:22px}
-    .booking-highlight-card{
-        padding:20px;border-radius:20px;border:1px solid #d8eeea;background:linear-gradient(180deg,#ffffff 0%,#fbfefd 100%);
-        box-shadow:0 12px 30px rgba(15,23,42,.05)
-    }
-    .booking-highlight-card span{display:block;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#0f766e}
-    .booking-highlight-card strong{display:block;font-size:30px;line-height:1;margin:12px 0 8px}
-    .booking-highlight-card p{margin:0;color:#64748b;font-size:14px}
-    .booking-code{font-weight:800;color:#0f172a}
-    .booking-subline{display:block;margin-top:6px;color:#64748b;font-size:13px;line-height:1.45}
-    .trip-pill{display:inline-flex;align-items:center;padding:8px 12px;border-radius:999px;background:#d9f7f3;color:#0f766e;font-size:12px;font-weight:700}
-    .payment-chip{display:inline-flex;align-items:center;padding:8px 12px;border-radius:999px;font-size:12px;font-weight:700}
-    .payment-chip.paid{background:#dcfce7;color:#15803d}
-    .payment-chip.advance-received,.payment-chip.part-paid{background:#ffedd5;color:#c2410c}
-    .payment-chip.pending{background:#fee2e2;color:#b91c1c}
-    .table-wrap table{min-width:1040px}
-    @media (max-width:1100px){.booking-highlight-grid{grid-template-columns:1fr 1fr}}
-    @media (max-width:640px){.booking-highlight-grid{grid-template-columns:1fr}}
-</style>
+<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
 <?php
 $my_total = count($bookings);
 $my_pending = 0;
+$my_confirmed = 0;
 $my_spend = 0;
+$document_gate = $this->General_model->get_required_documents_status((int) $current_user['id']);
 
 foreach ($bookings as $booking) {
+    $booking_status = !empty($booking['effective_status']) ? $booking['effective_status'] : $booking['status'];
     $my_spend += (float) $booking['amount'];
-    if ($booking['status'] === 'pending') {
+    if ($booking_status === 'pending') {
         $my_pending++;
+    }
+    if ($booking_status === 'confirmed' || $booking_status === 'completed') {
+        $my_confirmed++;
     }
 }
 ?>
-<div class="booking-highlight-grid">
-    <div class="booking-highlight-card">
-        <span>Total Bookings</span>
-        <strong><?php echo $my_total; ?></strong>
-        <p>Every trip request linked to your customer account.</p>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <span class="stat-label">Total Bookings</span>
+        <span class="stat-value"><?php echo $my_total; ?></span>
+        <span class="stat-note">Every ride request linked to your customer account appears here.</span>
     </div>
-    <div class="booking-highlight-card">
-        <span>Pending Requests</span>
-        <strong><?php echo $my_pending; ?></strong>
-        <p>Bookings that are still waiting for final admin approval.</p>
+    <div class="stat-card">
+        <span class="stat-label">Pending</span>
+        <span class="stat-value"><?php echo $my_pending; ?></span>
+        <span class="stat-note">Trips waiting for final review or approval from the admin team.</span>
     </div>
-    <div class="booking-highlight-card">
-        <span>Estimated Total</span>
-        <strong><?php echo number_format($my_spend, 2); ?></strong>
-        <p>Your combined estimated booking value across all trips.</p>
+    <div class="stat-card">
+        <span class="stat-label">Confirmed</span>
+        <span class="stat-value"><?php echo $my_confirmed; ?></span>
+        <span class="stat-note">Bookings already accepted or completed successfully.</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">Estimated Total</span>
+        <span class="stat-value">&#8377;<?php echo number_format($my_spend, 0); ?></span>
+        <span class="stat-note">Combined estimated booking value across your trip history.</span>
     </div>
 </div>
 
-<div class="section-card">
+<section class="section-card">
     <div class="card-head">
         <div>
-            <h3>My Bookings</h3>
-            <p>Your custom booking ID, route, travel dates and payment progress are visible here and on the admin side too.</p>
+            <div class="eyebrow">Ride History</div>
+            <h3>My bookings at a glance.</h3>
+            <p>Booking IDs, trip type, route, payment progress, and current status are laid out in one cleaner table view.</p>
         </div>
-        <a class="btn" href="<?php echo base_url('customer/bookings/create'); ?>">New Booking</a>
+        <?php if (!empty($document_gate['is_ready'])): ?>
+            <a class="btn" href="<?php echo base_url('customer/bookings/create'); ?>">Create Booking</a>
+        <?php else: ?>
+            <a class="btn" href="<?php echo base_url('customer/documents'); ?>">Complete Documents</a>
+        <?php endif; ?>
     </div>
+
+    <?php if (empty($document_gate['is_ready'])): ?>
+        <div class="flash flash-error" style="margin-bottom:20px;">
+            Booking is disabled until the admin approves your required documents.
+        </div>
+    <?php endif; ?>
+
     <div class="table-wrap">
         <table>
             <thead>
                 <tr>
-                    <th>Booking ID</th>
+                    <th>Booking</th>
                     <th>Vehicle</th>
-                    <th>Trip</th>
+                    <th>Trip Type</th>
                     <th>Route</th>
-                    <th>KM</th>
+                    <th>Distance</th>
                     <th>Amount</th>
                     <th>Payment</th>
                     <th>Status</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
-            <?php if (!empty($bookings)): foreach ($bookings as $booking): ?>
+            <?php if (!empty($bookings)): ?>
+                <?php foreach ($bookings as $booking): ?>
+                    <?php $booking_status = !empty($booking['effective_status']) ? $booking['effective_status'] : $booking['status']; ?>
+                    <tr>
+                        <td>
+                            <span class="table-title"><?php echo html_escape($booking['booking_code']); ?></span>
+                            <span class="table-note">Created <?php echo !empty($booking['created_at']) ? date('d M Y', strtotime($booking['created_at'])) : '-'; ?></span>
+                        </td>
+                        <td>
+                            <span class="table-title"><?php echo html_escape($booking['vehicle_name']); ?></span>
+                            <span class="table-note"><?php echo html_escape($booking['registration_no']); ?></span>
+                        </td>
+                        <td><span class="pill"><?php echo html_escape($booking['trip_label']); ?></span></td>
+                        <td>
+                            <span class="table-title"><?php echo html_escape($booking['pickup_location']); ?></span>
+                            <span class="table-note">Drop: <?php echo html_escape($booking['drop_location']); ?></span>
+                        </td>
+                        <td>
+                            <span class="table-title"><?php echo html_escape($booking['display_km']); ?></span>
+                            <span class="table-note">Estimated distance</span>
+                        </td>
+                        <td>
+                            <span class="table-title">&#8377;<?php echo number_format((float) $booking['amount'], 2); ?></span>
+                            <span class="table-note">Balance &#8377;<?php echo number_format((float) $booking['balance_amount'], 2); ?></span>
+                        </td>
+                        <td>
+                            <span class="badge badge-<?php echo html_escape($booking['payment_badge']); ?>"><?php echo html_escape($booking['payment_status']); ?></span>
+                            <span class="table-note">Paid &#8377;<?php echo number_format((float) $booking['paid_amount'], 2); ?></span>
+                            <?php if (!empty($booking['payment_request_status'])): ?>
+                                <span class="table-note">Receipt <?php echo ucfirst(html_escape($booking['payment_request_status'])); ?></span>
+                            <?php endif; ?>
+                        </td>
+                        <td><span class="badge badge-<?php echo html_escape($booking_status); ?>"><?php echo html_escape(ucfirst($booking_status)); ?></span></td>
+                        <td>
+                            <a class="btn-secondary" href="<?php echo base_url('customer/payments/pay/' . (int) $booking['id']); ?>">
+                                <?php echo !empty($booking['payment_request_id']) ? 'Update Receipt' : 'Pay Advance'; ?>
+                            </a>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            <?php else: ?>
                 <tr>
-                    <td>
-                        <div class="booking-code"><?php echo html_escape($booking['booking_code']); ?></div>
-                        <span class="booking-subline">Created <?php echo !empty($booking['created_at']) ? date('d M Y', strtotime($booking['created_at'])) : '-'; ?></span>
+                    <td colspan="9">
+                        <div class="empty-state">You have not created any bookings yet. Start by choosing a car and submitting your trip details.</div>
                     </td>
-                    <td>
-                        <strong><?php echo html_escape($booking['vehicle_name']); ?></strong>
-                        <span class="booking-subline"><?php echo html_escape($booking['registration_no']); ?></span>
-                    </td>
-                    <td><span class="trip-pill"><?php echo html_escape($booking['trip_label']); ?></span></td>
-                    <td>
-                        <strong><?php echo html_escape($booking['pickup_location']); ?></strong>
-                        <span class="booking-subline">Drop: <?php echo html_escape($booking['drop_location']); ?></span>
-                    </td>
-                    <td><?php echo html_escape($booking['display_km']); ?></td>
-                    <td>
-                        <strong><?php echo number_format((float) $booking['amount'], 2); ?></strong>
-                        <span class="booking-subline">Balance <?php echo number_format((float) $booking['balance_amount'], 2); ?></span>
-                    </td>
-                    <td>
-                        <span class="payment-chip <?php echo html_escape($booking['payment_badge']); ?>"><?php echo html_escape($booking['payment_status']); ?></span>
-                        <span class="booking-subline">Paid <?php echo number_format((float) $booking['paid_amount'], 2); ?></span>
-                    </td>
-                    <td><span class="badge badge-<?php echo html_escape($booking['status']); ?>"><?php echo html_escape($booking['status']); ?></span></td>
                 </tr>
-            <?php endforeach; else: ?>
-                <tr><td colspan="8">You have not created any bookings yet.</td></tr>
             <?php endif; ?>
             </tbody>
         </table>
     </div>
-</div>
-<?php $this->load->view('customer/partials/footer'); ?>
+</section>

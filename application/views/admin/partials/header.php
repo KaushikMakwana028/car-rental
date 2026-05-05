@@ -2,6 +2,7 @@
 <?php
 $segment2 = $this->uri->segment(2);
 $segment3 = $this->uri->segment(3);
+$payments_open = ($segment2 === 'payments');
 $current_name = !empty($current_user['full_name']) ? $current_user['full_name'] : 'Administrator';
 $current_profile_image = !empty($current_user['profile_image']) ? $current_user['profile_image'] : '';
 $current_initials = app_user_initials($current_name);
@@ -12,7 +13,7 @@ $current_initials = app_user_initials($current_name);
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?php echo isset($page_title) ? $page_title : 'Admin Panel'; ?></title>
+    <title><?php echo isset($page_title) ? $page_title : 'Admin Panel'; ?> | Cab Booking Fast</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -125,18 +126,12 @@ $current_initials = app_user_initials($current_name);
         }
 
         .brand-logo {
-            width: 40px;
-            height: 40px;
+            width: 48px;
+            height: 48px;
             border-radius: var(--radius-sm);
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-weight: 700;
-            font-size: 16px;
+            object-fit: contain;
             flex-shrink: 0;
-            letter-spacing: .02em;
+            filter: drop-shadow(0 8px 20px rgba(37, 99, 235, .12));
         }
 
         .brand-info strong {
@@ -211,6 +206,73 @@ $current_initials = app_user_initials($current_name);
         }
 
         .nav-link.active {
+            background: var(--primary-soft);
+            color: var(--primary);
+        }
+
+        .nav-dropdown {
+            margin-bottom: 4px;
+        }
+
+        .nav-dropdown.open .nav-submenu {
+            display: grid;
+        }
+
+        .nav-dropdown-trigger {
+            position: relative;
+            width: 100%;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .nav-dropdown-trigger::after {
+            content: '▾';
+            font-size: 11px;
+            color: var(--muted-light);
+            margin-left: auto;
+        }
+
+        .nav-submenu {
+            margin: 4px 0 8px 42px;
+            padding-left: 10px;
+            border-left: 1px solid var(--border);
+            display: none;
+            gap: 4px;
+        }
+
+        .nav-dropdown-trigger::after {
+            content: '';
+            width: 7px;
+            height: 7px;
+            border-right: 1.5px solid currentColor;
+            border-bottom: 1.5px solid currentColor;
+            font-size: 0;
+            color: var(--muted-light);
+            margin-left: auto;
+            transform: rotate(45deg);
+            transition: transform .18s ease;
+        }
+
+        .nav-dropdown.open .nav-dropdown-trigger::after {
+            transform: rotate(225deg);
+        }
+
+        .nav-sublink {
+            display: block;
+            padding: 8px 10px;
+            border-radius: var(--radius-sm);
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--muted);
+            transition: background .15s ease, color .15s ease;
+        }
+
+        .nav-sublink:hover {
+            background: var(--surface-soft);
+            color: var(--text);
+        }
+
+        .nav-sublink.active {
             background: var(--primary-soft);
             color: var(--primary);
         }
@@ -1018,9 +1080,9 @@ $current_initials = app_user_initials($current_name);
 
             <!-- Brand -->
             <div class="brand">
-                <div class="brand-logo"><?php echo html_escape($current_initials); ?></div>
+                <div class="brand-logo" style="background:linear-gradient(135deg,#f2dfb5,#c9973d);color:#624112;font-weight:900;font-size:14px;letter-spacing:.08em;display:flex;align-items:center;justify-content:center;">CBF</div>
                 <div class="brand-info">
-                    <strong>DriveEase</strong>
+                    <strong>Cab Booking Fast</strong>
                     <span>Admin workspace</span>
                 </div>
             </div>
@@ -1074,18 +1136,24 @@ $current_initials = app_user_initials($current_name);
                             <span>Fleet &amp; pricing</span>
                         </div>
                     </a>
-                    <a class="nav-link <?php echo ($segment2 === 'payments') ? 'active' : ''; ?>" href="<?php echo base_url('admin/payments'); ?>">
-                        <div class="nav-icon">
-                            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <rect x="2" y="5" width="20" height="14" rx="2" />
-                                <path d="M2 10h20" />
-                            </svg>
+                    <div class="nav-dropdown <?php echo $payments_open ? 'open' : ''; ?>">
+                        <button class="nav-link nav-dropdown-trigger js-nav-dropdown-trigger <?php echo ($segment2 === 'payments') ? 'active' : ''; ?>" type="button" aria-expanded="<?php echo $payments_open ? 'true' : 'false'; ?>">
+                            <div class="nav-icon">
+                                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <rect x="2" y="5" width="20" height="14" rx="2" />
+                                    <path d="M2 10h20" />
+                                </svg>
+                            </div>
+                            <div class="nav-copy">
+                                <strong>Payments</strong>
+                                <span>Requests &amp; bank details</span>
+                            </div>
+                        </button>
+                        <div class="nav-submenu">
+                            <a class="nav-sublink <?php echo ($segment2 === 'payments' && $segment3 === 'settings') ? 'active' : ''; ?>" href="<?php echo base_url('admin/payments/settings'); ?>">Add Details</a>
+                            <a class="nav-sublink <?php echo ($segment2 === 'payments' && $segment3 !== 'settings') ? 'active' : ''; ?>" href="<?php echo base_url('admin/payments/requests'); ?>">See Requests</a>
                         </div>
-                        <div class="nav-copy">
-                            <strong>Payments</strong>
-                            <span>Collections &amp; balances</span>
-                        </div>
-                    </a>
+                    </div>
                     <a class="nav-link <?php echo ($segment2 === 'documents') ? 'active' : ''; ?>" href="<?php echo base_url('admin/documents'); ?>">
                         <div class="nav-icon">
                             <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

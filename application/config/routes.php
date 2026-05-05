@@ -49,7 +49,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | Examples:	my-controller/index	-> my_controller/index
 |		my-controller/my-method	-> my_controller/my_method
 */
-$route['default_controller'] = 'customer/login';
+$route['default_controller'] = 'customer/dashboard';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
@@ -73,9 +73,14 @@ $route['admin/vehicles/store'] = 'admin/vehicle/store';
 $route['admin/vehicles/update/(:num)'] = 'admin/vehicle/update/$1';
 $route['admin/vehicles/delete/(:num)'] = 'admin/vehicle/delete/$1';
 $route['admin/payments'] = 'admin/payment/index';
+$route['admin/payments/requests'] = 'admin/payment/index';
+$route['admin/payments/settings'] = 'admin/payment/settings';
+$route['admin/payments/settings/save'] = 'admin/payment/save_settings';
+$route['admin/payments/approve/(:num)'] = 'admin/payment/approve/$1';
+$route['admin/payments/reject/(:num)'] = 'admin/payment/reject/$1';
 $route['admin/payments/store'] = 'admin/payment/store';
 
-$route['customer'] = 'customer/login';
+$route['customer'] = 'customer/dashboard';
 $route['customer/login'] = 'customer/login';
 $route['register'] = 'customer/login/register';
 $route['customer/logout'] = 'customer/login/logout';
@@ -88,6 +93,10 @@ $route['customer/bookings/create'] = 'customer/booking/create';
 $route['customer/bookings/store'] = 'customer/booking/store';
 $route['customer/documents'] = 'customer/document/index';
 $route['customer/documents/store'] = 'customer/document/store';
+$route['customer/documents/delete/(:num)'] = 'customer/document/delete/$1';
+$route['customer/payments'] = 'customer/payment/index';
+$route['customer/payments/pay/(:num)'] = 'customer/payment/pay/$1';
+$route['customer/payments/store'] = 'customer/payment/store';
 $route['customer/vehicles'] = 'customer/vehicle/index';
 $route['customer/vehicles/create'] = 'customer/vehicle/create';
 

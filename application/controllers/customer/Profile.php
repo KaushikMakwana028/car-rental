@@ -6,8 +6,9 @@ class Profile extends Customer_Controller
     public function index()
     {
         $data['page_title'] = 'My Profile';
+        $data['page_subtitle'] = 'Manage your contact details, profile image, and account security from one refined customer profile screen.';
         $data['profile_user'] = $this->General_model->get_user_by_id((int) $this->current_user['id']);
-        $this->load->view('customer/profile', $data);
+        $this->render_view('customer/profile', $data);
     }
 
     public function update()

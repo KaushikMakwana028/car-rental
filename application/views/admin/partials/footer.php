@@ -7,6 +7,7 @@
         var backdrop = document.querySelector('.js-sidebar-backdrop');
         var toggles = document.querySelectorAll('.js-menu-toggle');
         var navLinks = document.querySelectorAll('.sidebar .nav-link');
+        var navDropdownTriggers = document.querySelectorAll('.js-nav-dropdown-trigger');
         var profileDropdown = document.querySelector('.js-profile-dropdown');
         var profileTrigger = document.querySelector('.js-profile-trigger');
 
@@ -66,7 +67,25 @@
 
         navLinks.forEach(function (link) {
             link.addEventListener('click', function () {
+                if (link.classList.contains('js-nav-dropdown-trigger')) {
+                    return;
+                }
                 closeSidebar();
+            });
+        });
+
+        navDropdownTriggers.forEach(function (trigger) {
+            trigger.addEventListener('click', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                var dropdown = trigger.closest('.nav-dropdown');
+                if (!dropdown) {
+                    return;
+                }
+
+                var isOpen = dropdown.classList.toggle('open');
+                trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
             });
         });
 

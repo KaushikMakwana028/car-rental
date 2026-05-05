@@ -1,6 +1,27 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
     </div>
 </main>
+
+<footer class="footer-wrap">
+    <div class="container">
+        <div class="footer-panel">
+            <div class="footer-brand">
+                <div class="footer-logo">
+                    <img src="<?php echo base_url('assets/home/logo.png'); ?>" alt="Cab Booking Fast logo">
+                </div>
+                <div>
+                    <strong>Cab Booking Fast</strong>
+                    <span>Customer portal</span>
+                </div>
+            </div>
+            <div class="footer-note">
+                <strong>Unified Customer Experience</strong>
+                <div>One premium interface for discovering cars, creating bookings, managing documents, and updating profile details on every screen.</div>
+            </div>
+        </div>
+    </div>
+</footer>
+
 <script>
     (function () {
         var drawer = document.querySelector('.js-mobile-drawer');
@@ -12,7 +33,6 @@
 
         function syncToggleState(isOpen) {
             toggles.forEach(function (toggle) {
-                toggle.classList.toggle('active', isOpen);
                 toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
             });
         }
@@ -48,26 +68,25 @@
             profileTrigger.setAttribute('aria-expanded', 'false');
         }
 
-        if (toggles.length) {
-            toggles.forEach(function (toggle) {
-                toggle.addEventListener('click', function () {
-                    if (drawer && drawer.classList.contains('open')) {
-                        closeDrawer();
-                    } else {
-                        openDrawer();
-                    }
-                });
+        toggles.forEach(function (toggle) {
+            toggle.addEventListener('click', function () {
+                if (drawer && drawer.classList.contains('open')) {
+                    closeDrawer();
+                } else {
+                    openDrawer();
+                }
             });
-        }
+        });
 
         if (backdrop) {
-            backdrop.addEventListener('click', closeDrawer);
+            backdrop.addEventListener('click', function () {
+                closeDrawer();
+                closeProfileDropdown();
+            });
         }
 
         navLinks.forEach(function (link) {
-            link.addEventListener('click', function () {
-                closeDrawer();
-            });
+            link.addEventListener('click', closeDrawer);
         });
 
         if (profileDropdown && profileTrigger) {
