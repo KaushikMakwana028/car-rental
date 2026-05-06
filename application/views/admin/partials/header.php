@@ -118,20 +118,36 @@ $current_initials = app_user_initials($current_name);
 
         /* Brand */
         .brand {
+            padding: 22px 18px;
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 20px 20px 18px;
-            flex-shrink: 0;
+            justify-content: center;
+            min-height: 82px;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+        }
+
+        .brand-logo-wrap {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .brand-logo {
-            width: 48px;
-            height: 48px;
-            border-radius: var(--radius-sm);
+            width: auto;
+            height: 52px;
             object-fit: contain;
-            flex-shrink: 0;
-            filter: drop-shadow(0 8px 20px rgba(37, 99, 235, .12));
+            transition: transform .2s ease;
+            filter: drop-shadow(0 10px 20px rgba(37, 99, 235, .12));
+        }
+
+        .brand-logo:hover {
+            transform: scale(1.03);
+        }
+
+        .brand-divider {
+            height: 1px;
+            background: #edf2f7;
         }
 
         .brand-info strong {
@@ -1035,6 +1051,91 @@ $current_initials = app_user_initials($current_name);
             .profile-trigger {
                 padding: 5px 10px 5px 5px;
             }
+
+            .topbar {
+                padding: 10px 12px;
+                border-radius: 14px;
+            }
+
+            .topbar-left {
+                flex: 1;
+                min-width: 0;
+            }
+
+            /* Hide welcome text */
+            .topbar-copy p {
+                display: none;
+            }
+
+            /* Title smaller */
+            .topbar-copy h1 {
+                font-size: 15px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            /* Only profile image show */
+            .profile-trigger {
+                padding: 0;
+                border: none;
+                background: transparent;
+                gap: 0;
+            }
+
+            /* Hide admin name + role */
+            .profile-meta,
+            .profile-caret {
+                display: none;
+            }
+
+            /* Bigger clean round image */
+            .profile-avatar {
+                width: 42px;
+                height: 42px;
+                border-radius: 50%;
+                border: 2px solid #dbeafe;
+                box-shadow: 0 4px 14px rgba(37, 99, 235, 0.15);
+            }
+
+            .profile-avatar img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+            /* Dropdown align properly */
+            .dropdown-panel {
+                position: fixed;
+                top: 68px;
+                right: 12px;
+                left: 12px;
+                width: auto;
+                max-width: calc(100vw - 24px);
+                border-radius: 14px;
+                overflow: hidden;
+                z-index: 9999;
+            }
+
+            .dropdown-user {
+                padding: 14px;
+            }
+
+            .dropdown-link {
+                padding: 12px 14px;
+                font-size: 14px;
+            }
+
+            .dropdown-user {
+                display: none;
+            }
+
+            /* Remove extra top spacing */
+            .dropdown-panel {
+                padding-top: 6px;
+            }
+
+
         }
 
         @media (max-width: 640px) {
@@ -1080,10 +1181,8 @@ $current_initials = app_user_initials($current_name);
 
             <!-- Brand -->
             <div class="brand">
-                <div class="brand-logo" style="background:linear-gradient(135deg,#f2dfb5,#c9973d);color:#624112;font-weight:900;font-size:14px;letter-spacing:.08em;display:flex;align-items:center;justify-content:center;">CBF</div>
-                <div class="brand-info">
-                    <strong>Cab Booking Fast</strong>
-                    <span>Admin workspace</span>
+                <div class="brand-logo-wrap">
+                    <img src="<?php echo base_url('assets/home/logo.png'); ?>" alt="Logo" class="brand-logo">
                 </div>
             </div>
             <div class="brand-divider"></div>

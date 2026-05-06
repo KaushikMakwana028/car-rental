@@ -47,6 +47,7 @@ class Profile extends Admin_Controller
             'full_name' => trim($this->input->post('full_name', true)),
             'email' => $email,
             'phone' => trim($this->input->post('phone', true)),
+            'address' => trim($this->input->post('address', true)),
             'profile_image' => $profile_image,
         ));
 

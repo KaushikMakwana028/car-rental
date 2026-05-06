@@ -1,175 +1,218 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+<?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
 <?php
-$document_gate = isset($document_gate) ? $document_gate : array(
-    'is_ready' => false,
-    'approved_count' => 0,
-    'required_count' => 0,
-    'missing_documents' => array(),
-    'pending_documents' => array(),
-    'rejected_documents' => array(),
-);
-$available_document_types = array();
-foreach ($documents as $document) {
-    if ($document['status'] === 'missing') {
-        $available_document_types[] = $document['document_type'];
-    }
-}
+$document_map = isset($document_map) ? $document_map : array();
+$required_types = isset($required_types) ? $required_types : array();
+$booking = !empty($booking) ? $booking : array();
+$can_continue_to_payment = !empty($can_continue_to_payment);
+$current_step = isset($current_step) ? (int) $current_step : 2;
+$booking_back_url = base_url('customer/bookings/create' . (!empty($booking['vehicle_id']) ? '?vehicle_id=' . (int) $booking['vehicle_id'] : ''));
+$booking_back_url .= (strpos($booking_back_url, '?') === false ? '?' : '&') . 'booking_id=' . (int) $booking['id'] . '&customer_id=' . (int) $booking['customer_id'];
 ?>
 
-<section class="section-card">
-    <div class="card-head">
-        <div>
-            <div class="eyebrow">Verification</div>
-            <h3>My documents and approval progress.</h3>
-            <p>Upload each file once, track the review result, and unlock booking only after the admin approves the required documents.</p>
-        </div>
-        <div class="progress-shell">
-            <div class="progress-bar"><div class="progress-fill" style="width: <?php echo (int) $document_progress['percentage']; ?>%;"></div></div>
-            <div class="text-muted"><?php echo (int) $document_progress['submitted']; ?> of <?php echo (int) $document_progress['total']; ?> submitted</div>
-        </div>
-    </div>
+<style>
+    .step-shell {
+        padding: 20px 24px;
+    }
 
-    <?php if (!empty($document_gate['is_ready'])): ?>
-        <div class="flash flash-success" style="margin-bottom:20px;">All required documents are approved. Booking is now available on your account.</div>
-    <?php else: ?>
-        <div class="flash flash-error" style="margin-bottom:20px;">
-            Booking stays locked until admin approval is complete.
-            <?php if (!empty($document_gate['pending_documents'])): ?>
-                Under review: <?php echo html_escape(implode(', ', $document_gate['pending_documents'])); ?>.
-            <?php endif; ?>
-            <?php if (!empty($document_gate['missing_documents'])): ?>
-                Not uploaded: <?php echo html_escape(implode(', ', $document_gate['missing_documents'])); ?>.
-            <?php endif; ?>
-            <?php if (!empty($document_gate['rejected_documents'])): ?>
-                Upload again: <?php echo html_escape(implode(', ', $document_gate['rejected_documents'])); ?>.
-            <?php endif; ?>
-        </div>
-    <?php endif; ?>
+    .stepper {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+    }
 
-    <div class="info-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-bottom:24px;">
-        <div class="feature-card">
-            <strong>Required Approved</strong>
-            <span><?php echo (int) $document_gate['approved_count']; ?> / <?php echo (int) $document_gate['required_count']; ?> ready for booking.</span>
-        </div>
-        <div class="feature-card">
-            <strong>Pending Review</strong>
-            <span><?php echo !empty($document_gate['pending_documents']) ? html_escape(implode(', ', $document_gate['pending_documents'])) : 'No document waiting right now.'; ?></span>
-        </div>
-        <div class="feature-card">
-            <strong>Need Action</strong>
-            <span>
-                <?php
-                $needs_action = array_merge($document_gate['missing_documents'], $document_gate['rejected_documents']);
-                echo !empty($needs_action) ? html_escape(implode(', ', $needs_action)) : 'Everything required is already handled.';
-                ?>
-            </span>
-        </div>
-    </div>
+    .step-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+    }
 
-    <div class="docs-grid" style="margin-bottom:22px;">
-        <?php foreach ($documents as $document): ?>
-            <div class="doc-card">
-                <div class="doc-left">
-                    <div class="doc-icon"><?php echo strtoupper(substr($document['document_type'], 0, 1)); ?></div>
-                    <div class="doc-meta">
-                        <strong><?php echo html_escape($document['document_type']); ?></strong>
-                        <span>
-                            <?php
-                            if ($document['status'] === 'missing') {
-                                echo 'Not uploaded';
-                            } elseif ($document['status'] === 'approved') {
-                                echo 'Verified by admin';
-                            } elseif ($document['status'] === 'rejected') {
-                                echo 'Rejected. Please upload a clear file again.';
-                            } else {
-                                echo 'Pending admin approval';
-                            }
-                            ?>
-                        </span>
-                        <?php if (!empty($document['admin_notes'])): ?>
-                            <span style="color:#6b6050;">Note: <?php echo html_escape($document['admin_notes']); ?></span>
-                        <?php endif; ?>
-                    </div>
+    .step-badge {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 13px;
+        border: 1px solid rgba(35, 94, 167, .18);
+        background: #fff;
+        color: var(--muted);
+    }
+
+    .step-item.active .step-badge,
+    .step-item.done .step-badge {
+        background: linear-gradient(135deg, var(--accent) 0%, #f1c14f 100%);
+        border-color: transparent;
+        color: #fff;
+        box-shadow: 0 8px 18px rgba(35, 94, 167, .18);
+    }
+
+    .step-label {
+        color: var(--muted);
+        font-weight: 700;
+    }
+
+    .step-item.active .step-label,
+    .step-item.done .step-label {
+        color: var(--ink);
+    }
+
+    .step-line {
+        width: 42px;
+        height: 2px;
+        border-radius: 999px;
+        background: rgba(35, 94, 167, .14);
+    }
+
+    .step-line.done {
+        background: linear-gradient(90deg, var(--accent) 0%, #f1c14f 100%);
+    }
+
+    .booking-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 6px;
+    }
+
+    .booking-actions .btn,
+    .booking-actions .btn-secondary {
+        min-width: 156px;
+    }
+</style>
+
+<section class="section-card step-shell">
+    <div class="stepper">
+        <?php
+        $steps = array(
+            1 => 'Booking',
+            2 => 'Document',
+            3 => 'Payment',
+        );
+        foreach ($steps as $step_no => $step_label):
+            $is_active = $current_step === $step_no;
+            $is_done = $current_step > $step_no;
+        ?>
+            <div class="step-item <?php echo $is_active ? 'active' : ''; ?> <?php echo $is_done ? 'done' : ''; ?>">
+                <div class="step-badge">
+                    <?php echo $is_done ? '&#10003;' : $step_no; ?>
                 </div>
-                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;">
-                    <span class="badge badge-<?php echo html_escape($document['status']); ?>"><?php echo html_escape(ucfirst($document['status'])); ?></span>
-                    <?php if (!empty($document['file_path'])): ?>
-                        <a class="btn-secondary" href="<?php echo base_url($document['file_path']); ?>" target="_blank">View</a>
-                        <a class="btn-secondary" href="<?php echo base_url('customer/documents/delete/' . (int) $document['id']); ?>" onclick="return confirm('Delete this document?');">Delete</a>
-                    <?php endif; ?>
+                <div class="step-label">
+                    <?php echo html_escape($step_label); ?>
                 </div>
             </div>
+            <?php if ($step_no < 3): ?>
+                <div class="step-line <?php echo $current_step > $step_no ? 'done' : ''; ?>"></div>
+            <?php endif; ?>
         <?php endforeach; ?>
-    </div>
-
-    <div class="upload-panel">
-        <div class="card-head">
-            <div>
-                <div class="eyebrow">Upload</div>
-                <h3>Upload a new document.</h3>
-                <p>Accepted formats: JPG, PNG, PDF. Uploaded document types are removed from the list until the customer deletes that document.</p>
-            </div>
-        </div>
-        <?php if (!empty($available_document_types)): ?>
-            <form method="post" action="<?php echo base_url('customer/documents/store'); ?>" enctype="multipart/form-data">
-                <div class="form-grid">
-                    <div>
-                        <label>Document Type</label>
-                        <select name="document_type" required>
-                            <option value="">Select document type</option>
-                            <?php foreach ($available_document_types as $document_type): ?>
-                                <option value="<?php echo html_escape($document_type); ?>"><?php echo html_escape($document_type); ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div>
-                        <label>Related Booking</label>
-                        <select name="booking_id">
-                            <option value="0">General / Not linked</option>
-                            <?php foreach ($bookings as $booking): ?>
-                                <option value="<?php echo (int) $booking['id']; ?>"><?php echo html_escape($booking['booking_code']); ?> - <?php echo html_escape($booking['vehicle_name']); ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="full">
-                        <label>Choose File</label>
-                        <input class="js-document-file" type="file" name="document_file" accept=".jpg,.jpeg,.png,.pdf" required>
-                        <div class="helper js-document-file-name">No file selected yet. Maximum file size: 4 MB.</div>
-                    </div>
-                </div>
-                <div class="hero-actions">
-                    <button class="btn" type="submit">Upload Document</button>
-                    <?php if (!empty($document_gate['is_ready'])): ?>
-                        <a class="btn-secondary" href="<?php echo base_url('customer/bookings/create'); ?>">Create Booking</a>
-                    <?php else: ?>
-                        <a class="btn-secondary" href="<?php echo base_url('customer/bookings'); ?>">View My Bookings</a>
-                    <?php endif; ?>
-                </div>
-            </form>
-        <?php else: ?>
-            <div class="feature-card">
-                <strong>All document types are already uploaded.</strong>
-                <span>Delete an existing document if you want to upload that same document type again.</span>
-            </div>
-        <?php endif; ?>
     </div>
 </section>
 
-<script>
-    (function () {
-        var input = document.querySelector('.js-document-file');
-        var fileName = document.querySelector('.js-document-file-name');
+<div class="split-grid">
+    <section class="section-card">
+        <div class="card-head">
+            <div>
+                <div class="eyebrow">Documents</div>
+                <h3>Upload the required files.</h3>
+                <p>Add Aadhaar Card and Driving License as image or PDF files for this booking.</p>
+            </div>
+        </div>
 
-        if (!input || !fileName) {
-            return;
-        }
+        <div class="info-grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-bottom:20px;">
+            <?php foreach ($required_types as $document_type): ?>
+                <?php $document = isset($document_map[$document_type]) ? $document_map[$document_type] : array('status' => 'missing'); ?>
+                <div class="feature-card">
+                    <strong><?php echo html_escape($document_type); ?></strong>
+                    <span>
+                        Status:
+                        <?php echo !empty($document['file_path']) ? html_escape(ucfirst($document['status'])) : 'Not uploaded'; ?>
+                    </span>
+                    <?php if (!empty($document['admin_notes'])): ?>
+                        <span>Note: <?php echo html_escape($document['admin_notes']); ?></span>
+                    <?php endif; ?>
+                    <?php if (!empty($document['file_path'])): ?>
+                        <div class="hero-actions" style="margin-top:12px;">
+                            <a class="btn-secondary" href="<?php echo base_url($document['file_path']); ?>" target="_blank">View</a>
+                            <a class="btn-secondary" href="<?php echo base_url('customer/documents/delete/' . (int) $document['id'] . '?customer_id=' . (int) $booking['customer_id']); ?>" onclick="return confirm('Delete this document?');">Delete</a>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            <?php endforeach; ?>
+        </div>
 
-        input.addEventListener('change', function () {
-            if (input.files && input.files.length > 0) {
-                fileName.textContent = input.files[0].name;
-            } else {
-                fileName.textContent = 'No file selected yet. Maximum file size: 4 MB.';
-            }
-        });
-    })();
-</script>
+        <form method="post" action="<?php echo base_url('customer/documents/store'); ?>" enctype="multipart/form-data">
+            <input type="hidden" name="booking_id" value="<?php echo (int) $booking['id']; ?>">
+            <input type="hidden" name="customer_id" value="<?php echo (int) $booking['customer_id']; ?>">
+            <div class="form-grid">
+                <?php
+                $field_map = array('aadhaar_file' => 'Aadhaar Card', 'driving_license_file' => 'Driving License');
+                foreach ($field_map as $field_name => $document_type):
+                    $has_file = !empty($document_map[$document_type]['file_path']);
+                ?>
+                    <div>
+                        <label><?php echo $document_type; ?></label>
+                        <?php if ($has_file): ?>
+                            <p style="color:#1a8a4a;font-size:13px;font-weight:600;margin:4px 0;">
+                                ✓ Already uploaded &nbsp;
+                                <!-- <a href="<?php echo base_url($document_map[$document_type]['file_path']); ?>" target="_blank"
+                                    style="color:var(--accent);font-weight:600;">View</a> -->
+                            </p>
+                            <label style="display:inline-flex;align-items:center;gap:6px;margin-top:6px;font-size:13px;color:#666;cursor:pointer;">
+                                <input type="checkbox" style="width:15px;height:15px;cursor:pointer;accent-color:var(--accent);"
+                                    onchange="document.getElementById('<?php echo $field_name; ?>').style.display=this.checked?'block':'none'">
+                                Replace document
+                            </label>
+                            <input type="file" id="<?php echo $field_name; ?>" name="<?php echo $field_name; ?>"
+                                accept=".jpg,.jpeg,.png,.pdf"
+                                style="display:none;margin-top:8px;font-size:13px;">
+                        <?php else: ?>
+                            <input type="file" name="<?php echo $field_name; ?>" accept=".jpg,.jpeg,.png,.pdf" required>
+                        <?php endif; ?>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+            <div class="booking-actions">
+                <a class="btn-secondary" href="<?php echo $booking_back_url; ?>">Previous Step</a>
+                <?php
+                $all_uploaded = !empty($document_map['Aadhaar Card']['file_path']) && !empty($document_map['Driving License']['file_path']);
+                ?>
+                <?php if ($all_uploaded): ?>
+                    <a class="btn" href="<?php echo base_url('customer/payments/pay/' . (int)$booking['id'] . '?customer_id=' . (int)$booking['customer_id']); ?>">Continue to Payment</a>
+                <?php else: ?>
+                    <button class="btn" type="submit">Upload Documents and Continue</button>
+                <?php endif; ?>
+                <a class="btn-secondary" href="<?php echo base_url('customer/dashboard'); ?>">Cancel</a>
+            </div>
+        </form>
+    </section>
+
+    <aside class="section-card accent-card">
+        <div class="eyebrow">Booking</div>
+        <div class="card-head">
+            <div>
+                <h3>Current booking summary.</h3>
+                <p>Upload both documents, then move to advance payment.</p>
+            </div>
+        </div>
+        <div class="info-grid" style="grid-template-columns:1fr;">
+            <div class="feature-card">
+                <strong><?php echo html_escape($booking['booking_code']); ?></strong>
+                <span><?php echo html_escape($booking['vehicle_name']); ?></span>
+            </div>
+            <div class="feature-card">
+                <strong>Trip</strong>
+                <span><?php echo html_escape($booking['trip_label']); ?></span>
+            </div>
+            <div class="feature-card">
+                <strong>Route</strong>
+                <span><?php echo html_escape($booking['trip_route']); ?></span>
+            </div>
+            <div class="feature-card">
+                <strong>Advance</strong>
+                <span>&#8377;<?php echo number_format((float) $booking['advance_due'], 2); ?></span>
+            </div>
+        </div>
+    </aside>
+</div>

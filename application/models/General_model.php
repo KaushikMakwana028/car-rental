@@ -1,28 +1,23 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
 class General_model extends CI_Model
 {
     private $document_types = array(
         'Driving License',
         'Aadhaar Card',
-        'Passport / Voter ID',
-        'Passport Photo',
-        'Payment Receipt',
-        'Rental Agreement',
     );
 
     private $required_booking_documents = array(
         'Driving License',
         'Aadhaar Card',
-        'Passport / Voter ID',
-        'Passport Photo',
     );
 
     public function __construct()
     {
         parent::__construct();
         $this->ensure_users_profile_columns();
+        $this->ensure_users_booking_columns();
     }
 
     public function get_all($table, $where = array(), $order_by = 'id DESC')
@@ -115,6 +110,72 @@ class General_model extends CI_Model
         return array('status' => true, 'user_id' => $user_id);
     }
 
+    public function resolve_customer_account($full_name, $phone, $email = '')
+    {
+        $full_name = trim($full_name);
+        $phone = trim($phone);
+        $email = trim($email);
+
+        if ($phone !== '') {
+            $existing_customer = $this->get_row('users', array(
+                'phone' => $phone,
+                'role' => 0,
+            ));
+
+            if (!empty($existing_customer)) {
+                $update = array();
+                if ($full_name !== '' && $existing_customer['full_name'] !== $full_name) {
+                    $update['full_name'] = $full_name;
+                }
+                if ($email !== '' && $existing_customer['email'] !== $email) {
+                    $update['email'] = $this->build_customer_email($email, $phone, (int) $existing_customer['id']);
+                }
+
+                if (!empty($update)) {
+                    $this->update_user_profile((int) $existing_customer['id'], $update);
+                }
+
+                return (int) $existing_customer['id'];
+            }
+        }
+
+        if ($email !== '') {
+            $existing_customer = $this->get_row('users', array(
+                'email' => $email,
+                'role' => 0,
+            ));
+
+            if (!empty($existing_customer)) {
+                $update = array();
+                if ($full_name !== '' && $existing_customer['full_name'] !== $full_name) {
+                    $update['full_name'] = $full_name;
+                }
+                if ($phone !== '' && $existing_customer['phone'] !== $phone) {
+                    $update['phone'] = $phone;
+                }
+
+                if (!empty($update)) {
+                    $this->update_user_profile((int) $existing_customer['id'], $update);
+                }
+
+                return (int) $existing_customer['id'];
+            }
+        }
+
+        $password_seed = bin2hex(random_bytes(8));
+
+        return (int) $this->insert('users', array(
+            'full_name' => $full_name !== '' ? $full_name : 'Customer',
+            'email' => $this->build_customer_email($email, $phone),
+            'phone' => $phone,
+            'password' => password_hash($password_seed, PASSWORD_DEFAULT),
+            'role' => 0,
+            'status' => 1,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ));
+    }
+
     public function update_user_profile($user_id, $data)
     {
         $data['updated_at'] = date('Y-m-d H:i:s');
@@ -183,12 +244,15 @@ class General_model extends CI_Model
 
     public function create_booking($data)
     {
+        $skip_vehicle_booking = !empty($data['_skip_vehicle_booking']);
+        unset($data['_skip_vehicle_booking']);
+
         $data['created_at'] = date('Y-m-d H:i:s');
         $data['updated_at'] = date('Y-m-d H:i:s');
 
         $booking_id = $this->insert('bookings', $data);
 
-        if (!empty($data['vehicle_id'])) {
+        if (!$skip_vehicle_booking && !empty($data['vehicle_id'])) {
             $this->update('vehicles', array('id' => $data['vehicle_id']), array('status' => 'booked'));
         }
 
@@ -221,10 +285,26 @@ class General_model extends CI_Model
                 ->amount;
         }
 
+        $update = array(
+            'updated_at' => date('Y-m-d H:i:s'),
+        );
+
+        if ($paid_amount >= (float) $booking['amount'] && (float) $booking['amount'] > 0) {
+            $update['status'] = 'completed';
+            $result = $this->update('bookings', array('id' => $booking_id), $update);
+
+            if (!empty($booking['vehicle_id'])) {
+                $this->update('vehicles', array('id' => (int) $booking['vehicle_id']), array('status' => 'available'));
+            }
+
+            return $result;
+        }
+
         if ($paid_amount > 0 && (!isset($booking['status']) || $booking['status'] === 'pending')) {
+            $update['status'] = 'confirmed';
             return $this->update('bookings', array('id' => $booking_id), array(
                 'status' => 'confirmed',
-                'updated_at' => date('Y-m-d H:i:s'),
+                'updated_at' => $update['updated_at'],
             ));
         }
 
@@ -233,8 +313,10 @@ class General_model extends CI_Model
 
     public function format_booking_code($booking_id, $created_at = '')
     {
+        // If table is empty or truncated, next insert will be id=1
+        // so booking code resets automatically with the id
         $booking_id = (int) $booking_id;
-        $stamp = !empty($created_at) ? strtotime($created_at) : false;
+        $stamp      = !empty($created_at) ? strtotime($created_at) : false;
 
         if ($stamp === false) {
             $stamp = time();
@@ -344,6 +426,37 @@ class General_model extends CI_Model
             ->row_array();
 
         return !empty($row) ? array_merge($defaults, $row) : $defaults;
+    }
+
+    public function get_public_contact_details()
+    {
+        $defaults = array(
+            'full_name' => 'Cab Booking Fast',
+            'phone' => '',
+            'email' => '',
+            'address' => '',
+        );
+
+        if (!$this->db->table_exists('users')) {
+            return $defaults;
+        }
+
+        $admin = $this->db
+            ->where(array('role' => 1, 'status' => 1))
+            ->order_by('id', 'ASC')
+            ->get('users')
+            ->row_array();
+
+        if (empty($admin)) {
+            return $defaults;
+        }
+
+        return array(
+            'full_name' => !empty($admin['full_name']) ? $admin['full_name'] : $defaults['full_name'],
+            'phone' => !empty($admin['phone']) ? $admin['phone'] : '',
+            'email' => !empty($admin['email']) ? $admin['email'] : '',
+            'address' => isset($admin['address']) ? trim((string) $admin['address']) : '',
+        );
     }
 
     public function save_payment_settings($data)
@@ -713,6 +826,61 @@ class General_model extends CI_Model
         return $groups;
     }
 
+    public function sync_manual_booking_documents($customer_id, $booking_id, $aadhaar_number = '', $driving_license_number = '', $documents_verified = false)
+    {
+        $customer_id = (int) $customer_id;
+        $booking_id = (int) $booking_id;
+
+        if ($customer_id <= 0) {
+            return false;
+        }
+
+        $this->update_user_profile($customer_id, array(
+            'aadhaar_number' => trim($aadhaar_number),
+            'driving_license_number' => trim($driving_license_number),
+            'documents_verified' => $documents_verified ? 1 : 0,
+        ));
+
+        if (!$documents_verified || !$this->db->table_exists('documents')) {
+            return true;
+        }
+
+        $notes = 'Verified manually by admin during booking.';
+        $now = date('Y-m-d H:i:s');
+        $manual_documents = array(
+            'Aadhaar Card' => trim($aadhaar_number),
+            'Driving License' => trim($driving_license_number),
+        );
+
+        foreach ($manual_documents as $document_type => $document_number) {
+            $payload = array(
+                'customer_id' => $customer_id,
+                'booking_id' => $booking_id > 0 ? $booking_id : null,
+                'document_type' => $document_type,
+                'file_name' => '',
+                'file_path' => '',
+                'status' => 'approved',
+                'admin_notes' => $document_number !== '' ? $notes . ' Number: ' . $document_number : $notes,
+                'updated_at' => $now,
+            );
+
+            $existing = $this->get_row('documents', array(
+                'customer_id' => $customer_id,
+                'document_type' => $document_type,
+            ));
+
+            if (!empty($existing)) {
+                $this->update('documents', array('id' => (int) $existing['id']), $payload);
+                continue;
+            }
+
+            $payload['created_at'] = $now;
+            $this->insert('documents', $payload);
+        }
+
+        return true;
+    }
+
     private function enrich_bookings($bookings)
     {
         if (empty($bookings)) {
@@ -767,6 +935,56 @@ class General_model extends CI_Model
         if (!$this->db->field_exists('profile_image', 'users')) {
             $this->db->query("ALTER TABLE `users` ADD COLUMN `profile_image` VARCHAR(255) DEFAULT NULL AFTER `phone`");
         }
+    }
+
+    private function ensure_users_booking_columns()
+    {
+        if (!$this->db->table_exists('users')) {
+            return;
+        }
+
+        if (!$this->db->field_exists('aadhaar_number', 'users')) {
+            $this->db->query("ALTER TABLE `users` ADD COLUMN `aadhaar_number` VARCHAR(80) DEFAULT NULL AFTER `profile_image`");
+        }
+
+        if (!$this->db->field_exists('driving_license_number', 'users')) {
+            $this->db->query("ALTER TABLE `users` ADD COLUMN `driving_license_number` VARCHAR(80) DEFAULT NULL AFTER `aadhaar_number`");
+        }
+
+        if (!$this->db->field_exists('documents_verified', 'users')) {
+            $this->db->query("ALTER TABLE `users` ADD COLUMN `documents_verified` TINYINT(1) NOT NULL DEFAULT 0 AFTER `driving_license_number`");
+        }
+
+        if (!$this->db->field_exists('address', 'users')) {
+            $this->db->query("ALTER TABLE `users` ADD COLUMN `address` TEXT DEFAULT NULL AFTER `documents_verified`");
+        }
+    }
+
+    private function build_customer_email($email = '', $phone = '', $exclude_user_id = 0)
+    {
+        $email = trim($email);
+        if ($email !== '') {
+            $this->db->where('email', $email);
+            if ($exclude_user_id > 0) {
+                $this->db->where('id !=', (int) $exclude_user_id);
+            }
+            $existing_email = $this->db->get('users')->row_array();
+            if (empty($existing_email)) {
+                return $email;
+            }
+        }
+
+        $phone_digits = preg_replace('/\D+/', '', $phone);
+        if ($phone_digits === '') {
+            $phone_digits = (string) time();
+        }
+
+        do {
+            $generated_email = 'walkin.' . $phone_digits . '.' . mt_rand(1000, 9999) . '@local.customer';
+            $existing_generated = $this->get_row('users', array('email' => $generated_email));
+        } while (!empty($existing_generated));
+
+        return $generated_email;
     }
 
     private function get_payment_totals_map($booking_ids)

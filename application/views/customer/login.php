@@ -48,12 +48,13 @@
         .auth-showcase{
             padding:34px;
             background:
-                radial-gradient(circle at top right, rgba(255,255,255,.08), transparent 32%),
-                linear-gradient(135deg,#173b34,#102924);
-            color:#f8f2e6;
+                radial-gradient(circle at top right, rgba(200,85,61,.14), transparent 32%),
+                linear-gradient(135deg,#fffaf3,#fff1e7);
+            color:var(--ink);
             display:flex;
             flex-direction:column;
             justify-content:space-between;
+            border-right:1px solid var(--line);
         }
         .brand{
             display:flex;
@@ -81,7 +82,7 @@
             font-weight:800;
             letter-spacing:.18em;
             text-transform:uppercase;
-            color:rgba(248,242,230,.72);
+            color:#7a6953;
         }
         .showcase-copy{
             max-width:560px;
@@ -90,7 +91,7 @@
             display:inline-flex;
             align-items:center;
             gap:10px;
-            color:#f1cc87;
+            color:var(--gold-deep);
             font-size:11px;
             font-weight:800;
             letter-spacing:.16em;
@@ -100,7 +101,7 @@
             content:'';
             width:24px;
             height:2px;
-            background:linear-gradient(90deg,#f1cc87,transparent);
+            background:linear-gradient(90deg,var(--gold),transparent);
             border-radius:999px;
         }
         .showcase-copy h1{
@@ -112,7 +113,7 @@
         }
         .showcase-copy p{
             margin:18px 0 0;
-            color:rgba(248,242,230,.72);
+            color:var(--muted);
             font-size:16px;
             line-height:1.9;
         }
@@ -125,19 +126,19 @@
         .showcase-tile{
             padding:18px;
             border-radius:20px;
-            background:rgba(255,255,255,.08);
-            border:1px solid rgba(255,255,255,.10);
+            background:rgba(255,255,255,.72);
+            border:1px solid rgba(129,96,44,.12);
         }
         .showcase-tile strong{
             display:block;
-            color:#f3cf8e;
+            color:var(--gold-deep);
             font-family:'Cormorant Garamond',serif;
             font-size:28px;
         }
         .showcase-tile span{
             display:block;
             margin-top:4px;
-            color:rgba(248,242,230,.72);
+            color:var(--muted);
             font-size:13px;
             line-height:1.6;
         }
@@ -153,9 +154,9 @@
             justify-content:center;
             padding:10px 14px;
             border-radius:999px;
-            background:rgba(255,255,255,.08);
-            border:1px solid rgba(255,255,255,.10);
-            color:rgba(248,242,230,.76);
+            background:rgba(255,255,255,.68);
+            border:1px solid rgba(129,96,44,.12);
+            color:var(--muted);
             font-size:12px;
             font-weight:700;
         }
@@ -386,17 +387,10 @@
                 </form>
 
                 <div class="auth-links">
-                    <a class="auth-link" href="<?php echo base_url('register'); ?>">
-                        <div>
-                            <strong>Create account</strong>
-                            <span>Register a new customer profile to start booking.</span>
-                        </div>
-                        <div>&rsaquo;</div>
-                    </a>
                     <a class="auth-link" href="<?php echo base_url('customer/dashboard'); ?>">
                         <div>
                             <strong>Browse customer home</strong>
-                            <span>Go back and explore the redesigned customer pages first.</span>
+                            <span>Go back and explore the updated light customer pages first.</span>
                         </div>
                         <div>&rsaquo;</div>
                     </a>

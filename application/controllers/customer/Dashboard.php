@@ -5,10 +5,11 @@ class Dashboard extends MY_Controller
 {
     public function index()
     {
-        $data['page_title'] = 'Home';
-        $data['page_subtitle'] = 'Explore the fleet, compare vehicles, and move into booking with a cleaner premium customer experience.';
+        $data['page_title'] = '';
+        $data['page_subtitle'] = '';
         $data['current_user'] = $this->current_user;
-        $data['is_customer_logged_in'] = $this->is_logged_in() && $this->current_role() === 0;
+        $data['is_customer_logged_in'] = false;
+        $data['hide_page_hero'] = true;
 
         $data['vehicles'] = $this->General_model->get_available_vehicles();
 

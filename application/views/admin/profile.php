@@ -780,6 +780,10 @@
                     <span class="val"><?php echo html_escape($profile_user['phone']); ?></span>
                 </div>
                 <div class="pf-meta-item">
+                    <span class="lbl">Address</span>
+                    <span class="val"><?php echo !empty($profile_user['address']) ? html_escape($profile_user['address']) : 'Not added yet'; ?></span>
+                </div>
+                <div class="pf-meta-item">
                     <span class="lbl">Member Since</span>
                     <span class="val"><?php echo !empty($profile_user['created_at']) ? date('d M Y', strtotime($profile_user['created_at'])) : 'N/A'; ?></span>
                 </div>
@@ -823,7 +827,7 @@
             <div class="pf-card">
                 <div class="pf-card-head">
                     <h3>Personal Information</h3>
-                    <p>Update your name, email, and phone number.</p>
+                    <p>Update your name, email, phone number, and address.</p>
                 </div>
                 <form method="post" action="<?php echo base_url('admin/profile/update'); ?>" enctype="multipart/form-data">
                     <div class="pf-group">
@@ -840,6 +844,10 @@
                             <label>Phone Number</label>
                             <input type="text" name="phone" value="<?php echo html_escape($profile_user['phone']); ?>" required>
                         </div>
+                    </div>
+                    <div class="pf-group">
+                        <label>Address</label>
+                        <textarea name="address" rows="3" placeholder="Enter admin address"><?php echo !empty($profile_user['address']) ? html_escape($profile_user['address']) : ''; ?></textarea>
                     </div>
                     <div class="pf-btn-row">
                         <button type="submit" class="pf-btn pf-btn-primary">

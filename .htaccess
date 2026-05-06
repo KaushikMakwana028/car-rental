@@ -2,6 +2,8 @@
     RewriteEngine On
     RewriteBase /kaushik_php/ci_project/car-rental/
 
+    RewriteRule ^$ customer/dashboard [L,R=302]
+
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^(.*)$ index.php/$1 [L]

@@ -1,64 +1,68 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Payment extends Customer_Controller
+class Payment extends MY_Controller
 {
     public function index()
     {
-        $data['page_title'] = 'My Payments';
-        $data['page_subtitle'] = 'Track uploaded receipts, admin approval, and advance payment progress for each booking.';
-        $data['current_user'] = $this->current_user;
-        $data['payment_requests'] = $this->General_model->get_customer_payment_requests((int) $this->current_user['id']);
-        $this->render_view('customer/payments_list', $data);
+        redirect('customer/dashboard');
     }
 
     public function pay($booking_id)
     {
+        $customer_id = (int) $this->input->get('customer_id');
+        if ($customer_id <= 0) {
+            $customer_id = $this->get_active_customer_id();
+        }
         $booking_id = (int) $booking_id;
-        $booking = $this->General_model->get_row('bookings', array(
-            'id' => $booking_id,
-            'customer_id' => (int) $this->current_user['id'],
-        ));
 
-        if (empty($booking)) {
-            show_404();
+        if ($customer_id <= 0 || !$this->customer_can_access_booking($booking_id, $customer_id)) {
+            $this->session->set_flashdata('error', 'Please start your booking again.');
+            redirect('customer/dashboard');
         }
 
-        $data['page_title'] = 'Booking Payment';
-        $data['page_subtitle'] = 'Choose advance or full payment, use the admin payment details below, and upload your receipt for approval.';
-        $data['current_user'] = $this->current_user;
-        $data['booking'] = $this->General_model->get_bookings(array(
-            'bookings.id' => $booking_id,
-            'bookings.customer_id' => (int) $this->current_user['id'],
-        ));
-        $data['booking'] = !empty($data['booking']) ? $data['booking'][0] : array();
-        $data['payment_settings'] = $this->General_model->get_payment_settings();
-        $data['existing_request'] = $this->General_model->get_payment_request_for_booking($booking_id, (int) $this->current_user['id']);
+        $document_gate = $this->General_model->get_required_documents_status($customer_id);
+        if ((int) $document_gate['missing_count'] > 0) {
+            $this->session->set_flashdata('error', 'Upload both required documents before payment.');
+            redirect('customer/documents?booking_id=' . $booking_id . '&customer_id=' . $customer_id);
+        }
 
-        $this->render_view('customer/payment_pay', $data);
+        $this->set_public_booking_session($customer_id, $booking_id);
+        $booking = $this->General_model->get_bookings(array(
+            'bookings.id' => $booking_id,
+            'bookings.customer_id' => $customer_id,
+        ));
+        $booking = !empty($booking) ? $booking[0] : array();
+
+        $data['page_title'] = 'Advance Payment';
+        $data['page_subtitle'] = 'Pay the advance amount and upload your receipt to complete the booking request.';
+        $data['current_user'] = $this->current_user;
+        $data['is_customer_logged_in'] = $this->is_logged_in() && $this->current_role() === 0;
+        $data['current_step'] = 3;
+        $data['booking'] = $booking;
+        $data['payment_settings'] = $this->General_model->get_payment_settings();
+        $data['existing_request'] = $this->General_model->get_payment_request_for_booking($booking_id, $customer_id);
+
+        $this->render_customer_view('customer/payment_pay', $data);
     }
 
     public function store()
     {
+        $customer_id = (int) $this->input->post('customer_id');
+        if ($customer_id <= 0) {
+            $customer_id = $this->get_active_customer_id();
+        }
         $booking_id = (int) $this->input->post('booking_id');
         $booking = $this->General_model->get_bookings(array(
             'bookings.id' => $booking_id,
-            'bookings.customer_id' => (int) $this->current_user['id'],
+            'bookings.customer_id' => $customer_id,
         ));
         $booking = !empty($booking) ? $booking[0] : array();
 
         if (empty($booking)) {
-            show_404();
+            $this->session->set_flashdata('error', 'Please start your booking again.');
+            redirect('customer/dashboard');
         }
-
-        $payment_type = strtolower(trim($this->input->post('payment_type', true)));
-        if (!in_array($payment_type, array('advance', 'full'), true)) {
-            $payment_type = 'advance';
-        }
-
-        $advance_amount = isset($booking['advance_due']) ? (float) $booking['advance_due'] : 0;
-        $full_amount = isset($booking['amount']) ? (float) $booking['amount'] : 0;
-        $payment_amount = $payment_type === 'full' ? $full_amount : $advance_amount;
 
         $upload_dir = FCPATH . 'uploads/payments/';
         if (!is_dir($upload_dir)) {
@@ -71,23 +75,26 @@ class Payment extends Customer_Controller
             'max_size' => 8192,
             'file_ext_tolower' => true,
             'remove_spaces' => true,
-            'file_name' => 'payment_' . $this->current_user['id'] . '_' . $booking_id . '_' . time(),
+            'file_name' => 'payment_' . $customer_id . '_' . $booking_id . '_' . time(),
         );
 
         $this->load->library('upload', $config);
 
         if (!$this->upload->do_upload('receipt_file')) {
             $this->session->set_flashdata('error', strip_tags($this->upload->display_errors('', '')));
-            redirect('customer/payments/pay/' . $booking_id);
+            redirect('customer/payments/pay/' . $booking_id . '?customer_id=' . $customer_id);
         }
 
+        $advance_amount = isset($booking['advance_due']) && (float) $booking['advance_due'] > 0
+            ? (float) $booking['advance_due']
+            : (float) $booking['amount'];
         $upload_data = $this->upload->data();
-        $existing_request = $this->General_model->get_payment_request_for_booking($booking_id, (int) $this->current_user['id']);
+        $existing_request = $this->General_model->get_payment_request_for_booking($booking_id, $customer_id);
         $payload = array(
             'booking_id' => $booking_id,
-            'customer_id' => (int) $this->current_user['id'],
-            'payment_type' => $payment_type,
-            'amount' => $payment_amount,
+            'customer_id' => $customer_id,
+            'payment_type' => 'advance',
+            'amount' => $advance_amount,
             'payment_mode' => trim($this->input->post('payment_mode', true)),
             'reference_no' => trim($this->input->post('reference_no', true)),
             'receipt_file_name' => $upload_data['file_name'],
@@ -104,11 +111,28 @@ class Payment extends Customer_Controller
         } else {
             if ((int) $this->General_model->create_payment_request($payload) <= 0) {
                 $this->session->set_flashdata('error', 'Payment request table is missing. Please ask admin to update the database first.');
-                redirect('customer/payments/pay/' . $booking_id);
+                redirect('customer/payments/pay/' . $booking_id . '?customer_id=' . $customer_id);
             }
         }
 
-        $this->session->set_flashdata('success', 'Payment receipt uploaded successfully. It is now pending admin approval.');
-        redirect('customer/payments');
+        $this->General_model->update('bookings', array('id' => $booking_id), array(
+            'status' => 'confirmed',
+            'updated_at' => date('Y-m-d H:i:s'),
+        ));
+        $this->General_model->update('vehicles', array('id' => (int) $booking['vehicle_id']), array(
+            'status' => 'booked',
+        ));
+        $this->clear_public_booking_session();
+        $this->session->set_flashdata('swal', array(
+            'icon' => 'success',
+            'title' => 'Car Booked Successfully',
+            'text' => 'Your car is booked. Admin will contact you within 24 hours.',
+            'identity' => array(
+                'Booking ID' => isset($booking['booking_code']) ? $booking['booking_code'] : ('#' . $booking_id),
+                'Customer' => isset($booking['customer_name']) ? $booking['customer_name'] : '',
+                'Mobile' => isset($booking['customer_phone']) ? $booking['customer_phone'] : '',
+            ),
+        ));
+        redirect('customer/dashboard');
     }
 }

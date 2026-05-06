@@ -1,26 +1,26 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Booking extends Customer_Controller
+class Booking extends MY_Controller
 {
     public function index()
     {
-        $data['page_title'] = 'My Bookings';
-        $data['page_subtitle'] = 'Track every ride request, payment update, and approval status from one polished bookings overview.';
-        $data['current_user'] = $this->current_user;
-        $data['bookings'] = $this->General_model->get_bookings(array('bookings.customer_id' => $this->current_user['id']));
-        $this->render_view('customer/bookings_list', $data);
+        redirect('customer/dashboard');
     }
 
     public function create()
     {
-        $data['page_title'] = 'Create Booking';
-        $data['page_subtitle'] = 'Submit your trip requirements with confidence using a clearer form and automatic amount preview.';
+        $data['page_title'] = 'Book a Car';
+        $data['page_subtitle'] = 'Enter your name and mobile number, choose your trip details, and continue to document upload.';
         $data['current_user'] = $this->current_user;
+        $data['is_customer_logged_in'] = $this->is_logged_in() && $this->current_role() === 0;
+        $data['current_step'] = 1;
         $data['vehicles'] = $this->General_model->get_available_vehicles();
-        $data['document_gate'] = $this->General_model->get_required_documents_status((int) $this->current_user['id']);
         $requested_vehicle_id = (int) $this->input->get('vehicle_id');
+        $requested_booking_id = (int) $this->input->get('booking_id');
+        $requested_customer_id = (int) $this->input->get('customer_id');
         $data['selected_vehicle_id'] = 0;
+        $data['booking_edit'] = array();
 
         if ($requested_vehicle_id > 0) {
             foreach ($data['vehicles'] as $vehicle) {
@@ -31,39 +31,56 @@ class Booking extends Customer_Controller
             }
         }
 
-        $this->render_view('customer/bookings_create', $data);
+        if ($requested_booking_id > 0 && $requested_customer_id > 0 && $this->customer_can_access_booking($requested_booking_id, $requested_customer_id)) {
+            $booking_rows = $this->General_model->get_bookings(array(
+                'bookings.id' => $requested_booking_id,
+                'bookings.customer_id' => $requested_customer_id,
+            ));
+            $booking = !empty($booking_rows) ? $booking_rows[0] : array();
+            if (!empty($booking)) {
+                $data['booking_edit'] = $booking;
+                $data['selected_vehicle_id'] = (int) $booking['vehicle_id'];
+                $this->set_public_booking_session($requested_customer_id, $requested_booking_id);
+            }
+        }
+
+        $this->render_customer_view('customer/bookings_create', $data);
     }
 
     public function store()
     {
-        $document_gate = $this->General_model->get_required_documents_status((int) $this->current_user['id']);
-        if (empty($document_gate['is_ready'])) {
-            $message_parts = array('Booking is locked until admin approves all required documents.');
-
-            if (!empty($document_gate['missing_documents'])) {
-                $message_parts[] = 'Upload: ' . implode(', ', $document_gate['missing_documents']) . '.';
-            }
-
-            if (!empty($document_gate['pending_documents'])) {
-                $message_parts[] = 'Waiting for approval: ' . implode(', ', $document_gate['pending_documents']) . '.';
-            }
-
-            if (!empty($document_gate['rejected_documents'])) {
-                $message_parts[] = 'Please re-upload: ' . implode(', ', $document_gate['rejected_documents']) . '.';
-            }
-
-            $message = implode(' ', $message_parts);
-            $this->session->set_flashdata('error', $message);
-            redirect('customer/documents');
-        }
-
+        $booking_id = (int) $this->input->post('booking_id');
+        $customer_id = (int) $this->input->post('customer_id');
         $vehicle_id = (int) $this->input->post('vehicle_id');
         $estimated_km = (int) $this->input->post('estimated_km');
+        $customer_name = trim($this->input->post('customer_name', true));
+        $customer_phone = trim($this->input->post('customer_phone', true));
         $vehicle = $this->General_model->get_row('vehicles', array('id' => $vehicle_id));
-        $calculated_amount = !empty($vehicle) ? ((float) $vehicle['rate_per_day'] * $estimated_km) : 0;
+
+        if ($customer_name === '' || $customer_phone === '') {
+            $this->session->set_flashdata('error', 'Customer name and mobile number are required.');
+            redirect('customer/bookings/create');
+        }
+
+        if (empty($vehicle)) {
+            $this->session->set_flashdata('error', 'Please select an available car.');
+            redirect('customer/bookings/create');
+        }
+
+        $calculated_amount = (float) $vehicle['rate_per_day'] * $estimated_km;
+        $is_booking_edit = $booking_id > 0 && $customer_id > 0 && $this->customer_can_access_booking($booking_id, $customer_id);
+
+        if ($is_booking_edit) {
+            $this->General_model->update_user_profile($customer_id, array(
+                'full_name' => $customer_name,
+                'phone' => $customer_phone,
+            ));
+        } else {
+            $customer_id = (int) $this->General_model->resolve_customer_account($customer_name, $customer_phone);
+        }
 
         $payload = array(
-            'customer_id' => (int) $this->current_user['id'],
+            'customer_id' => $customer_id,
             'vehicle_id' => $vehicle_id,
             'pickup_date' => $this->input->post('pickup_date', true),
             'return_date' => $this->input->post('return_date', true),
@@ -72,10 +89,20 @@ class Booking extends Customer_Controller
             'estimated_km' => $estimated_km,
             'amount' => $calculated_amount,
             'status' => 'pending',
+            '_skip_vehicle_booking' => true,
         );
 
-        $booking_id = (int) $this->General_model->create_booking($payload);
-        $this->session->set_flashdata('success', 'Booking request submitted. Please upload your advance payment receipt now.');
-        redirect('customer/payments/pay/' . $booking_id);
+        if ($is_booking_edit) {
+            unset($payload['_skip_vehicle_booking']);
+            $payload['updated_at'] = date('Y-m-d H:i:s');
+            $this->General_model->update('bookings', array('id' => $booking_id, 'customer_id' => $customer_id), $payload);
+            $this->session->set_flashdata('success', 'Step 1 updated successfully. Continue with document upload.');
+        } else {
+            $booking_id = (int) $this->General_model->create_booking($payload);
+            $this->session->set_flashdata('success', 'Step 1 completed successfully. Your booking details were saved. Continue with document upload.');
+        }
+
+        $this->set_public_booking_session($customer_id, $booking_id);
+        redirect('customer/documents?booking_id=' . $booking_id . '&customer_id=' . $customer_id);
     }
 }

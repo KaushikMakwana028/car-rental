@@ -1,6 +1,26 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
+<?php
+$register_mode = isset($register_mode) ? $register_mode : 'customer';
+$is_admin_setup = $register_mode === 'admin';
+$portal_label = $is_admin_setup ? 'Admin Setup' : 'Customer Portal';
+$hero_title = $is_admin_setup ? 'Create the first admin account for this car rental panel.' : 'Start booking with a more premium customer side.';
+$hero_text = $is_admin_setup ? 'This page is available only until the first admin account is created. Once that account is saved, registration closes automatically for safety.' : 'Registration is now part of the same warm, brand-led experience, with better spacing, cleaner form styling, and mobile-friendly layout behavior.';
+$intro_one_title = $is_admin_setup ? 'One-time secure setup' : 'One customer identity';
+$intro_one_text = $is_admin_setup ? 'Use this screen to create the first admin who will manage vehicles, bookings, payments, and customer records.' : 'Register once and manage bookings, documents, and profile details from one dashboard.';
+$intro_two_title = $is_admin_setup ? 'Auto-disable after signup' : 'Fast booking start';
+$intro_two_text = $is_admin_setup ? 'After the first admin is registered, this page is disabled automatically so no extra admin accounts can be opened from the public route.' : 'After account creation, you can sign in and continue directly into the booking flow.';
+$intro_three_title = $is_admin_setup ? 'Clean login handoff' : 'Improved mobile view';
+$intro_three_text = $is_admin_setup ? 'As soon as setup is complete, you will be sent back to the admin login page to sign in.' : 'The full registration experience now stacks cleanly on smaller screens.';
+$card_title = $is_admin_setup ? 'Create admin account' : 'Create your account';
+$card_text = $is_admin_setup ? 'Enter the admin name, email, phone, and password to unlock the admin dashboard.' : 'Register with your name, email, phone, and password to unlock the redesigned customer experience.';
+$submit_label = $is_admin_setup ? 'Create Admin Account' : 'Create Customer Account';
+$login_url = isset($login_url) ? $login_url : base_url('customer/login');
+$back_label = $is_admin_setup ? 'Back to Admin Login' : 'Back to Login';
+$terms_text = $is_admin_setup ? 'After the first admin account is created, this registration page turns off automatically.' : 'By creating an account, you are ready to use the redesigned customer booking experience.';
+?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,250 +29,316 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root{
-            --bg:#f6efe3;
-            --paper:#fffdf8;
-            --ink:#241b13;
-            --muted:#716252;
-            --line:rgba(129,96,44,.16);
-            --gold:#b98735;
-            --gold-deep:#8f6320;
-            --forest:#173b34;
-            --danger:#a73434;
-            --danger-soft:#fde8e8;
-            --shadow-lg:0 28px 60px rgba(72,52,22,.12);
+        :root {
+            --bg: #f6efe3;
+            --paper: #fffdf8;
+            --ink: #241b13;
+            --muted: #716252;
+            --line: rgba(129, 96, 44, .16);
+            --gold: #b98735;
+            --gold-deep: #8f6320;
+            --forest: #173b34;
+            --danger: #a73434;
+            --danger-soft: #fde8e8;
+            --shadow-lg: 0 28px 60px rgba(72, 52, 22, .12);
         }
-        *{box-sizing:border-box}
-        body{
-            margin:0;
-            min-height:100vh;
-            font-family:'Manrope',sans-serif;
-            color:var(--ink);
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: 'Manrope', sans-serif;
+            color: var(--ink);
             background:
-                radial-gradient(circle at top left, rgba(185,135,53,.14), transparent 24%),
-                radial-gradient(circle at right, rgba(23,59,52,.10), transparent 22%),
-                linear-gradient(180deg,#fbf7ef 0%,#f4ebdd 100%);
-            padding:24px;
+                radial-gradient(circle at top left, rgba(185, 135, 53, .14), transparent 24%),
+                radial-gradient(circle at right, rgba(23, 59, 52, .10), transparent 22%),
+                linear-gradient(180deg, #fbf7ef 0%, #f4ebdd 100%);
+            padding: 24px;
         }
-        a{text-decoration:none;color:inherit}
-        img{display:block;max-width:100%}
-        .page{
-            max-width:1180px;
-            margin:0 auto;
-            display:grid;
-            grid-template-columns:.92fr 1.08fr;
-            gap:22px;
-            align-items:stretch;
+
+        a {
+            text-decoration: none;
+            color: inherit
         }
+
+        img {
+            display: block;
+            max-width: 100%
+        }
+
+        .page {
+            max-width: 1180px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: .92fr 1.08fr;
+            gap: 22px;
+            align-items: stretch;
+        }
+
         .intro,
-        .card{
-            border-radius:30px;
-            border:1px solid var(--line);
-            background:rgba(255,253,248,.96);
-            box-shadow:var(--shadow-lg);
+        .card {
+            border-radius: 30px;
+            border: 1px solid var(--line);
+            background: rgba(255, 253, 248, .96);
+            box-shadow: var(--shadow-lg);
         }
-        .intro{
-            padding:30px;
+
+        .intro {
+            padding: 30px;
             background:
-                radial-gradient(circle at top right, rgba(185,135,53,.16), transparent 28%),
-                linear-gradient(180deg,#fffaf1 0%,#f7eedf 100%);
+                radial-gradient(circle at top right, rgba(185, 135, 53, .16), transparent 28%),
+                linear-gradient(180deg, #fffaf1 0%, #f7eedf 100%);
         }
-        .brand{
-            display:flex;
-            align-items:center;
-            gap:14px;
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
         }
-        .brand-logo{
-            width:68px;
-            height:68px;
-            padding:10px;
-            border-radius:22px;
-            background:linear-gradient(135deg,#fff5de,#eed29d);
-            box-shadow:0 14px 28px rgba(185,135,53,.16);
+
+        .brand-logo {
+            width: 68px;
+            height: 68px;
+            padding: 10px;
+            border-radius: 22px;
+            background: linear-gradient(135deg, #fff5de, #eed29d);
+            box-shadow: 0 14px 28px rgba(185, 135, 53, .16);
         }
-        .brand-copy strong{
-            display:block;
-            font-family:'Cormorant Garamond',serif;
-            font-size:38px;
-            line-height:.9;
-            color:#7a541d;
+
+        .brand-copy strong {
+            display: block;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 38px;
+            line-height: .9;
+            color: #7a541d;
         }
-        .brand-copy span{
-            display:block;
-            margin-top:6px;
-            font-size:11px;
-            font-weight:800;
-            letter-spacing:.18em;
-            text-transform:uppercase;
-            color:#7a6953;
+
+        .brand-copy span {
+            display: block;
+            margin-top: 6px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            color: #7a6953;
         }
-        .eyebrow{
-            display:inline-flex;
-            align-items:center;
-            gap:10px;
-            margin-top:34px;
-            color:#8c6220;
-            font-size:11px;
-            font-weight:800;
-            letter-spacing:.16em;
-            text-transform:uppercase;
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 34px;
+            color: #8c6220;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: .16em;
+            text-transform: uppercase;
         }
-        .eyebrow::before{
-            content:'';
-            width:24px;
-            height:2px;
-            background:linear-gradient(90deg,var(--gold),transparent);
-            border-radius:999px;
+
+        .eyebrow::before {
+            content: '';
+            width: 24px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--gold), transparent);
+            border-radius: 999px;
         }
-        .intro h1{
-            margin:16px 0 0;
-            font-family:'Cormorant Garamond',serif;
-            font-size:66px;
-            line-height:.9;
-            letter-spacing:-.03em;
-            color:#2a1f14;
+
+        .intro h1 {
+            margin: 16px 0 0;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 66px;
+            line-height: .9;
+            letter-spacing: -.03em;
+            color: #2a1f14;
         }
-        .intro p{
-            margin:18px 0 0;
-            color:var(--muted);
-            font-size:15px;
-            line-height:1.9;
+
+        .intro p {
+            margin: 18px 0 0;
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.9;
         }
-        .intro-grid{
-            display:grid;
-            gap:14px;
-            margin-top:26px;
+
+        .intro-grid {
+            display: grid;
+            gap: 14px;
+            margin-top: 26px;
         }
-        .intro-item{
-            padding:18px;
-            border-radius:20px;
-            background:#fffdfa;
-            border:1px solid rgba(129,96,44,.12);
+
+        .intro-item {
+            padding: 18px;
+            border-radius: 20px;
+            background: #fffdfa;
+            border: 1px solid rgba(129, 96, 44, .12);
         }
-        .intro-item strong{
-            display:block;
-            font-size:15px;
-            color:#2b2015;
+
+        .intro-item strong {
+            display: block;
+            font-size: 15px;
+            color: #2b2015;
         }
-        .intro-item span{
-            display:block;
-            margin-top:6px;
-            color:var(--muted);
-            font-size:13px;
-            line-height:1.7;
+
+        .intro-item span {
+            display: block;
+            margin-top: 6px;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.7;
         }
-        .card{
-            padding:30px;
+
+        .card {
+            padding: 30px;
         }
-        .card h2{
-            margin:0;
-            font-family:'Cormorant Garamond',serif;
-            font-size:48px;
-            line-height:.92;
+
+        .card h2 {
+            margin: 0;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 48px;
+            line-height: .92;
         }
-        .card p{
-            margin:12px 0 0;
-            color:var(--muted);
-            font-size:15px;
-            line-height:1.8;
+
+        .card p {
+            margin: 12px 0 0;
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.8;
         }
-        .flash{
-            margin-top:20px;
-            padding:14px 16px;
-            border-radius:18px;
-            border:1px solid #efc5c5;
-            background:var(--danger-soft);
-            color:#922e2e;
-            font-size:14px;
-            font-weight:700;
-            line-height:1.6;
+
+        .flash {
+            margin-top: 20px;
+            padding: 14px 16px;
+            border-radius: 18px;
+            border: 1px solid #efc5c5;
+            background: var(--danger-soft);
+            color: #922e2e;
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 1.6;
         }
-        .form-grid{
-            display:grid;
-            grid-template-columns:1fr 1fr;
-            gap:16px;
-            margin-top:24px;
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 24px;
         }
-        .full{grid-column:1 / -1}
-        label{
-            display:block;
-            margin-bottom:8px;
-            font-size:11px;
-            font-weight:800;
-            letter-spacing:.12em;
-            text-transform:uppercase;
-            color:#7a6547;
+
+        .full {
+            grid-column: 1 / -1
         }
-        .input-wrap{position:relative}
-        .input-icon{
-            position:absolute;
-            left:14px;
-            top:50%;
-            width:18px;
-            height:18px;
-            color:#9a8870;
-            transform:translateY(-50%);
-            pointer-events:none;
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: #7a6547;
         }
-        input{
-            width:100%;
-            min-height:54px;
-            padding:14px 16px 14px 46px;
-            border-radius:18px;
-            border:1px solid rgba(129,96,44,.18);
-            background:#fff;
-            color:var(--ink);
-            outline:none;
-            transition:.18s ease;
+
+        .input-wrap {
+            position: relative
         }
-        input:focus{
-            border-color:rgba(185,135,53,.56);
-            box-shadow:0 0 0 4px rgba(185,135,53,.10);
+
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            width: 18px;
+            height: 18px;
+            color: #9a8870;
+            transform: translateY(-50%);
+            pointer-events: none;
         }
-        .btn{
-            width:100%;
-            min-height:52px;
-            border:none;
-            border-radius:999px;
-            background:linear-gradient(135deg,var(--gold),var(--gold-deep));
-            color:#fff;
-            font-size:14px;
-            font-weight:800;
-            cursor:pointer;
-            box-shadow:0 16px 28px rgba(185,135,53,.22);
+
+        input {
+            width: 100%;
+            min-height: 54px;
+            padding: 14px 16px 14px 46px;
+            border-radius: 18px;
+            border: 1px solid rgba(129, 96, 44, .18);
+            background: #fff;
+            color: var(--ink);
+            outline: none;
+            transition: .18s ease;
         }
-        .back-link{
-            margin-top:18px;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            min-height:50px;
-            border-radius:999px;
-            border:1px solid var(--line);
-            background:#fff8eb;
-            color:#5f503d;
-            font-size:14px;
-            font-weight:700;
+
+        input:focus {
+            border-color: rgba(185, 135, 53, .56);
+            box-shadow: 0 0 0 4px rgba(185, 135, 53, .10);
         }
-        .terms{
-            margin-top:14px;
-            color:var(--muted);
-            font-size:12px;
-            line-height:1.7;
-            text-align:center;
+
+        .btn {
+            width: 100%;
+            min-height: 52px;
+            border: none;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+            color: #fff;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 16px 28px rgba(185, 135, 53, .22);
         }
-        @media (max-width:980px){
-            .page{grid-template-columns:1fr}
+
+        .back-link {
+            margin-top: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 50px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: #fff8eb;
+            color: #5f503d;
+            font-size: 14px;
+            font-weight: 700;
         }
-        @media (max-width:640px){
-            body{padding:14px}
-            .intro,.card{padding:22px;border-radius:24px}
-            .intro h1{font-size:46px}
-            .card h2{font-size:38px}
-            .form-grid{grid-template-columns:1fr}
+
+        .terms {
+            margin-top: 14px;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.7;
+            text-align: center;
+        }
+
+        @media (max-width:980px) {
+            .page {
+                grid-template-columns: 1fr
+            }
+        }
+
+        @media (max-width:640px) {
+            body {
+                padding: 14px
+            }
+
+            .intro,
+            .card {
+                padding: 22px;
+                border-radius: 24px
+            }
+
+            .intro h1 {
+                font-size: 46px
+            }
+
+            .card h2 {
+                font-size: 38px
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr
+            }
         }
     </style>
 </head>
+
 <body>
     <div class="page">
         <section class="intro">
@@ -262,33 +348,33 @@
                 </div>
                 <div class="brand-copy">
                     <strong>Cab Booking Fast</strong>
-                    <span>Customer Portal</span>
+                    <span><?php echo $portal_label; ?></span>
                 </div>
             </div>
 
             <div class="eyebrow">Create Account</div>
-            <h1>Start booking with a more premium customer side.</h1>
-            <p>Registration is now part of the same warm, brand-led experience, with better spacing, cleaner form styling, and mobile-friendly layout behavior.</p>
+            <h1><?php echo $hero_title; ?></h1>
+            <p><?php echo $hero_text; ?></p>
 
             <div class="intro-grid">
                 <div class="intro-item">
-                    <strong>One customer identity</strong>
-                    <span>Register once and manage bookings, documents, and profile details from one dashboard.</span>
+                    <strong><?php echo $intro_one_title; ?></strong>
+                    <span><?php echo $intro_one_text; ?></span>
                 </div>
                 <div class="intro-item">
-                    <strong>Fast booking start</strong>
-                    <span>After account creation, you can sign in and continue directly into the booking flow.</span>
+                    <strong><?php echo $intro_two_title; ?></strong>
+                    <span><?php echo $intro_two_text; ?></span>
                 </div>
                 <div class="intro-item">
-                    <strong>Improved mobile view</strong>
-                    <span>The full registration experience now stacks cleanly on smaller screens.</span>
+                    <strong><?php echo $intro_three_title; ?></strong>
+                    <span><?php echo $intro_three_text; ?></span>
                 </div>
             </div>
         </section>
 
         <section class="card">
-            <h2>Create your account</h2>
-            <p>Register with your name, email, phone, and password to unlock the redesigned customer experience.</p>
+            <h2><?php echo $card_title; ?></h2>
+            <p><?php echo $card_text; ?></p>
 
             <?php if ($this->session->flashdata('error')): ?>
                 <div class="flash"><?php echo $this->session->flashdata('error'); ?></div>
@@ -336,14 +422,15 @@
                         </div>
                     </div>
                     <div class="full">
-                        <button class="btn" type="submit">Create Customer Account</button>
+                        <button class="btn" type="submit"><?php echo $submit_label; ?></button>
                     </div>
                 </div>
             </form>
 
-            <a class="back-link" href="<?php echo base_url('customer/login'); ?>">Back to Login</a>
-            <div class="terms">By creating an account, you are ready to use the redesigned customer booking experience.</div>
+            <a class="back-link" href="<?php echo $login_url; ?>"><?php echo $back_label; ?></a>
+            <div class="terms"><?php echo $terms_text; ?></div>
         </section>
     </div>
 </body>
+
 </html>

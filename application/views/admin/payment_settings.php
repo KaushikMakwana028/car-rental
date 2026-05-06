@@ -35,7 +35,7 @@
 
     .info-panel .card-head,
     .info-panel .detail-stack {
-        border-color: rgba(255,255,255,.12);
+        border-color: rgba(255, 255, 255, .12);
     }
 
     .detail-stack {
@@ -47,8 +47,8 @@
     .detail-box {
         padding: 14px 16px;
         border-radius: 14px;
-        background: rgba(255,255,255,.08);
-        border: 1px solid rgba(255,255,255,.12);
+        background: rgba(255, 255, 255, .08);
+        border: 1px solid rgba(255, 255, 255, .12);
     }
 
     .detail-box strong {
@@ -62,7 +62,7 @@
         display: block;
         font-size: 14px;
         line-height: 1.6;
-        color: rgba(255,255,255,.86);
+        color: rgba(255, 255, 255, .86);
         word-break: break-word;
     }
 
@@ -75,8 +75,151 @@
     }
 
     @media (max-width: 992px) {
+
         .payment-settings-grid {
-            grid-template-columns: 1fr;
+            grid-template-columns: 1fr !important;
+        }
+
+        .page-wrapper {
+            padding: 16px;
+        }
+    }
+
+    @media (max-width: 768px) {
+
+        /* Header */
+        .page-header h1 {
+            font-size: 24px;
+            line-height: 1.3;
+        }
+
+        .page-header p {
+            font-size: 13px;
+        }
+
+        /* Cards */
+        .section-card {
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        /* Card Header */
+        .card-head {
+            padding: 18px 18px 14px;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .card-head h3 {
+            font-size: 18px;
+        }
+
+        .card-head p {
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        /* Form Padding */
+        form {
+            padding: 18px !important;
+        }
+
+        /* Form Grid */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr !important;
+            gap: 16px;
+        }
+
+        /* Inputs */
+        .form-grid input,
+        .form-grid textarea,
+        .form-grid select {
+            width: 100%;
+            font-size: 14px;
+            padding: 12px 14px;
+            box-sizing: border-box;
+        }
+
+        /* Labels */
+        .form-grid label {
+            font-size: 13px;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        /* Button */
+        .btn {
+            width: 100%;
+            justify-content: center;
+            text-align: center;
+        }
+
+        /* Right Side Panel */
+        .detail-stack {
+            padding: 18px;
+        }
+
+        .detail-box {
+            padding: 14px;
+            border-radius: 12px;
+        }
+
+        .detail-box strong {
+            font-size: 12px;
+        }
+
+        .detail-box span {
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        /* QR Image */
+        .preview-qr {
+            width: 100%;
+            max-width: 220px;
+            height: auto;
+            display: block;
+        }
+    }
+
+    @media (max-width: 480px) {
+
+        .page-wrapper {
+            padding: 12px;
+        }
+
+        .page-header {
+            margin-bottom: 18px;
+        }
+
+        .page-header h1 {
+            font-size: 22px;
+        }
+
+        .section-card {
+            border-radius: 14px;
+        }
+
+        .card-head {
+            padding: 16px;
+        }
+
+        form {
+            padding: 16px !important;
+        }
+
+        .detail-stack {
+            padding: 16px;
+        }
+
+        .detail-box {
+            padding: 12px;
+        }
+
+        .preview-qr {
+            max-width: 180px;
         }
     }
 </style>

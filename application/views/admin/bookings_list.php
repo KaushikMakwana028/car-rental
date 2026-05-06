@@ -709,6 +709,17 @@
         margin-top: 2px;
     }
 
+    .bk-detail-note {
+        margin-top: 12px;
+        padding: 10px 12px;
+        border-radius: var(--r-md);
+        background: #f8fafc;
+        border: 0.5px solid var(--bk-border);
+        color: var(--bk-muted);
+        font-size: 11px;
+        line-height: 1.6;
+    }
+
     /* Collect form */
     .bk-collect-summary {
         border: 0.5px solid var(--bk-primary-mid);
@@ -843,6 +854,21 @@
 </style>
 
 <?php
+if (!function_exists('admin_whatsapp_url')) {
+    function admin_whatsapp_url($phone, $message)
+    {
+        $digits = preg_replace('/\D+/', '', (string) $phone);
+        if ($digits === '') {
+            return '';
+        }
+
+        if (strlen($digits) === 10) {
+            $digits = '91' . $digits;
+        }
+
+        return 'https://wa.me/' . $digits . '?text=' . rawurlencode($message);
+    }
+}
 /* ── Computed stats ── */
 $total_bookings     = count($bookings);
 $confirmed_bookings = 0;
@@ -981,6 +1007,13 @@ unset($booking);
                         <?php foreach ($bookings as $booking): ?>
                             <?php
                             $has_balance = ((float) $booking['balance_amount'] > 0.01);
+                            $is_fully_paid = (float) $booking['paid_amount'] >= (float) $booking['amount'] && (float) $booking['amount'] > 0;
+                            $collection_message = $is_fully_paid
+                                ? 'Hello ' . trim((string) $booking['customer_name']) . ', thank you for completing your payment. We have received the full amount of Rs ' . number_format((float) $booking['paid_amount'], 2) . ' for booking ' . trim((string) $booking['booking_code']) . '. Your booking is confirmed successfully. We wish you a comfortable journey and hope you travel with us again soon.'
+                                : 'Hello ' . trim((string) $booking['customer_name']) . ', thank you for your payment. For booking ' . trim((string) $booking['booking_code']) . ', we have received a total of Rs ' . number_format((float) $booking['paid_amount'], 2) . '. Your booking is being processed successfully.';
+                            $collection_whatsapp_url = ((float) $booking['paid_amount'] > 0 && trim((string) $booking['customer_phone']) !== '')
+                                ? admin_whatsapp_url($booking['customer_phone'], $collection_message)
+                                : '';
                             $detail_payload = [
                                 'booking_code'       => $booking['booking_code'],
                                 'customer_name'      => $booking['customer_name'],
@@ -1002,6 +1035,10 @@ unset($booking);
                                 'payment_badge'      => $booking['payment_badge'],
                                 'status'             => $booking['display_status'],
                                 'status_label'       => ucfirst($booking['display_status']),
+                                'collection_whatsapp_url' => $collection_whatsapp_url,
+                                'thank_you_message'  => $is_fully_paid
+                                    ? 'Full payment of Rs ' . number_format((float) $booking['paid_amount'], 2) . ' has been received. This booking is complete and ready for a warm thank-you message to the customer.'
+                                    : 'A total of Rs ' . number_format((float) $booking['paid_amount'], 2) . ' has been received for this booking so far.',
                             ];
                             ?>
                             <tr class="js-bk-row"
@@ -1055,6 +1092,9 @@ unset($booking);
                                             <a class="bk-action-btn" href="<?php echo base_url($booking['payment_request_receipt']); ?>" target="_blank">Receipt</a>
                                         <?php else: ?>
                                             <button class="bk-action-btn js-bk-view" type="button">Summary</button>
+                                        <?php endif; ?>
+                                        <?php if ($collection_whatsapp_url !== ''): ?>
+                                            <a class="bk-action-btn" href="<?php echo html_escape($collection_whatsapp_url); ?>" target="_blank" rel="noopener noreferrer">WhatsApp</a>
                                         <?php endif; ?>
                                     </div>
                                 </td>
@@ -1118,8 +1158,10 @@ unset($booking);
                 <div class="bk-fare-row good"><span>Collected So Far</span><strong id="bkDPaid">Rs 0</strong></div>
                 <div class="bk-fare-row total due"><span>Balance Due</span><strong id="bkDBalance">Rs 0</strong></div>
             </div>
+            <div class="bk-detail-note" id="bkDetailNote">Payment summary will appear here.</div>
             <div class="bk-modal-actions">
                 <button class="bk-btn-line" type="button" data-close-modal="bkDetailModal">Close</button>
+                <a class="bk-btn-line" href="#" id="bkDetailWhatsappBtn" target="_blank" rel="noopener noreferrer" style="display:none;">WhatsApp</a>
                 <button class="bk-btn" type="button" id="bkDetailCollectBtn">Collect Payment</button>
             </div>
         </div>
@@ -1143,6 +1185,7 @@ unset($booking);
                 <div class="bk-fare-row good"><span>Already Paid</span><strong id="bkCPaid">Rs 0</strong></div>
                 <div class="bk-fare-row total due"><span>Balance Due</span><strong id="bkCBalance">Rs 0</strong></div>
             </div>
+            <div class="bk-detail-note" id="bkCNote">Save the payment and then share the thank-you message with the customer.</div>
             <form class="bk-collect-form" method="post" action="<?php echo base_url('admin/payments/store'); ?>">
                 <input type="hidden" name="booking_id" id="bkCBookingId" value="">
                 <input type="hidden" name="payment_type" value="payment">
@@ -1188,6 +1231,9 @@ unset($booking);
         var detailModal = document.getElementById('bkDetailModal');
         var collectModal = document.getElementById('bkCollectModal');
         var detailCollectBtn = document.getElementById('bkDetailCollectBtn');
+        var detailWhatsappBtn = document.getElementById('bkDetailWhatsappBtn');
+        var detailNote = document.getElementById('bkDetailNote');
+        var collectNote = document.getElementById('bkCNote');
         var activeFilter = 'all';
         var currentCollect = null;
 
@@ -1252,6 +1298,9 @@ unset($booking);
             document.getElementById('bkDAdvance').textContent = fmt(d.advance_due || 0);
             document.getElementById('bkDPaid').textContent = fmt(d.paid_amount || 0);
             document.getElementById('bkDBalance').textContent = fmt(d.balance_amount || 0);
+            if (detailNote) {
+                detailNote.textContent = d.thank_you_message || 'Payment summary will appear here.';
+            }
 
             currentCollect = {
                 bookingId: row.getAttribute('data-booking-id') || '',
@@ -1259,9 +1308,21 @@ unset($booking);
                 customerName: row.getAttribute('data-booking-customer') || '',
                 amount: row.getAttribute('data-amount') || '0',
                 paid: row.getAttribute('data-paid') || '0',
-                balance: row.getAttribute('data-balance') || '0'
+                balance: row.getAttribute('data-balance') || '0',
+                whatsappUrl: d.collection_whatsapp_url || '',
+                nextTotal: parseFloat(d.amount || 0),
+                paidSoFar: parseFloat(d.paid_amount || 0)
             };
             detailCollectBtn.style.display = parseFloat(currentCollect.balance) > 0.01 ? 'inline-flex' : 'none';
+            if (detailWhatsappBtn) {
+                if (currentCollect.whatsappUrl) {
+                    detailWhatsappBtn.href = currentCollect.whatsappUrl;
+                    detailWhatsappBtn.style.display = 'inline-flex';
+                } else {
+                    detailWhatsappBtn.href = '#';
+                    detailWhatsappBtn.style.display = 'none';
+                }
+            }
         }
 
         function fillCollect(data) {
@@ -1272,6 +1333,13 @@ unset($booking);
             document.getElementById('bkCPaid').textContent = fmt(data.paid || 0);
             document.getElementById('bkCBalance').textContent = fmt(data.balance || 0);
             document.getElementById('bkCAmountInput').value = parseFloat(data.balance || '0').toFixed(2);
+            if (collectNote) {
+                var nextPaid = parseFloat(data.paid || 0) + parseFloat(data.balance || 0);
+                var totalAmount = parseFloat(data.amount || 0);
+                collectNote.textContent = nextPaid >= totalAmount && totalAmount > 0 ?
+                    'After saving this payment, the full booking amount will be collected at ' + fmt(nextPaid) + '. You can then send a complete thank-you and travel-again message to the customer on WhatsApp.' :
+                    'After saving this payment, the total collected amount will become ' + fmt(nextPaid) + ' for this booking. You can then send a thank-you message to the customer on WhatsApp.';
+            }
         }
 
         chips.forEach(function(c) {
@@ -1299,7 +1367,8 @@ unset($booking);
                         customerName: row.getAttribute('data-booking-customer') || '',
                         amount: row.getAttribute('data-amount') || '0',
                         paid: row.getAttribute('data-paid') || '0',
-                        balance: row.getAttribute('data-balance') || '0'
+                        balance: row.getAttribute('data-balance') || '0',
+                        whatsappUrl: ''
                     };
                     fillCollect(currentCollect);
                     openModal(collectModal);

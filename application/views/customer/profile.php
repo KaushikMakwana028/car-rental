@@ -46,22 +46,22 @@
                     <?php endif; ?>
                 </div>
                 <div>
-                    <h3 style="margin:0;color:#fff;"><?php echo html_escape($profile_user['full_name']); ?></h3>
-                    <p style="margin:6px 0 0;color:rgba(247,243,231,.72);"><?php echo html_escape($profile_user['email']); ?></p>
+                    <h3 style="margin:0;"><?php echo html_escape($profile_user['full_name']); ?></h3>
+                    <p style="margin:6px 0 0;color:var(--ink-2);"><?php echo html_escape($profile_user['email']); ?></p>
                 </div>
             </div>
             <div class="info-grid" style="grid-template-columns:1fr;margin-top:20px;">
-                <div class="feature-card" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.10);">
-                    <strong style="color:#fff;">Phone</strong>
-                    <span style="color:rgba(247,243,231,.70);"><?php echo html_escape($profile_user['phone']); ?></span>
+                <div class="feature-card">
+                    <strong>Phone</strong>
+                    <span><?php echo html_escape($profile_user['phone']); ?></span>
                 </div>
-                <div class="feature-card" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.10);">
-                    <strong style="color:#fff;">Role</strong>
-                    <span style="color:rgba(247,243,231,.70);">Customer account</span>
+                <div class="feature-card">
+                    <strong>Role</strong>
+                    <span>Customer account</span>
                 </div>
-                <div class="feature-card" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.10);">
-                    <strong style="color:#fff;">Status</strong>
-                    <span style="color:rgba(247,243,231,.70);"><?php echo ((int) $profile_user['status'] === 1) ? 'Active' : 'Inactive'; ?></span>
+                <div class="feature-card">
+                    <strong>Status</strong>
+                    <span><?php echo ((int) $profile_user['status'] === 1) ? 'Active' : 'Inactive'; ?></span>
                 </div>
             </div>
         </section>
