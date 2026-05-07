@@ -2,6 +2,7 @@
 <?php
 $existing_request   = !empty($existing_request)   ? $existing_request   : array();
 $payment_settings   = !empty($payment_settings)   ? $payment_settings   : array();
+$cancel_url         = isset($cancel_url) ? $cancel_url : base_url('dashboard');
 $advance_amount     = isset($booking['advance_due']) ? (float) $booking['advance_due'] : 0;
 $advance_amount     = $advance_amount > 0 ? $advance_amount : (float) $booking['amount'];
 $current_step       = isset($current_step) ? (int) $current_step : 3;
@@ -542,7 +543,7 @@ $current_step       = isset($current_step) ? (int) $current_step : 3;
             <div class="booking-actions">
                 <a class="btn-secondary" href="<?php echo base_url('documents?booking_id=' . (int) $booking['id'] . '&customer_id=' . (int) $booking['customer_id']); ?>">&#8592; Previous Step</a>
                 <button class="btn" type="submit">Complete Booking</button>
-                <a class="btn-secondary" href="<?php echo base_url('dashboard'); ?>">Cancel</a>
+                <a class="btn-secondary js-swal-confirm" href="<?php echo $cancel_url; ?>" data-swal-title="Cancel booking?" data-swal-text="This incomplete booking draft will be removed." data-swal-confirm="Yes, cancel">Cancel</a>
             </div>
         </form>
     </section>

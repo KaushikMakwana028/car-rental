@@ -32,11 +32,7 @@ class Booking extends MY_Controller
         }
 
         if ($requested_booking_id > 0 && $requested_customer_id > 0 && $this->customer_can_access_booking($requested_booking_id, $requested_customer_id)) {
-            $booking_rows = $this->General_model->get_bookings(array(
-                'bookings.id' => $requested_booking_id,
-                'bookings.customer_id' => $requested_customer_id,
-            ));
-            $booking = !empty($booking_rows) ? $booking_rows[0] : array();
+            $booking = $this->General_model->get_booking_for_flow($requested_booking_id, $requested_customer_id);
             if (!empty($booking)) {
                 $data['booking_edit'] = $booking;
                 $data['selected_vehicle_id'] = (int) $booking['vehicle_id'];
@@ -88,7 +84,7 @@ class Booking extends MY_Controller
             'drop_location' => trim($this->input->post('drop_location', true)),
             'estimated_km' => $estimated_km,
             'amount' => $calculated_amount,
-            'status' => 'pending',
+            'status' => 'draft',
             '_skip_vehicle_booking' => true,
         );
 
@@ -104,5 +100,36 @@ class Booking extends MY_Controller
 
         $this->set_public_booking_session($customer_id, $booking_id);
         redirect('documents?booking_id=' . $booking_id . '&customer_id=' . $customer_id);
+    }
+
+    public function cancel($booking_id = 0)
+    {
+        $booking_id = (int) $booking_id;
+        $customer_id = (int) $this->input->get('customer_id');
+        if ($customer_id <= 0) {
+            $customer_id = $this->get_active_customer_id();
+        }
+
+        if ($booking_id <= 0 || $customer_id <= 0 || !$this->customer_can_access_booking($booking_id, $customer_id)) {
+            $this->session->set_flashdata('error', 'Booking was not found or it is already closed.');
+            redirect('dashboard');
+        }
+
+        $booking = $this->General_model->get_booking_for_flow($booking_id, $customer_id);
+        if (empty($booking)) {
+            $this->clear_public_booking_session();
+            $this->session->set_flashdata('error', 'Booking was not found or it is already closed.');
+            redirect('dashboard');
+        }
+
+        if ($booking['status'] !== 'draft') {
+            $this->session->set_flashdata('error', 'Only incomplete bookings can be cancelled from this flow.');
+            redirect('dashboard');
+        }
+
+        $this->General_model->purge_draft_booking($booking_id, $customer_id);
+        $this->clear_public_booking_session();
+        $this->session->set_flashdata('success', 'Incomplete booking cancelled successfully.');
+        redirect('dashboard');
     }
 }

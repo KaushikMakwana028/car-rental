@@ -238,6 +238,35 @@ $flash_error     = $this->session->flashdata('error');
     (function() {
         var payload = null;
 
+        document.querySelectorAll('.js-swal-confirm').forEach(function(link) {
+            link.addEventListener('click', function(event) {
+                event.preventDefault();
+
+                if (typeof Swal === 'undefined') {
+                    window.location.href = link.getAttribute('href');
+                    return;
+                }
+
+                Swal.fire({
+                    title: link.getAttribute('data-swal-title') || 'Are you sure?',
+                    text: link.getAttribute('data-swal-text') || '',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: link.getAttribute('data-swal-confirm') || 'Continue',
+                    cancelButtonText: 'Keep it',
+                    confirmButtonColor: '#f97316',
+                    cancelButtonColor: '#b8aa97',
+                    background: '#fffdf9',
+                    color: '#1c1712',
+                    reverseButtons: true
+                }).then(function(result) {
+                    if (result.isConfirmed) {
+                        window.location.href = link.getAttribute('href');
+                    }
+                });
+            });
+        });
+
         <?php if (!empty($swal_flash)): ?>
             payload = <?php echo json_encode($swal_flash); ?>;
         <?php elseif (!empty($flash_success)): ?>

@@ -18,6 +18,8 @@ class General_model extends CI_Model
         parent::__construct();
         $this->ensure_users_profile_columns();
         $this->ensure_users_booking_columns();
+        $this->ensure_booking_status_values();
+        $this->cleanup_orphan_temporary_customers();
     }
 
     public function get_all($table, $where = array(), $order_by = 'id DESC')
@@ -206,12 +208,15 @@ class General_model extends CI_Model
             'total_customers' => (int) $this->db->where('role', 0)->count_all_results('users'),
             'total_vehicles' => (int) $this->db->count_all('vehicles'),
             'available_vehicles' => (int) $this->db->where('status', 'available')->count_all_results('vehicles'),
-            'total_bookings' => (int) $this->db->count_all('bookings'),
-            'pending_bookings' => (int) $this->db->where('status', 'pending')->count_all_results('bookings'),
+            'total_bookings' => (int) $this->db->where('status !=', 'draft')->count_all_results('bookings'),
+            'pending_bookings' => (int) $this->db->where(array('status' => 'pending'))->count_all_results('bookings'),
         );
 
         if ($role === 'customer' && $user_id > 0) {
-            $counts['my_bookings'] = (int) $this->db->where('customer_id', $user_id)->count_all_results('bookings');
+            $counts['my_bookings'] = (int) $this->db
+                ->where('customer_id', $user_id)
+                ->where('status !=', 'draft')
+                ->count_all_results('bookings');
             $counts['my_pending_bookings'] = (int) $this->db
                 ->where(array('customer_id' => $user_id, 'status' => 'pending'))
                 ->count_all_results('bookings');
@@ -222,10 +227,19 @@ class General_model extends CI_Model
 
     public function get_bookings($filters = array())
     {
+        $include_drafts = !empty($filters['include_drafts']);
+        unset($filters['include_drafts']);
+
         $this->db->select('bookings.*, users.full_name AS customer_name, users.phone AS customer_phone, vehicles.name AS vehicle_name, vehicles.registration_no, vehicles.advance_amount');
         $this->db->from('bookings');
         $this->db->join('users', 'users.id = bookings.customer_id', 'left');
         $this->db->join('vehicles', 'vehicles.id = bookings.vehicle_id', 'left');
+
+        if ($include_drafts) {
+            $this->db->where_in('bookings.status', array('draft', 'pending', 'confirmed', 'completed', 'cancelled'));
+        } else {
+            $this->db->where_in('bookings.status', array('pending', 'confirmed', 'completed', 'cancelled'));
+        }
 
         if (!empty($filters)) {
             $this->db->where($filters);
@@ -235,6 +249,17 @@ class General_model extends CI_Model
         $bookings = $this->db->get()->result_array();
 
         return $this->enrich_bookings($bookings);
+    }
+
+    public function get_booking_for_flow($booking_id, $customer_id)
+    {
+        $rows = $this->get_bookings(array(
+            'include_drafts' => true,
+            'bookings.id' => (int) $booking_id,
+            'bookings.customer_id' => (int) $customer_id,
+        ));
+
+        return !empty($rows) ? $rows[0] : array();
     }
 
     public function get_available_vehicles()
@@ -257,6 +282,60 @@ class General_model extends CI_Model
         }
 
         return $booking_id;
+    }
+
+    public function purge_draft_booking($booking_id, $customer_id)
+    {
+        $booking_id = (int) $booking_id;
+        $customer_id = (int) $customer_id;
+
+        if ($booking_id <= 0 || $customer_id <= 0) {
+            return false;
+        }
+
+        $booking = $this->get_row('bookings', array(
+            'id' => $booking_id,
+            'customer_id' => $customer_id,
+            'status' => 'draft',
+        ));
+        if (empty($booking)) {
+            return false;
+        }
+
+        if ($this->db->table_exists('payment_requests')) {
+            $requests = $this->db
+                ->where('booking_id', $booking_id)
+                ->where('customer_id', $customer_id)
+                ->get('payment_requests')
+                ->result_array();
+
+            foreach ($requests as $request) {
+                if (!empty($request['receipt_path'])) {
+                    $absolute_path = FCPATH . ltrim(str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $request['receipt_path']), DIRECTORY_SEPARATOR);
+                    if (is_file($absolute_path)) {
+                        @unlink($absolute_path);
+                    }
+                }
+            }
+
+            $this->delete('payment_requests', array('booking_id' => $booking_id, 'customer_id' => $customer_id));
+        }
+
+        $this->update('documents', array('booking_id' => $booking_id, 'customer_id' => $customer_id), array(
+            'booking_id' => null,
+            'updated_at' => date('Y-m-d H:i:s'),
+        ));
+
+        if ($this->db->table_exists('payments')) {
+            $this->delete('payments', array('booking_id' => $booking_id));
+        }
+
+        $deleted = $this->delete('bookings', array('id' => $booking_id, 'customer_id' => $customer_id, 'status' => 'draft'));
+        if ($deleted) {
+            $this->purge_temporary_customer_if_unused($customer_id);
+        }
+
+        return $deleted;
     }
 
     public function sync_booking_status_from_payment($booking_id)
@@ -958,6 +1037,99 @@ class General_model extends CI_Model
         if (!$this->db->field_exists('address', 'users')) {
             $this->db->query("ALTER TABLE `users` ADD COLUMN `address` TEXT DEFAULT NULL AFTER `documents_verified`");
         }
+    }
+
+    private function ensure_booking_status_values()
+    {
+        if (!$this->db->table_exists('bookings') || !$this->db->field_exists('status', 'bookings')) {
+            return;
+        }
+
+        $status_field = $this->db->query("SHOW COLUMNS FROM `bookings` LIKE 'status'")->row_array();
+        $status_type = !empty($status_field['Type']) ? strtolower((string) $status_field['Type']) : '';
+
+        if (strpos($status_type, "enum('draft'") === false) {
+            $this->db->query("ALTER TABLE `bookings` MODIFY `status` ENUM('draft','pending','confirmed','completed','cancelled') NULL DEFAULT 'pending'");
+        }
+
+        $this->db->query("UPDATE `bookings` SET `status` = 'draft' WHERE `status` IS NULL OR `status` = ''");
+    }
+
+    private function cleanup_orphan_temporary_customers()
+    {
+        if (!$this->db->table_exists('users') || !$this->db->table_exists('bookings')) {
+            return;
+        }
+
+        $rows = $this->db->query("
+            SELECT users.id
+            FROM users
+            LEFT JOIN bookings ON bookings.customer_id = users.id
+            WHERE users.role = 0
+              AND users.email LIKE 'walkin.%@local.customer'
+            GROUP BY users.id
+            HAVING COUNT(bookings.id) = 0
+        ")->result_array();
+
+        foreach ($rows as $row) {
+            $this->purge_temporary_customer_if_unused((int) $row['id']);
+        }
+    }
+
+    private function purge_temporary_customer_if_unused($customer_id)
+    {
+        $customer_id = (int) $customer_id;
+        if ($customer_id <= 0) {
+            return false;
+        }
+
+        $customer = $this->get_row('users', array(
+            'id' => $customer_id,
+            'role' => 0,
+        ));
+        if (empty($customer)) {
+            return false;
+        }
+
+        $remaining_bookings = $this->count_rows('bookings', array('customer_id' => $customer_id));
+        if ($remaining_bookings > 0) {
+            return false;
+        }
+
+        $email = isset($customer['email']) ? (string) $customer['email'] : '';
+        if (!preg_match('/^walkin\..+@local\.customer$/', $email)) {
+            return false;
+        }
+
+        $documents = $this->get_all('documents', array('customer_id' => $customer_id));
+        foreach ($documents as $document) {
+            if (!empty($document['file_path'])) {
+                $absolute_path = FCPATH . ltrim(str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $document['file_path']), DIRECTORY_SEPARATOR);
+                if (is_file($absolute_path)) {
+                    @unlink($absolute_path);
+                }
+            }
+        }
+
+        if ($this->db->table_exists('payment_requests')) {
+            $requests = $this->db
+                ->where('customer_id', $customer_id)
+                ->get('payment_requests')
+                ->result_array();
+
+            foreach ($requests as $request) {
+                if (!empty($request['receipt_path'])) {
+                    $absolute_path = FCPATH . ltrim(str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $request['receipt_path']), DIRECTORY_SEPARATOR);
+                    if (is_file($absolute_path)) {
+                        @unlink($absolute_path);
+                    }
+                }
+            }
+
+            $this->delete('payment_requests', array('customer_id' => $customer_id));
+        }
+
+        return $this->delete('users', array('id' => $customer_id, 'role' => 0));
     }
 
     private function build_customer_email($email = '', $phone = '', $exclude_user_id = 0)

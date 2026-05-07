@@ -1,6 +1,12 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+<?php
+$swal_flash    = $this->session->flashdata('swal');
+$flash_success = $this->session->flashdata('success');
+$flash_error   = $this->session->flashdata('error');
+?>
     </main>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     (function () {
         var sidebar = document.querySelector('.js-sidebar');
@@ -115,6 +121,100 @@
                 closeProfileDropdown();
             }
         });
+
+        function runConfirm(targetUrl, options) {
+            if (typeof Swal === 'undefined') {
+                window.location.href = targetUrl;
+                return;
+            }
+
+            Swal.fire({
+                title: options.title || 'Are you sure?',
+                text: options.text || '',
+                icon: options.icon || 'warning',
+                showCancelButton: true,
+                confirmButtonText: options.confirmText || 'Continue',
+                cancelButtonText: options.cancelText || 'Keep it',
+                confirmButtonColor: '#2563eb',
+                cancelButtonColor: '#cbd5e1',
+                background: '#ffffff',
+                color: '#1a202c',
+                reverseButtons: true
+            }).then(function (result) {
+                if (result.isConfirmed) {
+                    window.location.href = targetUrl;
+                }
+            });
+        }
+
+        document.querySelectorAll('.js-swal-confirm').forEach(function (link) {
+            link.addEventListener('click', function (event) {
+                event.preventDefault();
+                runConfirm(link.getAttribute('href'), {
+                    title: link.getAttribute('data-swal-title'),
+                    text: link.getAttribute('data-swal-text'),
+                    confirmText: link.getAttribute('data-swal-confirm')
+                });
+            });
+        });
+
+        document.querySelectorAll('.js-swal-confirm-form').forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+
+                if (typeof Swal === 'undefined') {
+                    form.submit();
+                    return;
+                }
+
+                Swal.fire({
+                    title: form.getAttribute('data-swal-title') || 'Are you sure?',
+                    text: form.getAttribute('data-swal-text') || '',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: form.getAttribute('data-swal-confirm') || 'Continue',
+                    cancelButtonText: 'Keep it',
+                    confirmButtonColor: '#2563eb',
+                    cancelButtonColor: '#cbd5e1',
+                    background: '#ffffff',
+                    color: '#1a202c',
+                    reverseButtons: true
+                }).then(function (result) {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+
+        var payload = null;
+        <?php if (!empty($swal_flash)): ?>
+        payload = <?php echo json_encode($swal_flash); ?>;
+        <?php elseif (!empty($flash_success)): ?>
+        payload = {
+            icon: 'success',
+            title: 'Success',
+            text: <?php echo json_encode($flash_success); ?>
+        };
+        <?php elseif (!empty($flash_error)): ?>
+        payload = {
+            icon: 'error',
+            title: 'Something went wrong',
+            text: <?php echo json_encode($flash_error); ?>
+        };
+        <?php endif; ?>
+
+        if (payload && typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: payload.icon || 'info',
+                title: payload.title || 'Notice',
+                html: payload.text ? '<div style="font-size:14px;line-height:1.65;color:#475569;">' + payload.text + '</div>' : '',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#2563eb',
+                background: '#ffffff',
+                color: '#1a202c'
+            });
+        }
     })();
 </script>
 </body>

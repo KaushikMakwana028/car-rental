@@ -56,7 +56,8 @@
         content: '';
         position: absolute;
         inset: 0;
-        background: radial-gradient(ellipse 70% 120% at 110% 50%, rgba(35, 94, 167, .12) 0%, transparent 60%), radial-gradient(ellipse 50% 80% at -10% 80%, rgba(241, 193, 79, .18) 0%, transparent 55%);
+        background: radial-gradient(ellipse 70% 120% at 110% 50%, rgba(35, 94, 167, .12) 0%, transparent 60%),
+            radial-gradient(ellipse 50% 80% at -10% 80%, rgba(241, 193, 79, .18) 0%, transparent 55%);
     }
 
     .vc-hero-inner {
@@ -162,7 +163,6 @@
     .vc-search-row {
         display: flex;
         align-items: center;
-        gap: 0;
         background: var(--cream);
         border: 1.5px solid var(--border-strong);
         border-radius: var(--radius-md);
@@ -173,7 +173,7 @@
 
     .vc-search-row:focus-within {
         border-color: var(--accent);
-        box-shadow: 0 0 0 3px rgba(200, 85, 61, .1);
+        box-shadow: 0 0 0 3px rgba(35, 94, 167, .1);
     }
 
     .vc-search-icon {
@@ -236,7 +236,7 @@
 
     .vc-filter-group select:focus {
         border-color: var(--accent);
-        box-shadow: 0 0 0 3px rgba(200, 85, 61, .1);
+        box-shadow: 0 0 0 3px rgba(35, 94, 167, .1);
     }
 
     /* Results meta */
@@ -276,6 +276,7 @@
         transition: box-shadow .22s, transform .22s;
         display: flex;
         flex-direction: column;
+        animation: fadeUp .4s ease both;
     }
 
     .vc-card:hover {
@@ -481,7 +482,7 @@
         height: 14px;
     }
 
-    /* Empty / no vehicles */
+    /* Empty state */
     .vc-empty-state {
         grid-column: 1/-1;
         text-align: center;
@@ -538,6 +539,70 @@
         line-height: 1.6;
     }
 
+    /* ── PAGINATION ── */
+    .vc-pagination-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 36px 0 8px;
+        flex-wrap: wrap;
+    }
+
+    .vc-page-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 38px;
+        height: 38px;
+        padding: 0 6px;
+        border-radius: var(--radius-sm);
+        border: 1.5px solid var(--border-strong);
+        background: var(--card-bg);
+        font-family: var(--font-body);
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--ink-soft);
+        cursor: pointer;
+        transition: background .15s, border-color .15s, color .15s, transform .12s;
+        user-select: none;
+        line-height: 1;
+    }
+
+    .vc-page-btn:hover:not(:disabled):not(.active) {
+        background: var(--cream-dark);
+        border-color: var(--accent);
+        color: var(--accent);
+        transform: translateY(-1px);
+    }
+
+    .vc-page-btn.active {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #FAF8F3;
+        font-weight: 600;
+        cursor: default;
+    }
+
+    .vc-page-btn:disabled {
+        opacity: .38;
+        cursor: not-allowed;
+    }
+
+    .vc-page-btn.ellipsis {
+        border-color: transparent;
+        background: transparent;
+        cursor: default;
+        color: var(--ink-muted);
+        pointer-events: none;
+        min-width: 24px;
+    }
+
+    .vc-page-btn svg {
+        width: 16px;
+        height: 16px;
+    }
+
     /* Animations */
     @keyframes fadeUp {
         from {
@@ -550,17 +615,6 @@
             transform: translateY(0);
         }
     }
-
-    .vc-card {
-        animation: fadeUp .4s ease both;
-    }
-
-    <?php if (!empty($vehicles)): foreach ($vehicles as $i => $v): ?>.vc-card:nth-child(<?php echo $i + 1; ?>) {
-        animation-delay: <?php echo $i * 0.05; ?>s;
-    }
-
-    <?php endforeach;
-    endif; ?>
 
     /* Responsive */
     @media(max-width:768px) {
@@ -589,6 +643,12 @@
 
         .vc-grid {
             grid-template-columns: 1fr;
+        }
+
+        .vc-page-btn {
+            min-width: 34px;
+            height: 34px;
+            font-size: 13px;
         }
     }
 
@@ -641,11 +701,9 @@
                         <select id="filterType">
                             <option value="">All Types</option>
                             <?php
-                            $types = array();
-                            foreach ($vehicles as $vehicle) {
-                                $types[] = trim((string) $vehicle['vehicle_type']);
-                            }
-                            $types = array_values(array_unique(array_filter($types)));
+                            $types = array_values(array_unique(array_filter(array_map(function ($v) {
+                                return trim((string)$v['vehicle_type']);
+                            }, $vehicles))));
                             sort($types);
                             foreach ($types as $type):
                             ?>
@@ -658,11 +716,9 @@
                         <select id="filterFuel">
                             <option value="">All Fuel Types</option>
                             <?php
-                            $fuels = array();
-                            foreach ($vehicles as $vehicle) {
-                                $fuels[] = trim((string) $vehicle['fuel_type']);
-                            }
-                            $fuels = array_values(array_unique(array_filter($fuels)));
+                            $fuels = array_values(array_unique(array_filter(array_map(function ($v) {
+                                return trim((string)$v['fuel_type']);
+                            }, $vehicles))));
                             sort($fuels);
                             foreach ($fuels as $fuel):
                             ?>
@@ -675,15 +731,13 @@
                         <select id="filterSeats">
                             <option value="">Any Seats</option>
                             <?php
-                            $seats = array();
-                            foreach ($vehicles as $vehicle) {
-                                $seats[] = (int) $vehicle['seats'];
-                            }
-                            $seats = array_values(array_unique(array_filter($seats)));
+                            $seats = array_values(array_unique(array_filter(array_map(function ($v) {
+                                return (int)$v['seats'];
+                            }, $vehicles))));
                             sort($seats);
                             foreach ($seats as $seat):
                             ?>
-                                <option value="<?php echo (int) $seat; ?>"><?php echo (int) $seat; ?>+ Seats</option>
+                                <option value="<?php echo (int)$seat; ?>"><?php echo (int)$seat; ?>+ Seats</option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -713,8 +767,9 @@
                         data-registration="<?php echo html_escape(strtolower($vehicle['registration_no'])); ?>"
                         data-type="<?php echo html_escape(strtolower($vehicle['vehicle_type'])); ?>"
                         data-fuel="<?php echo html_escape(strtolower($vehicle['fuel_type'])); ?>"
-                        data-seats="<?php echo (int) $vehicle['seats']; ?>"
-                        data-advance="<?php echo (float) $vehicle['advance_amount']; ?>">
+                        data-seats="<?php echo (int)$vehicle['seats']; ?>"
+                        data-advance="<?php echo (float)$vehicle['advance_amount']; ?>">
+
                         <?php if ($vehicle_image !== ''): ?>
                             <div class="vc-card-media">
                                 <img src="<?php echo app_vehicle_image_url($vehicle_image); ?>" alt="<?php echo html_escape($vehicle['name']); ?>" loading="lazy">
@@ -738,19 +793,19 @@
                                 </div>
                                 <div class="vc-spec-item">
                                     <div class="vc-spec-label">Seats</div>
-                                    <div class="vc-spec-value"><?php echo (int) $vehicle['seats']; ?> Seats</div>
+                                    <div class="vc-spec-value"><?php echo (int)$vehicle['seats']; ?> Seats</div>
                                 </div>
                             </div>
                             <div class="vc-divider"></div>
                             <div class="vc-card-footer">
                                 <div>
                                     <div class="vc-price-label">Rate / KM</div>
-                                    <div class="vc-price-value">&#8377;<?php echo number_format((float) $vehicle['rate_per_day'], 2); ?><span class="vc-price-unit">/km</span></div>
-                                    <div class="vc-advance-tag">                                       
-                                        &#8377;<?php echo number_format((float) $vehicle['advance_amount'], 0); ?> advance
+                                    <div class="vc-price-value">&#8377;<?php echo number_format((float)$vehicle['rate_per_day'], 2); ?><span class="vc-price-unit">/km</span></div>
+                                    <div class="vc-advance-tag">
+                                        &#8377;<?php echo number_format((float)$vehicle['advance_amount'], 0); ?> advance
                                     </div>
                                 </div>
-                                <a class="vc-book-btn" href="<?php echo base_url('bookings/create?vehicle_id=' . (int) $vehicle['id']); ?>">
+                                <a class="vc-book-btn" href="<?php echo base_url('bookings/create?vehicle_id=' . (int)$vehicle['id']); ?>">
                                     Book
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M5 12h14M12 5l7 7-7 7" />
@@ -773,6 +828,9 @@
                 </div>
             </div>
 
+            <!-- Pagination -->
+            <nav class="vc-pagination-wrap" id="vcPagination" aria-label="Vehicle pages"></nav>
+
         <?php else: ?>
             <div class="vc-no-vehicles">
                 <h2>No vehicles available right now.</h2>
@@ -786,43 +844,228 @@
 <?php if (!empty($vehicles)): ?>
     <script>
         (function() {
-            var search = document.getElementById('vehicleSearch');
-            var type = document.getElementById('filterType');
-            var fuel = document.getElementById('filterFuel');
-            var seats = document.getElementById('filterSeats');
-            var advance = document.getElementById('filterAdvance');
-            var cards = Array.prototype.slice.call(document.querySelectorAll('.js-vehicle-card'));
-            var empty = document.getElementById('vehicleEmptyState');
-            var count = document.getElementById('resultsCount');
 
+            /* ── refs ── */
+            var search = document.getElementById('vehicleSearch');
+            var selType = document.getElementById('filterType');
+            var selFuel = document.getElementById('filterFuel');
+            var selSeats = document.getElementById('filterSeats');
+            var selAdv = document.getElementById('filterAdvance');
+            var grid = document.getElementById('vehicleGrid');
+            var emptyEl = document.getElementById('vehicleEmptyState');
+            var countEl = document.getElementById('resultsCount');
+            var pagNav = document.getElementById('vcPagination');
+
+            var allCards = Array.prototype.slice.call(document.querySelectorAll('.js-vehicle-card'));
+
+            /* ── state ── */
+            var currentPage = 1;
+            var visibleCards = allCards.slice(); // cards that pass current filters
+
+            /* ── per-page: 9 desktop / 6 mobile ── */
+            function perPage() {
+                return window.innerWidth <= 768 ? 6 : 9;
+            }
+
+            /* ── filter ── */
             function applyFilters() {
                 var sv = (search.value || '').toLowerCase().trim();
-                var tv = (type.value || '').toLowerCase();
-                var fv = (fuel.value || '').toLowerCase();
-                var sev = parseInt(seats.value || '0', 10);
-                var adv = parseFloat(advance.value || '0');
-                var vis = 0;
-                cards.forEach(function(card) {
-                    var ok =
-                        (sv === '' || card.dataset.name.indexOf(sv) !== -1 ||
+                var tv = (selType.value || '').toLowerCase();
+                var fv = (selFuel.value || '').toLowerCase();
+                var sev = parseInt(selSeats.value || '0', 10);
+                var adv = parseFloat(selAdv.value || '0');
+
+                visibleCards = allCards.filter(function(card) {
+                    return (
+                        (sv === '' ||
+                            card.dataset.name.indexOf(sv) !== -1 ||
                             card.dataset.registration.indexOf(sv) !== -1 ||
                             card.dataset.type.indexOf(sv) !== -1 ||
-                            card.dataset.fuel.indexOf(sv) !== -1) &&
+                            card.dataset.fuel.indexOf(sv) !== -1
+                        ) &&
                         (tv === '' || card.dataset.type === tv) &&
                         (fv === '' || card.dataset.fuel === fv) &&
                         (sev === 0 || parseInt(card.dataset.seats, 10) >= sev) &&
-                        (adv === 0 || parseFloat(card.dataset.advance) <= adv);
-                    card.style.display = ok ? '' : 'none';
-                    if (ok) vis++;
+                        (adv === 0 || parseFloat(card.dataset.advance) <= adv)
+                    );
                 });
-                empty.style.display = vis === 0 ? '' : 'none';
-                if (count) count.innerHTML = 'Showing <strong>' + vis + '</strong> vehicle' + (vis !== 1 ? 's' : '');
+
+                /* reset to page 1 whenever filters change */
+                currentPage = 1;
+                render();
             }
 
-            [search, type, fuel, seats, advance].forEach(function(el) {
+            /* ── render cards for current page ── */
+            function render() {
+                var pp = perPage();
+                var total = visibleCards.length;
+                var totalPages = Math.max(1, Math.ceil(total / pp));
+
+                if (currentPage > totalPages) currentPage = totalPages;
+
+                var start = (currentPage - 1) * pp;
+                var end = start + pp;
+
+                /* hide all, show only page slice */
+                allCards.forEach(function(c) {
+                    c.style.display = 'none';
+                });
+                visibleCards.forEach(function(c, i) {
+                    c.style.display = (i >= start && i < end) ? '' : 'none';
+                    /* re-trigger fade animation */
+                    if (i >= start && i < end) {
+                        c.style.animation = 'none';
+                        /* eslint-disable-next-line no-unused-expressions */
+                        c.offsetHeight; /* reflow */
+                        c.style.animation = '';
+                        c.style.animationDelay = ((i - start) * 0.05) + 's';
+                    }
+                });
+
+                emptyEl.style.display = total === 0 ? '' : 'none';
+
+                /* count text */
+                if (countEl) {
+                    if (total === 0) {
+                        countEl.innerHTML = 'No vehicles found';
+                    } else {
+                        var showing = Math.min(end, total) - start;
+                        countEl.innerHTML =
+                            'Showing <strong>' + (start + 1) + '–' + Math.min(end, total) +
+                            '</strong> of <strong>' + total + '</strong> vehicle' + (total !== 1 ? 's' : '');
+                    }
+                }
+
+                buildPagination(totalPages);
+            }
+
+            /* ── build pagination nav ── */
+            function buildPagination(totalPages) {
+                pagNav.innerHTML = '';
+                if (totalPages <= 1) return;
+
+                var pages = getPageNumbers(currentPage, totalPages);
+
+                /* Prev button */
+                pagNav.appendChild(makeBtn(null, currentPage === 1, false, 'prev',
+                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>'
+                ));
+
+                pages.forEach(function(p) {
+                    if (p === '…') {
+                        pagNav.appendChild(makeBtn('…', false, false, 'ellipsis'));
+                    } else {
+                        pagNav.appendChild(makeBtn(p, false, p === currentPage, 'number'));
+                    }
+                });
+
+                /* Next button */
+                pagNav.appendChild(makeBtn(null, currentPage === totalPages, false, 'next',
+                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>'
+                ));
+            }
+
+            /* ── smart page number list ── */
+            /* Rules:
+                 first  → 1 2 3 … last
+                 middle → 1 … p-1 p p+1 … last
+                 last   → 1 … last-2 last-1 last
+            */
+            function getPageNumbers(cur, total) {
+                if (total <= 5) {
+                    /* show all pages when there are 5 or fewer */
+                    var arr = [];
+                    for (var i = 1; i <= total; i++) arr.push(i);
+                    return arr;
+                }
+
+                /* first 3 pages */
+                if (cur <= 3) {
+                    var result = [1, 2, 3];
+                    if (total > 4) result.push('…');
+                    result.push(total);
+                    return result;
+                }
+
+                /* last 3 pages */
+                if (cur >= total - 2) {
+                    return [1, '…', total - 2, total - 1, total];
+                }
+
+                /* middle */
+                return [1, '…', cur - 1, cur, cur + 1, '…', total];
+            }
+
+            /* ── create a single pagination button ── */
+            function makeBtn(label, disabled, active, type, innerHtml) {
+                var btn = document.createElement('button');
+                btn.className = 'vc-page-btn' +
+                    (active ? ' active' : '') +
+                    (type === 'ellipsis' ? ' ellipsis' : '');
+                btn.innerHTML = innerHtml || label;
+                btn.disabled = !!disabled;
+
+                if (type === 'number' && !active) {
+                    btn.setAttribute('aria-label', 'Page ' + label);
+                    btn.addEventListener('click', function() {
+                        currentPage = label;
+                        render();
+                        scrollToGrid();
+                    });
+                }
+                if (type === 'prev') {
+                    btn.setAttribute('aria-label', 'Previous page');
+                    btn.addEventListener('click', function() {
+                        if (currentPage > 1) {
+                            currentPage--;
+                            render();
+                            scrollToGrid();
+                        }
+                    });
+                }
+                if (type === 'next') {
+                    btn.setAttribute('aria-label', 'Next page');
+                    btn.addEventListener('click', function() {
+                        var pp = perPage();
+                        var totalPages = Math.ceil(visibleCards.length / pp);
+                        if (currentPage < totalPages) {
+                            currentPage++;
+                            render();
+                            scrollToGrid();
+                        }
+                    });
+                }
+                return btn;
+            }
+
+            /* smooth scroll back to top of grid on page change */
+            function scrollToGrid() {
+                var top = grid.getBoundingClientRect().top + window.pageYOffset - 24;
+                window.scrollTo({
+                    top: top,
+                    behavior: 'smooth'
+                });
+            }
+
+            /* ── event listeners ── */
+            [search, selType, selFuel, selSeats, selAdv].forEach(function(el) {
                 el.addEventListener('input', applyFilters);
                 el.addEventListener('change', applyFilters);
             });
+
+            /* re-render on resize (desktop ↔ mobile per-page change) */
+            var resizeTimer;
+            window.addEventListener('resize', function() {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(function() {
+                    currentPage = 1;
+                    render();
+                }, 200);
+            });
+
+            /* ── initial render ── */
+            render();
+
         })();
     </script>
 <?php endif; ?>

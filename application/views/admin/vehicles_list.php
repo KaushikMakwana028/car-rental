@@ -376,6 +376,16 @@
         background: #dbeafe;
     }
 
+    .vm-btn.view {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        color: #334155;
+    }
+
+    .vm-btn.view:hover {
+        background: #eef2f7;
+    }
+
     .vm-btn.delete {
         background: var(--danger-bg);
         border-color: var(--danger-bd);
@@ -388,6 +398,178 @@
 
     .vm-actions form {
         display: contents;
+    }
+
+    .vm-booking-card {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xl);
+        background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+    }
+
+    .vm-booking-hero {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 24px 24px 20px;
+        border-bottom: 1px solid var(--border-soft);
+        background: radial-gradient(circle at top right, rgba(37, 99, 235, .10), transparent 34%), linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+    }
+
+    .vm-booking-kicker {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: var(--brand);
+        margin-bottom: 10px;
+    }
+
+    .vm-booking-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--text-1);
+        margin-bottom: 4px;
+        line-height: 1.15;
+    }
+
+    .vm-booking-sub {
+        font-size: 13.5px;
+        color: var(--text-2);
+        line-height: 1.6;
+    }
+
+    .vm-booking-status {
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 14px;
+        border-radius: 999px;
+        background: var(--brand-light);
+        border: 1px solid var(--brand-mid);
+        color: var(--brand-hover);
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .vm-booking-status::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: currentColor;
+    }
+
+    .vm-booking-grid {
+        display: grid;
+        grid-template-columns: 1.15fr .85fr;
+        gap: 18px;
+        padding: 22px 24px 24px;
+    }
+
+    .vm-booking-panel {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        background: #fff;
+        padding: 18px;
+    }
+
+    .vm-panel-label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: var(--text-3);
+        margin-bottom: 14px;
+    }
+
+    .vm-panel-head {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 18px;
+    }
+
+    .vm-panel-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 16px;
+        background: var(--brand-light);
+        border: 1px solid var(--brand-mid);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--brand-hover);
+        font-size: 18px;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .vm-panel-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--text-1);
+        margin-bottom: 3px;
+    }
+
+    .vm-panel-sub {
+        font-size: 13px;
+        color: var(--text-2);
+    }
+
+    .vm-detail-list {
+        display: grid;
+        gap: 10px;
+    }
+
+    .vm-detail-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border-soft);
+    }
+
+    .vm-detail-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .vm-detail-key {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: var(--text-3);
+        flex-shrink: 0;
+    }
+
+    .vm-detail-val {
+        font-size: 13.5px;
+        font-weight: 600;
+        color: var(--text-1);
+        text-align: right;
+        line-height: 1.55;
+    }
+
+    .vm-detail-val.muted {
+        color: var(--text-2);
+        font-weight: 500;
+    }
+
+    .vm-detail-highlight {
+        margin-top: 16px;
+        padding: 14px 16px;
+        border-radius: var(--radius-md);
+        background: linear-gradient(135deg, #eff6ff 0%, #f8fbff 100%);
+        border: 1px solid var(--brand-mid);
+        color: var(--brand-hover);
+        font-size: 13px;
+        line-height: 1.6;
     }
 
     /* ── Empty ── */
@@ -740,6 +922,19 @@
             grid-column: 1;
         }
 
+        .vm-booking-hero,
+        .vm-detail-row {
+            flex-direction: column;
+        }
+
+        .vm-booking-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .vm-detail-val {
+            text-align: left;
+        }
+
         .vm-modal {
             padding: 20px;
         }
@@ -837,6 +1032,33 @@
                     <?php if (!empty($vehicles)): ?>
                         <?php foreach ($vehicles as $index => $vehicle): ?>
                             <?php $vehicle_image = isset($vehicle['image']) ? $vehicle['image'] : ''; ?>
+                            <?php $active_booking = !empty($vehicle['active_booking']) ? $vehicle['active_booking'] : array(); ?>
+                            <?php
+                            $booking_detail = array(
+                                'vehicle_name' => isset($vehicle['name']) ? $vehicle['name'] : '',
+                                'registration_no' => isset($vehicle['registration_no']) ? $vehicle['registration_no'] : '',
+                                'vehicle_type' => isset($vehicle['vehicle_type']) ? $vehicle['vehicle_type'] : '',
+                                'fuel_type' => isset($vehicle['fuel_type']) ? $vehicle['fuel_type'] : '',
+                                'seats' => isset($vehicle['seats']) ? (int) $vehicle['seats'] : 0,
+                                'rate_per_day' => isset($vehicle['rate_per_day']) ? (float) $vehicle['rate_per_day'] : 0,
+                                'advance_amount' => isset($vehicle['advance_amount']) ? (float) $vehicle['advance_amount'] : 0,
+                                'vehicle_status' => isset($vehicle['status']) ? $vehicle['status'] : '',
+                                'booking_code' => !empty($active_booking['booking_code']) ? $active_booking['booking_code'] : '',
+                                'booking_status' => !empty($active_booking['effective_status']) ? $active_booking['effective_status'] : (!empty($active_booking['status']) ? $active_booking['status'] : ''),
+                                'customer_name' => !empty($active_booking['customer_name']) ? $active_booking['customer_name'] : '',
+                                'customer_phone' => !empty($active_booking['customer_phone']) ? $active_booking['customer_phone'] : '',
+                                'trip_label' => !empty($active_booking['trip_label']) ? $active_booking['trip_label'] : '',
+                                'trip_route' => !empty($active_booking['trip_route']) ? $active_booking['trip_route'] : '',
+                                'pickup_date' => !empty($active_booking['pickup_date']) ? date('d M Y', strtotime($active_booking['pickup_date'])) : '',
+                                'return_date' => !empty($active_booking['return_date']) ? date('d M Y', strtotime($active_booking['return_date'])) : '',
+                                'estimated_km' => !empty($active_booking['estimated_km']) ? (int) $active_booking['estimated_km'] : 0,
+                                'amount' => !empty($active_booking['amount']) ? (float) $active_booking['amount'] : 0,
+                                'paid_amount' => !empty($active_booking['paid_amount']) ? (float) $active_booking['paid_amount'] : 0,
+                                'balance_amount' => !empty($active_booking['balance_amount']) ? (float) $active_booking['balance_amount'] : 0,
+                                'payment_status' => !empty($active_booking['payment_status']) ? $active_booking['payment_status'] : '',
+                                'booking_created_at' => !empty($active_booking['created_at']) ? date('d M Y, h:i A', strtotime($active_booking['created_at'])) : '',
+                            );
+                            ?>
                             <tr>
                                 <td><span class="vm-row-num"><?php echo (int)$index + 1; ?></span></td>
                                 <td>
@@ -867,6 +1089,16 @@
                                 </td>
                                 <td>
                                     <div class="vm-actions">
+                                        <?php if ($vehicle['status'] === 'booked'): ?>
+                                            <button class="vm-btn view js-open-booking-view" type="button"
+                                                data-detail="<?php echo html_escape(json_encode($booking_detail)); ?>">
+                                                <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M1.5 8s2.4-4 6.5-4 6.5 4 6.5 4-2.4 4-6.5 4-6.5-4-6.5-4Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" />
+                                                    <circle cx="8" cy="8" r="2.2" stroke="currentColor" stroke-width="1.4" />
+                                                </svg>
+                                                View
+                                            </button>
+                                        <?php endif; ?>
                                         <button class="vm-btn edit edit-vehicle-btn" type="button"
                                             data-id="<?php echo (int)$vehicle['id']; ?>"
                                             data-name="<?php echo html_escape($vehicle['name']); ?>"
@@ -883,7 +1115,7 @@
                                             </svg>
                                             Edit
                                         </button>
-                                        <form method="post" action="<?php echo base_url('admin/vehicles/delete/' . (int)$vehicle['id']); ?>" onsubmit="return confirm('Delete this vehicle?');">
+                                        <form method="post" action="<?php echo base_url('admin/vehicles/delete/' . (int)$vehicle['id']); ?>" class="js-swal-confirm-form" data-swal-title="Delete vehicle?" data-swal-text="This vehicle will be removed permanently." data-swal-confirm="Delete">
                                             <button class="vm-btn delete" type="submit">
                                                 <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                     <path d="M2 4h12M5 4V2.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5V4M6 7v5M10 7v5M3 4l.8 9a1 1 0 0 0 1 .9h6.4a1 1 0 0 0 1-.9L13 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
@@ -918,6 +1150,90 @@
 </div>
 
 <!-- ══ MODAL ══ -->
+<div class="vm-modal-overlay" id="vehicleBookingViewModal">
+    <div class="vm-modal">
+        <div class="vm-modal-head">
+            <div>
+                <h3>Vehicle Booking Details</h3>
+                <p>See the current booking and customer information for this vehicle in one clean summary card.</p>
+            </div>
+            <button class="vm-modal-close" type="button" id="closeVehicleBookingViewModal" aria-label="Close">
+                <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 3l10 10M13 3 3 13" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+                </svg>
+            </button>
+        </div>
+        <div class="vm-booking-card">
+            <div class="vm-booking-hero">
+                <div>
+                    <div class="vm-booking-kicker">Current Assignment</div>
+                    <div class="vm-booking-title" id="vmBookingViewTitle">Vehicle Name</div>
+                    <div class="vm-booking-sub" id="vmBookingViewSubtitle">Registration and category details will appear here.</div>
+                </div>
+                <div class="vm-booking-status" id="vmBookingViewStatus">Available</div>
+            </div>
+            <div class="vm-booking-grid">
+                <div class="vm-booking-panel">
+                    <div class="vm-panel-label">Customer</div>
+                    <div class="vm-panel-head">
+                        <div class="vm-panel-avatar" id="vmBookingCustomerAvatar">C</div>
+                        <div>
+                            <div class="vm-panel-title" id="vmBookingCustomerName">No customer assigned</div>
+                            <div class="vm-panel-sub" id="vmBookingCustomerPhone">Vehicle is currently not linked to any active booking.</div>
+                        </div>
+                    </div>
+                    <div class="vm-detail-list">
+                        <div class="vm-detail-row">
+                            <div class="vm-detail-key">Booking ID</div>
+                            <div class="vm-detail-val" id="vmBookingCode">-</div>
+                        </div>
+                        <div class="vm-detail-row">
+                            <div class="vm-detail-key">Status</div>
+                            <div class="vm-detail-val" id="vmBookingStatusText">-</div>
+                        </div>
+                        <div class="vm-detail-row">
+                            <div class="vm-detail-key">Payment</div>
+                            <div class="vm-detail-val" id="vmBookingPaymentStatus">-</div>
+                        </div>
+                        <div class="vm-detail-row">
+                            <div class="vm-detail-key">Created</div>
+                            <div class="vm-detail-val muted" id="vmBookingCreatedAt">-</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="vm-booking-panel">
+                    <div class="vm-panel-label">Trip Summary</div>
+                    <div class="vm-detail-list">
+                        <div class="vm-detail-row">
+                            <div class="vm-detail-key">Dates</div>
+                            <div class="vm-detail-val" id="vmBookingTripDates">-</div>
+                        </div>
+                        <div class="vm-detail-row">
+                            <div class="vm-detail-key">Route</div>
+                            <div class="vm-detail-val" id="vmBookingRoute">-</div>
+                        </div>
+                        <div class="vm-detail-row">
+                            <div class="vm-detail-key">Distance</div>
+                            <div class="vm-detail-val" id="vmBookingDistance">-</div>
+                        </div>
+                        <div class="vm-detail-row">
+                            <div class="vm-detail-key">Estimated Fare</div>
+                            <div class="vm-detail-val" id="vmBookingAmount">-</div>
+                        </div>
+                        <div class="vm-detail-row">
+                            <div class="vm-detail-key">Paid / Balance</div>
+                            <div class="vm-detail-val" id="vmBookingBalance">-</div>
+                        </div>
+                    </div>
+                    <div class="vm-detail-highlight" id="vmVehicleMeta">
+                        Category, fuel, seating, and advance amount will appear here.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="vm-modal-overlay" id="vehicleModal">
     <div class="vm-modal">
         <div class="vm-modal-head">
@@ -1013,6 +1329,7 @@
 <script>
     (function() {
         var modal = document.getElementById('vehicleModal');
+        var bookingViewModal = document.getElementById('vehicleBookingViewModal');
         var form = document.getElementById('vehicleForm');
         var title = document.getElementById('vehicleModalTitle');
         var copy = document.getElementById('vehicleModalCopy');
@@ -1026,6 +1343,21 @@
         var uploadSub = document.getElementById('uploadSub');
         var baseStore = '<?php echo base_url('admin/vehicles/store'); ?>';
         var baseUpdate = '<?php echo base_url('admin/vehicles/update/'); ?>';
+
+        function fmtMoney(value) {
+            var num = parseFloat(value || 0);
+            return 'Rs ' + num.toLocaleString('en-IN', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function getInitials(name) {
+            var parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+            if (!parts.length) return 'C';
+            if (parts.length === 1) return parts[0].slice(0, 1).toUpperCase();
+            return (parts[0].slice(0, 1) + parts[1].slice(0, 1)).toUpperCase();
+        }
 
         function setPreview(src) {
             if (src) {
@@ -1048,6 +1380,12 @@
             modal.scrollTop = 0;
         }
 
+        function openBookingViewModal() {
+            bookingViewModal.classList.add('open');
+            document.body.style.overflow = 'hidden';
+            bookingViewModal.scrollTop = 0;
+        }
+
         function closeModal() {
             modal.classList.remove('open');
             document.body.style.overflow = '';
@@ -1058,6 +1396,11 @@
             submitBtn.textContent = 'Add Vehicle';
             setPreview('');
             setUpload('', '');
+        }
+
+        function closeBookingViewModal() {
+            bookingViewModal.classList.remove('open');
+            document.body.style.overflow = '';
         }
 
         function setVal(id, val) {
@@ -1072,13 +1415,18 @@
 
         document.getElementById('closeVehicleModal').addEventListener('click', closeModal);
         document.getElementById('cancelVehicleModal').addEventListener('click', closeModal);
+        document.getElementById('closeVehicleBookingViewModal').addEventListener('click', closeBookingViewModal);
 
         modal.addEventListener('click', function(e) {
             if (e.target === modal) closeModal();
         });
+        bookingViewModal.addEventListener('click', function(e) {
+            if (e.target === bookingViewModal) closeBookingViewModal();
+        });
 
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+            if (e.key === 'Escape' && bookingViewModal.classList.contains('open')) closeBookingViewModal();
         });
 
         if (imageInput) {
@@ -1138,6 +1486,51 @@
                     setPreview('');
                 }
                 openModal();
+            });
+        });
+
+        document.querySelectorAll('.js-open-booking-view').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var detail = {};
+                try {
+                    detail = JSON.parse(btn.getAttribute('data-detail') || '{}');
+                } catch (e) {
+                    detail = {};
+                }
+
+                var statusText = String(detail.booking_status || detail.vehicle_status || 'available')
+                    .replace(/\b\w/g, function(ch) {
+                        return ch.toUpperCase();
+                    });
+                var customerName = detail.customer_name || 'No customer assigned';
+                var customerPhone = detail.customer_phone || 'Vehicle is currently not linked to any active booking.';
+
+                document.getElementById('vmBookingViewTitle').textContent = detail.vehicle_name || 'Vehicle Details';
+                document.getElementById('vmBookingViewSubtitle').textContent =
+                    [detail.registration_no, detail.vehicle_type, detail.fuel_type].filter(Boolean).join(' • ') || 'Vehicle information';
+                document.getElementById('vmBookingViewStatus').textContent = statusText;
+                document.getElementById('vmBookingCustomerAvatar').textContent = getInitials(customerName);
+                document.getElementById('vmBookingCustomerName').textContent = customerName;
+                document.getElementById('vmBookingCustomerPhone').textContent = customerPhone;
+                document.getElementById('vmBookingCode').textContent = detail.booking_code || 'No active booking';
+                document.getElementById('vmBookingStatusText').textContent = statusText;
+                document.getElementById('vmBookingPaymentStatus').textContent = detail.payment_status || 'No payment activity';
+                document.getElementById('vmBookingCreatedAt').textContent = detail.booking_created_at || '-';
+                document.getElementById('vmBookingTripDates').textContent = detail.trip_label || '-';
+                document.getElementById('vmBookingRoute').textContent = detail.trip_route || '-';
+                document.getElementById('vmBookingDistance').textContent = detail.estimated_km ? (detail.estimated_km + ' km') : '-';
+                document.getElementById('vmBookingAmount').textContent = detail.amount ? fmtMoney(detail.amount) : '-';
+                document.getElementById('vmBookingBalance').textContent = (detail.paid_amount || detail.balance_amount)
+                    ? (fmtMoney(detail.paid_amount || 0) + ' paid • ' + fmtMoney(detail.balance_amount || 0) + ' balance')
+                    : 'No payment recorded';
+                document.getElementById('vmVehicleMeta').textContent =
+                    'Seats: ' + (detail.seats || '-') +
+                    ' • Rate/KM: ' + fmtMoney(detail.rate_per_day || 0) +
+                    ' • Advance: ' + fmtMoney(detail.advance_amount || 0) +
+                    ' • Pickup: ' + (detail.pickup_date || '-') +
+                    ' • Return: ' + (detail.return_date || '-');
+
+                openBookingViewModal();
             });
         });
     })();

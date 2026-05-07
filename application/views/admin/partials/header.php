@@ -1367,18 +1367,4 @@ $current_initials = app_user_initials($current_name);
                 </div>
             </div>
 
-            <!-- Flash messages -->
-            <?php if ($this->session->flashdata('success')): ?>
-                <div class="flash flash-success">
-                    <div class="flash-icon">&#10003;</div>
-                    <?php echo $this->session->flashdata('success'); ?>
-                </div>
-            <?php endif; ?>
-            <?php if ($this->session->flashdata('error')): ?>
-                <div class="flash flash-error">
-                    <div class="flash-icon">&#33;</div>
-                    <?php echo $this->session->flashdata('error'); ?>
-                </div>
-            <?php endif; ?>
-
             <!-- Page content injected here by individual view files -->

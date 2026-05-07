@@ -7,7 +7,50 @@ class Vehicle extends Admin_Controller
     {
         $data['page_title'] = 'Manage Vehicles';
         $data['current_user'] = $this->current_user;
-        $data['vehicles'] = $this->General_model->get_all('vehicles');
+        $vehicles = $this->General_model->get_all('vehicles');
+        $bookings = $this->General_model->get_bookings();
+        $booking_map = array();
+
+        foreach ($bookings as $booking) {
+            $vehicle_id = isset($booking['vehicle_id']) ? (int) $booking['vehicle_id'] : 0;
+            if ($vehicle_id <= 0 || isset($booking_map[$vehicle_id])) {
+                continue;
+            }
+
+            $status = !empty($booking['effective_status']) ? $booking['effective_status'] : $booking['status'];
+            if (!in_array($status, array('pending', 'confirmed', 'completed'), true)) {
+                continue;
+            }
+
+            $booking_map[$vehicle_id] = $booking;
+        }
+
+        foreach ($vehicles as &$vehicle) {
+            $vehicle_id = isset($vehicle['id']) ? (int) $vehicle['id'] : 0;
+            $vehicle['active_booking'] = isset($booking_map[$vehicle_id]) ? $booking_map[$vehicle_id] : array();
+        }
+        unset($vehicle);
+
+        usort($vehicles, function ($left, $right) {
+            $priority = array(
+                'booked' => 0,
+                'available' => 1,
+                'service' => 2,
+            );
+
+            $left_status = isset($left['status']) ? $left['status'] : '';
+            $right_status = isset($right['status']) ? $right['status'] : '';
+            $left_rank = isset($priority[$left_status]) ? $priority[$left_status] : 99;
+            $right_rank = isset($priority[$right_status]) ? $priority[$right_status] : 99;
+
+            if ($left_rank === $right_rank) {
+                return (int) $right['id'] - (int) $left['id'];
+            }
+
+            return $left_rank - $right_rank;
+        });
+
+        $data['vehicles'] = $vehicles;
         $this->render_view('admin/vehicles_list', $data);
     }
 

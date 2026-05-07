@@ -21,11 +21,7 @@ class Document extends MY_Controller
         }
 
         $this->set_public_booking_session($customer_id, $booking_id);
-        $booking = $this->General_model->get_bookings(array(
-            'bookings.id' => $booking_id,
-            'bookings.customer_id' => $customer_id,
-        ));
-        $booking = !empty($booking) ? $booking[0] : array();
+        $booking = $this->General_model->get_booking_for_flow($booking_id, $customer_id);
 
         $documents = $this->General_model->get_customer_documents_matrix($customer_id);
         $document_map = array();
@@ -43,6 +39,7 @@ class Document extends MY_Controller
         $data['document_map'] = $document_map;
         $data['required_types'] = $this->General_model->get_document_types();
         $data['can_continue_to_payment'] = $this->can_continue_to_payment($customer_id);
+        $data['cancel_url'] = base_url('bookings/cancel/' . $booking_id . '?customer_id=' . $customer_id);
         $this->render_customer_view('documents_list', $data);
     }
 

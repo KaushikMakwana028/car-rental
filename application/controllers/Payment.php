@@ -28,11 +28,7 @@ class Payment extends MY_Controller
         }
 
         $this->set_public_booking_session($customer_id, $booking_id);
-        $booking = $this->General_model->get_bookings(array(
-            'bookings.id' => $booking_id,
-            'bookings.customer_id' => $customer_id,
-        ));
-        $booking = !empty($booking) ? $booking[0] : array();
+        $booking = $this->General_model->get_booking_for_flow($booking_id, $customer_id);
 
         $data['page_title'] = 'Advance Payment';
         $data['page_subtitle'] = 'Pay the advance amount and upload your receipt to complete the booking request.';
@@ -42,6 +38,7 @@ class Payment extends MY_Controller
         $data['booking'] = $booking;
         $data['payment_settings'] = $this->General_model->get_payment_settings();
         $data['existing_request'] = $this->General_model->get_payment_request_for_booking($booking_id, $customer_id);
+        $data['cancel_url'] = base_url('bookings/cancel/' . $booking_id . '?customer_id=' . $customer_id);
 
         $this->render_customer_view('payment_pay', $data);
     }
@@ -53,11 +50,7 @@ class Payment extends MY_Controller
             $customer_id = $this->get_active_customer_id();
         }
         $booking_id = (int) $this->input->post('booking_id');
-        $booking = $this->General_model->get_bookings(array(
-            'bookings.id' => $booking_id,
-            'bookings.customer_id' => $customer_id,
-        ));
-        $booking = !empty($booking) ? $booking[0] : array();
+        $booking = $this->General_model->get_booking_for_flow($booking_id, $customer_id);
 
         if (empty($booking)) {
             $this->session->set_flashdata('error', 'Please start your booking again.');
@@ -116,7 +109,7 @@ class Payment extends MY_Controller
         }
 
         $this->General_model->update('bookings', array('id' => $booking_id), array(
-            'status' => 'confirmed',
+            'status' => 'pending',
             'updated_at' => date('Y-m-d H:i:s'),
         ));
         $this->General_model->update('vehicles', array('id' => (int) $booking['vehicle_id']), array(
@@ -125,8 +118,8 @@ class Payment extends MY_Controller
         $this->clear_public_booking_session();
         $this->session->set_flashdata('swal', array(
             'icon' => 'success',
-            'title' => 'Car Booked Successfully',
-            'text' => 'Your car is booked. Admin will contact you within 24 hours.',
+            'title' => 'Booking Request Submitted',
+            'text' => 'Your booking request and payment receipt were submitted successfully. Admin will review them shortly.',
             'identity' => array(
                 'Booking ID' => isset($booking['booking_code']) ? $booking['booking_code'] : ('#' . $booking_id),
                 'Customer' => isset($booking['customer_name']) ? $booking['customer_name'] : '',

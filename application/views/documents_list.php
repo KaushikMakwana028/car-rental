@@ -5,6 +5,7 @@ $required_types = isset($required_types) ? $required_types : array();
 $booking = !empty($booking) ? $booking : array();
 $can_continue_to_payment = !empty($can_continue_to_payment);
 $current_step = isset($current_step) ? (int) $current_step : 2;
+$cancel_url = isset($cancel_url) ? $cancel_url : base_url('dashboard');
 $booking_back_url = base_url('bookings/create' . (!empty($booking['vehicle_id']) ? '?vehicle_id=' . (int) $booking['vehicle_id'] : ''));
 $booking_back_url .= (strpos($booking_back_url, '?') === false ? '?' : '&') . 'booking_id=' . (int) $booking['id'] . '&customer_id=' . (int) $booking['customer_id'];
 ?>
@@ -135,7 +136,7 @@ $booking_back_url .= (strpos($booking_back_url, '?') === false ? '?' : '&') . 'b
                     <?php if (!empty($document['file_path'])): ?>
                         <div class="hero-actions" style="margin-top:12px;">
                             <a class="btn-secondary" href="<?php echo base_url($document['file_path']); ?>" target="_blank">View</a>
-                            <a class="btn-secondary" href="<?php echo base_url('documents/delete/' . (int) $document['id'] . '?customer_id=' . (int) $booking['customer_id']); ?>" onclick="return confirm('Delete this document?');">Delete</a>
+                            <a class="btn-secondary js-swal-confirm" href="<?php echo base_url('documents/delete/' . (int) $document['id'] . '?customer_id=' . (int) $booking['customer_id']); ?>" data-swal-title="Delete document?" data-swal-text="This uploaded document will be removed." data-swal-confirm="Delete">Delete</a>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -183,7 +184,7 @@ $booking_back_url .= (strpos($booking_back_url, '?') === false ? '?' : '&') . 'b
                 <?php else: ?>
                     <button class="btn" type="submit">Upload Documents and Continue</button>
                 <?php endif; ?>
-                <a class="btn-secondary" href="<?php echo base_url('dashboard'); ?>">Cancel</a>
+                <a class="btn-secondary js-swal-confirm" href="<?php echo $cancel_url; ?>" data-swal-title="Cancel booking?" data-swal-text="This incomplete booking draft will be removed." data-swal-confirm="Yes, cancel">Cancel</a>
             </div>
         </form>
     </section>

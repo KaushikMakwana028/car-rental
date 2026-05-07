@@ -24,7 +24,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |
 */
 $config['base_url'] = 'http://localhost/kaushik_php/ci_project/car-rental/';
-
 /*
 |--------------------------------------------------------------------------
 | Index File
