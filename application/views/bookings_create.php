@@ -113,7 +113,7 @@
                 <p>Start the booking with mobile number and name, then continue to document upload.</p>
             </div>
         </div>
-        <form method="post" action="<?php echo base_url('customer/bookings/store'); ?>">
+        <form method="post" action="<?php echo base_url('bookings/store'); ?>">
             <input type="hidden" name="booking_id" value="<?php echo !empty($booking_edit['id']) ? (int) $booking_edit['id'] : 0; ?>">
             <input type="hidden" name="customer_id" value="<?php echo !empty($booking_edit['customer_id']) ? (int) $booking_edit['customer_id'] : 0; ?>">
             <div class="form-grid">
@@ -169,7 +169,7 @@
             </div>
             <div class="booking-actions">
                 <button class="btn" type="submit">Continue</button>
-                <a class="btn-secondary" href="<?php echo base_url('customer/dashboard'); ?>">Back to Home</a>
+                <a class="btn-secondary" href="<?php echo base_url('dashboard'); ?>">Back to Home</a>
             </div>
         </form>
     </section>

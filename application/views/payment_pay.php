@@ -494,7 +494,7 @@ $current_step       = isset($current_step) ? (int) $current_step : 3;
             </div>
         </div>
 
-        <form method="post" action="<?php echo base_url('customer/payments/store'); ?>" enctype="multipart/form-data">
+        <form method="post" action="<?php echo base_url('payments/store'); ?>" enctype="multipart/form-data">
             <input type="hidden" name="booking_id" value="<?php echo (int) $booking['id']; ?>">
             <input type="hidden" name="customer_id" value="<?php echo (int) $booking['customer_id']; ?>">
 
@@ -540,9 +540,9 @@ $current_step       = isset($current_step) ? (int) $current_step : 3;
             </div>
 
             <div class="booking-actions">
-                <a class="btn-secondary" href="<?php echo base_url('customer/documents?booking_id=' . (int) $booking['id'] . '&customer_id=' . (int) $booking['customer_id']); ?>">&#8592; Previous Step</a>
+                <a class="btn-secondary" href="<?php echo base_url('documents?booking_id=' . (int) $booking['id'] . '&customer_id=' . (int) $booking['customer_id']); ?>">&#8592; Previous Step</a>
                 <button class="btn" type="submit">Complete Booking</button>
-                <a class="btn-secondary" href="<?php echo base_url('customer/dashboard'); ?>">Cancel</a>
+                <a class="btn-secondary" href="<?php echo base_url('dashboard'); ?>">Cancel</a>
             </div>
         </form>
     </section>

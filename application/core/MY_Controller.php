@@ -56,7 +56,7 @@ class MY_Controller extends CI_Controller
         $this->session->set_userdata('customer_intended_url', $target_url);
     }
 
-    protected function consume_customer_intended_url($default = 'customer/dashboard')
+    protected function consume_customer_intended_url($default = 'dashboard')
     {
         $target_url = $this->session->userdata('customer_intended_url');
         $this->session->unset_userdata('customer_intended_url');
@@ -112,9 +112,9 @@ class MY_Controller extends CI_Controller
 
     protected function render_customer_view($view, $data = array())
     {
-        $this->load->view('customer/partials/header', $data);
+        $this->load->view('partials/header', $data);
         $this->load->view($view, $data);
-        $this->load->view('customer/partials/footer', $data);
+        $this->load->view('partials/footer', $data);
     }
 }
 
@@ -147,7 +147,7 @@ class Customer_Controller extends MY_Controller
             if ($this->input->method() === 'get') {
                 $this->remember_customer_intended_url();
             }
-            redirect('customer/login');
+            redirect('login');
         }
     }
 

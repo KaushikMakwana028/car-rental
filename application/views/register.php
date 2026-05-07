@@ -14,7 +14,7 @@ $intro_three_text = $is_admin_setup ? 'As soon as setup is complete, you will be
 $card_title = $is_admin_setup ? 'Create admin account' : 'Create your account';
 $card_text = $is_admin_setup ? 'Enter the admin name, email, phone, and password to unlock the admin dashboard.' : 'Register with your name, email, phone, and password to unlock the redesigned customer experience.';
 $submit_label = $is_admin_setup ? 'Create Admin Account' : 'Create Customer Account';
-$login_url = isset($login_url) ? $login_url : base_url('customer/login');
+$login_url = isset($login_url) ? $login_url : base_url('login');
 $back_label = $is_admin_setup ? 'Back to Admin Login' : 'Back to Login';
 $terms_text = $is_admin_setup ? 'After the first admin account is created, this registration page turns off automatically.' : 'By creating an account, you are ready to use the redesigned customer booking experience.';
 ?>

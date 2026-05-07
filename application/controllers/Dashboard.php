@@ -13,8 +13,8 @@ class Dashboard extends MY_Controller
 
         $data['vehicles'] = $this->General_model->get_available_vehicles();
 
-        $this->load->view('customer/partials/header', $data);
-        $this->load->view('customer/home_view', $data);
-        $this->load->view('customer/partials/footer', $data);
+        $this->load->view('partials/header', $data);
+        $this->load->view('home_view', $data);
+        $this->load->view('partials/footer', $data);
     }
 }

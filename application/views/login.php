@@ -354,7 +354,7 @@
                     <div class="flash error"><?php echo $this->session->flashdata('error'); ?></div>
                 <?php endif; ?>
 
-                <form method="post" action="<?php echo base_url('customer/login'); ?>">
+                <form method="post" action="<?php echo base_url('login'); ?>">
                     <div class="form-grid">
                         <div>
                             <label for="login_id">Email or Mobile</label>
@@ -387,7 +387,7 @@
                 </form>
 
                 <div class="auth-links">
-                    <a class="auth-link" href="<?php echo base_url('customer/dashboard'); ?>">
+                    <a class="auth-link" href="<?php echo base_url('dashboard'); ?>">
                         <div>
                             <strong>Browse customer home</strong>
                             <span>Go back and explore the updated light customer pages first.</span>

@@ -5,12 +5,12 @@ class Login extends MY_Controller
 {
     public function index()
     {
-        redirect('customer/dashboard');
+        redirect('dashboard');
     }
 
     public function register()
     {
-        redirect('customer/dashboard');
+        redirect('dashboard');
     }
 
     public function logout()
@@ -18,6 +18,6 @@ class Login extends MY_Controller
         $this->session->unset_userdata('logged_in_user');
         $this->session->unset_userdata('customer_intended_url');
         $this->session->set_flashdata('success', 'User logged out successfully.');
-        redirect('customer/dashboard');
+        redirect('dashboard');
     }
 }

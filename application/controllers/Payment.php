@@ -5,7 +5,7 @@ class Payment extends MY_Controller
 {
     public function index()
     {
-        redirect('customer/dashboard');
+        redirect('dashboard');
     }
 
     public function pay($booking_id)
@@ -18,13 +18,13 @@ class Payment extends MY_Controller
 
         if ($customer_id <= 0 || !$this->customer_can_access_booking($booking_id, $customer_id)) {
             $this->session->set_flashdata('error', 'Please start your booking again.');
-            redirect('customer/dashboard');
+            redirect('dashboard');
         }
 
         $document_gate = $this->General_model->get_required_documents_status($customer_id);
         if ((int) $document_gate['missing_count'] > 0) {
             $this->session->set_flashdata('error', 'Upload both required documents before payment.');
-            redirect('customer/documents?booking_id=' . $booking_id . '&customer_id=' . $customer_id);
+            redirect('documents?booking_id=' . $booking_id . '&customer_id=' . $customer_id);
         }
 
         $this->set_public_booking_session($customer_id, $booking_id);
@@ -43,7 +43,7 @@ class Payment extends MY_Controller
         $data['payment_settings'] = $this->General_model->get_payment_settings();
         $data['existing_request'] = $this->General_model->get_payment_request_for_booking($booking_id, $customer_id);
 
-        $this->render_customer_view('customer/payment_pay', $data);
+        $this->render_customer_view('payment_pay', $data);
     }
 
     public function store()
@@ -61,7 +61,7 @@ class Payment extends MY_Controller
 
         if (empty($booking)) {
             $this->session->set_flashdata('error', 'Please start your booking again.');
-            redirect('customer/dashboard');
+            redirect('dashboard');
         }
 
         $upload_dir = FCPATH . 'uploads/payments/';
@@ -82,7 +82,7 @@ class Payment extends MY_Controller
 
         if (!$this->upload->do_upload('receipt_file')) {
             $this->session->set_flashdata('error', strip_tags($this->upload->display_errors('', '')));
-            redirect('customer/payments/pay/' . $booking_id . '?customer_id=' . $customer_id);
+            redirect('payments/pay/' . $booking_id . '?customer_id=' . $customer_id);
         }
 
         $advance_amount = isset($booking['advance_due']) && (float) $booking['advance_due'] > 0
@@ -111,7 +111,7 @@ class Payment extends MY_Controller
         } else {
             if ((int) $this->General_model->create_payment_request($payload) <= 0) {
                 $this->session->set_flashdata('error', 'Payment request table is missing. Please ask admin to update the database first.');
-                redirect('customer/payments/pay/' . $booking_id . '?customer_id=' . $customer_id);
+                redirect('payments/pay/' . $booking_id . '?customer_id=' . $customer_id);
             }
         }
 
@@ -133,6 +133,6 @@ class Payment extends MY_Controller
                 'Mobile' => isset($booking['customer_phone']) ? $booking['customer_phone'] : '',
             ),
         ));
-        redirect('customer/dashboard');
+        redirect('dashboard');
     }
 }

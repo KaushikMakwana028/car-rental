@@ -20,6 +20,6 @@ class Welcome extends CI_Controller {
 	 */
 	public function index()
 	{
-		redirect('customer/dashboard');
+		redirect('dashboard');
 	}
 }

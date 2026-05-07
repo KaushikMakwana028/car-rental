@@ -49,9 +49,9 @@ foreach ($bookings as $booking) {
             <p>Booking IDs, trip type, route, payment progress, and current status are laid out in one cleaner table view.</p>
         </div>
         <?php if (!empty($document_gate['is_ready'])): ?>
-            <a class="btn" href="<?php echo base_url('customer/bookings/create'); ?>">Create Booking</a>
+            <a class="btn" href="<?php echo base_url('bookings/create'); ?>">Create Booking</a>
         <?php else: ?>
-            <a class="btn" href="<?php echo base_url('customer/documents'); ?>">Complete Documents</a>
+            <a class="btn" href="<?php echo base_url('documents'); ?>">Complete Documents</a>
         <?php endif; ?>
     </div>
 
@@ -111,7 +111,7 @@ foreach ($bookings as $booking) {
                         </td>
                         <td><span class="badge badge-<?php echo html_escape($booking_status); ?>"><?php echo html_escape(ucfirst($booking_status)); ?></span></td>
                         <td>
-                            <a class="btn-secondary" href="<?php echo base_url('customer/payments/pay/' . (int) $booking['id']); ?>">
+                            <a class="btn-secondary" href="<?php echo base_url('payments/pay/' . (int) $booking['id']); ?>">
                                 <?php echo !empty($booking['payment_request_id']) ? 'Update Receipt' : 'Pay Advance'; ?>
                             </a>
                         </td>

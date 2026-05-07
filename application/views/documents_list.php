@@ -5,7 +5,7 @@ $required_types = isset($required_types) ? $required_types : array();
 $booking = !empty($booking) ? $booking : array();
 $can_continue_to_payment = !empty($can_continue_to_payment);
 $current_step = isset($current_step) ? (int) $current_step : 2;
-$booking_back_url = base_url('customer/bookings/create' . (!empty($booking['vehicle_id']) ? '?vehicle_id=' . (int) $booking['vehicle_id'] : ''));
+$booking_back_url = base_url('bookings/create' . (!empty($booking['vehicle_id']) ? '?vehicle_id=' . (int) $booking['vehicle_id'] : ''));
 $booking_back_url .= (strpos($booking_back_url, '?') === false ? '?' : '&') . 'booking_id=' . (int) $booking['id'] . '&customer_id=' . (int) $booking['customer_id'];
 ?>
 
@@ -135,14 +135,14 @@ $booking_back_url .= (strpos($booking_back_url, '?') === false ? '?' : '&') . 'b
                     <?php if (!empty($document['file_path'])): ?>
                         <div class="hero-actions" style="margin-top:12px;">
                             <a class="btn-secondary" href="<?php echo base_url($document['file_path']); ?>" target="_blank">View</a>
-                            <a class="btn-secondary" href="<?php echo base_url('customer/documents/delete/' . (int) $document['id'] . '?customer_id=' . (int) $booking['customer_id']); ?>" onclick="return confirm('Delete this document?');">Delete</a>
+                            <a class="btn-secondary" href="<?php echo base_url('documents/delete/' . (int) $document['id'] . '?customer_id=' . (int) $booking['customer_id']); ?>" onclick="return confirm('Delete this document?');">Delete</a>
                         </div>
                     <?php endif; ?>
                 </div>
             <?php endforeach; ?>
         </div>
 
-        <form method="post" action="<?php echo base_url('customer/documents/store'); ?>" enctype="multipart/form-data">
+        <form method="post" action="<?php echo base_url('documents/store'); ?>" enctype="multipart/form-data">
             <input type="hidden" name="booking_id" value="<?php echo (int) $booking['id']; ?>">
             <input type="hidden" name="customer_id" value="<?php echo (int) $booking['customer_id']; ?>">
             <div class="form-grid">
@@ -179,11 +179,11 @@ $booking_back_url .= (strpos($booking_back_url, '?') === false ? '?' : '&') . 'b
                 $all_uploaded = !empty($document_map['Aadhaar Card']['file_path']) && !empty($document_map['Driving License']['file_path']);
                 ?>
                 <?php if ($all_uploaded): ?>
-                    <a class="btn" href="<?php echo base_url('customer/payments/pay/' . (int)$booking['id'] . '?customer_id=' . (int)$booking['customer_id']); ?>">Continue to Payment</a>
+                    <a class="btn" href="<?php echo base_url('payments/pay/' . (int)$booking['id'] . '?customer_id=' . (int)$booking['customer_id']); ?>">Continue to Payment</a>
                 <?php else: ?>
                     <button class="btn" type="submit">Upload Documents and Continue</button>
                 <?php endif; ?>
-                <a class="btn-secondary" href="<?php echo base_url('customer/dashboard'); ?>">Cancel</a>
+                <a class="btn-secondary" href="<?php echo base_url('dashboard'); ?>">Cancel</a>
             </div>
         </form>
     </section>

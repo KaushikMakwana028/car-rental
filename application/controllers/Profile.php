@@ -8,7 +8,7 @@ class Profile extends Customer_Controller
         $data['page_title'] = 'My Profile';
         $data['page_subtitle'] = 'Manage your contact details, profile image, and account security from one refined customer profile screen.';
         $data['profile_user'] = $this->General_model->get_user_by_id((int) $this->current_user['id']);
-        $this->render_view('customer/profile', $data);
+        $this->render_view('profile', $data);
     }
 
     public function update()
@@ -29,7 +29,7 @@ class Profile extends Customer_Controller
 
         if (!empty($existing_email)) {
             $this->session->set_flashdata('error', 'That email address is already used by another account.');
-            redirect('customer/profile');
+            redirect('profile');
             return;
         }
 
@@ -37,7 +37,7 @@ class Profile extends Customer_Controller
         if (!empty($_FILES['profile_image']['name'])) {
             $uploaded_path = $this->upload_profile_image();
             if ($uploaded_path === false) {
-                redirect('customer/profile');
+                redirect('profile');
                 return;
             }
 
@@ -54,7 +54,7 @@ class Profile extends Customer_Controller
         $updated_user = $this->General_model->get_user_by_id($user_id);
         $this->session->set_userdata('logged_in_user', $updated_user);
         $this->session->set_flashdata('success', 'Profile updated successfully.');
-        redirect('customer/profile');
+        redirect('profile');
     }
 
     public function password()
@@ -66,25 +66,25 @@ class Profile extends Customer_Controller
 
         if (!$this->General_model->verify_user_password($user_id, $current_password)) {
             $this->session->set_flashdata('error', 'Current password is incorrect.');
-            redirect('customer/profile');
+            redirect('profile');
             return;
         }
 
         if (strlen($new_password) < 6) {
             $this->session->set_flashdata('error', 'New password must be at least 6 characters.');
-            redirect('customer/profile');
+            redirect('profile');
             return;
         }
 
         if ($new_password !== $confirm_password) {
             $this->session->set_flashdata('error', 'New password and confirm password do not match.');
-            redirect('customer/profile');
+            redirect('profile');
             return;
         }
 
         $this->General_model->update_user_password($user_id, $new_password);
         $this->session->set_flashdata('success', 'Password changed successfully.');
-        redirect('customer/profile');
+        redirect('profile');
     }
 
     private function upload_profile_image()

@@ -693,7 +693,7 @@ $hide_page_hero = !empty($hide_page_hero);
         <div class="wrap hrow">
 
             <!-- Logo + Brand Name -->
-            <a class="hlogo" href="<?php echo base_url('customer/dashboard'); ?>" aria-label="Go to Dashboard">
+            <a class="hlogo" href="<?php echo base_url('dashboard'); ?>" aria-label="Go to Dashboard">
                 <div class="hlogo-img-wrap">
                     <img src="<?php echo $brand_logo; ?>" alt="Cab Booking Fast Logo">
                 </div>

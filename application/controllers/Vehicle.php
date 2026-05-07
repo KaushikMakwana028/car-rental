@@ -5,11 +5,11 @@ class Vehicle extends MY_Controller
 {
     public function index()
     {
-        redirect('customer/dashboard');
+        redirect('dashboard');
     }
 
     public function create()
     {
-        redirect('customer/dashboard');
+        redirect('dashboard');
     }
 }

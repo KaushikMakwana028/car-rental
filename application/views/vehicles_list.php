@@ -38,7 +38,7 @@ foreach ($vehicles as $vehicle) {
             <h3>Choose the car that fits the trip.</h3>
             <p>Vehicle cards are now cleaner, image-led, and easier to scan on mobile screens without losing the important pricing details.</p>
         </div>
-        <a class="btn-secondary" href="<?php echo base_url('customer/bookings'); ?>">View My Bookings</a>
+        <a class="btn-secondary" href="<?php echo base_url('bookings'); ?>">View My Bookings</a>
     </div>
 
     <?php if (empty($document_gate['is_ready'])): ?>
@@ -80,9 +80,9 @@ foreach ($vehicles as $vehicle) {
                             <div class="spec-row"><span>Advance</span><strong>&#8377;<?php echo number_format((float) $vehicle['advance_amount'], 2); ?></strong></div>
                         </div>
                         <?php if (!empty($document_gate['is_ready'])): ?>
-                            <a class="btn" href="<?php echo base_url('customer/bookings/create?vehicle_id=' . (int) $vehicle['id']); ?>">Book Now</a>
+                            <a class="btn" href="<?php echo base_url('bookings/create?vehicle_id=' . (int) $vehicle['id']); ?>">Book Now</a>
                         <?php else: ?>
-                            <a class="btn" href="<?php echo base_url('customer/documents'); ?>">Complete Documents</a>
+                            <a class="btn" href="<?php echo base_url('documents'); ?>">Complete Documents</a>
                         <?php endif; ?>
                     </div>
                 </article>

@@ -612,7 +612,7 @@
                 <h1>Find your<br><em>perfect ride.</em></h1>
                 <p class="vc-hero-sub">Browse our curated fleet. Filter by type, fuel, and seats to find exactly what you need.</p>
             </div>
-            <a class="vc-hero-cta" href="<?php echo base_url('customer/bookings/create'); ?>">
+            <a class="vc-hero-cta" href="<?php echo base_url('bookings/create'); ?>">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M5 12h14M12 5l7 7-7 7" />
                 </svg>
@@ -746,14 +746,11 @@
                                 <div>
                                     <div class="vc-price-label">Rate / KM</div>
                                     <div class="vc-price-value">&#8377;<?php echo number_format((float) $vehicle['rate_per_day'], 2); ?><span class="vc-price-unit">/km</span></div>
-                                    <div class="vc-advance-tag">
-                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                                        </svg>
+                                    <div class="vc-advance-tag">                                       
                                         &#8377;<?php echo number_format((float) $vehicle['advance_amount'], 0); ?> advance
                                     </div>
                                 </div>
-                                <a class="vc-book-btn" href="<?php echo base_url('customer/bookings/create?vehicle_id=' . (int) $vehicle['id']); ?>">
+                                <a class="vc-book-btn" href="<?php echo base_url('bookings/create?vehicle_id=' . (int) $vehicle['id']); ?>">
                                     Book
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M5 12h14M12 5l7 7-7 7" />

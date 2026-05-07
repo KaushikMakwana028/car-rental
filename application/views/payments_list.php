@@ -46,7 +46,7 @@ foreach ($payment_requests as $request) {
             <h3>Uploaded receipts and approval status.</h3>
             <p>Check whether your advance payment receipt is pending, approved, or rejected by admin.</p>
         </div>
-        <a class="btn" href="<?php echo base_url('customer/bookings'); ?>">My Bookings</a>
+        <a class="btn" href="<?php echo base_url('bookings'); ?>">My Bookings</a>
     </div>
 
     <div class="table-wrap">

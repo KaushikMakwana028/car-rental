@@ -9,7 +9,7 @@
                 <p>Keep your contact details accurate so ride updates, approvals, and admin communication reach the right person quickly.</p>
             </div>
         </div>
-        <form method="post" action="<?php echo base_url('customer/profile/update'); ?>" enctype="multipart/form-data">
+        <form method="post" action="<?php echo base_url('profile/update'); ?>" enctype="multipart/form-data">
             <div class="form-grid">
                 <div class="full">
                     <label>Full Name</label>
@@ -74,7 +74,7 @@
                     <p>Use a strong password to protect your booking history and personal details.</p>
                 </div>
             </div>
-            <form method="post" action="<?php echo base_url('customer/profile/password'); ?>">
+            <form method="post" action="<?php echo base_url('profile/password'); ?>">
                 <div class="form-grid">
                     <div class="full">
                         <label>Current Password</label>

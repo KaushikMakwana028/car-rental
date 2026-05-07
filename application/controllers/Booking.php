@@ -5,7 +5,7 @@ class Booking extends MY_Controller
 {
     public function index()
     {
-        redirect('customer/dashboard');
+        redirect('dashboard');
     }
 
     public function create()
@@ -44,7 +44,7 @@ class Booking extends MY_Controller
             }
         }
 
-        $this->render_customer_view('customer/bookings_create', $data);
+        $this->render_customer_view('bookings_create', $data);
     }
 
     public function store()
@@ -59,12 +59,12 @@ class Booking extends MY_Controller
 
         if ($customer_name === '' || $customer_phone === '') {
             $this->session->set_flashdata('error', 'Customer name and mobile number are required.');
-            redirect('customer/bookings/create');
+            redirect('bookings/create');
         }
 
         if (empty($vehicle)) {
             $this->session->set_flashdata('error', 'Please select an available car.');
-            redirect('customer/bookings/create');
+            redirect('bookings/create');
         }
 
         $calculated_amount = (float) $vehicle['rate_per_day'] * $estimated_km;
@@ -103,6 +103,6 @@ class Booking extends MY_Controller
         }
 
         $this->set_public_booking_session($customer_id, $booking_id);
-        redirect('customer/documents?booking_id=' . $booking_id . '&customer_id=' . $customer_id);
+        redirect('documents?booking_id=' . $booking_id . '&customer_id=' . $customer_id);
     }
 }

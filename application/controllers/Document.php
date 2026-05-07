@@ -17,7 +17,7 @@ class Document extends MY_Controller
 
         if ($customer_id <= 0 || !$this->customer_can_access_booking($booking_id, $customer_id)) {
             $this->session->set_flashdata('error', 'Please start your booking again.');
-            redirect('customer/dashboard');
+            redirect('dashboard');
         }
 
         $this->set_public_booking_session($customer_id, $booking_id);
@@ -43,7 +43,7 @@ class Document extends MY_Controller
         $data['document_map'] = $document_map;
         $data['required_types'] = $this->General_model->get_document_types();
         $data['can_continue_to_payment'] = $this->can_continue_to_payment($customer_id);
-        $this->render_customer_view('customer/documents_list', $data);
+        $this->render_customer_view('documents_list', $data);
     }
 
     public function delete($document_id = 0)
@@ -60,7 +60,7 @@ class Document extends MY_Controller
 
         if (empty($document)) {
             $this->session->set_flashdata('error', 'Document not found.');
-            redirect('customer/documents');
+            redirect('documents');
         }
 
         if (!empty($document['file_path'])) {
@@ -73,7 +73,7 @@ class Document extends MY_Controller
         $this->General_model->delete('documents', array('id' => $document_id, 'customer_id' => $customer_id));
         $this->session->set_flashdata('success', 'Document deleted successfully.');
         $redirect_booking_id = !empty($document['booking_id']) ? (int) $document['booking_id'] : $this->get_active_booking_id();
-        redirect('customer/documents?booking_id=' . $redirect_booking_id . '&customer_id=' . $customer_id);
+        redirect('documents?booking_id=' . $redirect_booking_id . '&customer_id=' . $customer_id);
     }
 
     public function store()
@@ -89,7 +89,7 @@ class Document extends MY_Controller
 
         if ($customer_id <= 0 || !$this->customer_can_access_booking($booking_id, $customer_id)) {
             $this->session->set_flashdata('error', 'Please start your booking again.');
-            redirect('customer/dashboard');
+            redirect('dashboard');
         }
 
         $upload_dir = FCPATH . 'uploads/documents/';
@@ -106,12 +106,12 @@ class Document extends MY_Controller
         foreach ($required_uploads as $field_name => $document_type) {
             if (empty($_FILES[$field_name]['name'])) {
                 $this->session->set_flashdata('error', 'Please upload both Aadhaar Card and Driving License.');
-                redirect('customer/documents?booking_id=' . $booking_id . '&customer_id=' . $customer_id);
+                redirect('documents?booking_id=' . $booking_id . '&customer_id=' . $customer_id);
             }
 
             $upload_data = $this->upload_document_file($upload_dir, $field_name, $customer_id, $document_type);
             if ($upload_data === false) {
-                redirect('customer/documents?booking_id=' . $booking_id . '&customer_id=' . $customer_id);
+                redirect('documents?booking_id=' . $booking_id . '&customer_id=' . $customer_id);
             }
 
             $uploaded_any = true;
@@ -142,11 +142,11 @@ class Document extends MY_Controller
 
         if (!$uploaded_any) {
             $this->session->set_flashdata('error', 'Please upload required documents.');
-            redirect('customer/documents?booking_id=' . $booking_id . '&customer_id=' . $customer_id);
+            redirect('documents?booking_id=' . $booking_id . '&customer_id=' . $customer_id);
         }
 
         $this->session->set_flashdata('success', 'Documents uploaded successfully. Please complete payment now.');
-        redirect('customer/payments/pay/' . $booking_id . '?customer_id=' . $customer_id);
+        redirect('payments/pay/' . $booking_id . '?customer_id=' . $customer_id);
     }
 
     private function can_continue_to_payment($customer_id)
