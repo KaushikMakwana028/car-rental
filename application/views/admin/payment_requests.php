@@ -633,7 +633,7 @@ if (!function_exists('admin_whatsapp_url')) {
                     <tbody>
                         <?php foreach ($payment_requests as $request):
                             $is_reviewed = in_array(strtolower((string) $request['status']), ['approved', 'rejected'], true);
-                            $approved_message = 'Hello ' . trim((string)$request['customer_name']) . ', your advance payment of Rs ' . number_format((float)$request['amount'], 2) . ' has been received for booking ' . trim((string)$request['booking_code']) . '. Your car is booked successfully. Thank you.';
+                            $approved_message = app_booking_confirmation_whatsapp_message($request);
                             $approved_whatsapp_url = strtolower((string)$request['status']) === 'approved'
                                 ? admin_whatsapp_url($request['customer_phone'], $approved_message)
                                 : '';
@@ -737,7 +737,7 @@ if (!function_exists('admin_whatsapp_url')) {
             <div class="mobile-cards">
                 <?php foreach ($payment_requests as $request):
                     $is_reviewed = in_array(strtolower((string) $request['status']), ['approved', 'rejected'], true);
-                    $approved_message = 'Hello ' . trim((string)$request['customer_name']) . ', your advance payment of Rs ' . number_format((float)$request['amount'], 2) . ' has been received for booking ' . trim((string)$request['booking_code']) . '. Your car is booked successfully. Thank you.';
+                    $approved_message = app_booking_confirmation_whatsapp_message($request);
                     $approved_whatsapp_url = strtolower((string)$request['status']) === 'approved'
                         ? admin_whatsapp_url($request['customer_phone'], $approved_message)
                         : '';

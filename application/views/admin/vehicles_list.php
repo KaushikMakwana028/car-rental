@@ -883,6 +883,74 @@
         box-shadow: 0 4px 14px rgba(37, 99, 235, .4);
     }
 
+    /* ── Pagination ── */
+    .vm-pagination {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 24px;
+        border-top: 1px solid var(--border-soft);
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .vm-page-info {
+        font-size: 13px;
+        color: var(--text-2);
+    }
+
+    .vm-page-info strong {
+        color: var(--text-1);
+        font-weight: 600;
+    }
+
+    .vm-page-btns {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        flex-wrap: wrap;
+    }
+
+    .vm-pg-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 34px;
+        height: 34px;
+        padding: 0 8px;
+        border-radius: var(--radius-sm);
+        border: 1.5px solid var(--border);
+        background: var(--surface);
+        color: var(--text-2);
+        font: 600 13px/1 var(--font);
+        cursor: pointer;
+        transition: background .12s ease, border-color .12s ease, color .12s ease;
+        white-space: nowrap;
+    }
+
+    .vm-pg-btn:hover:not(:disabled):not(.active) {
+        background: var(--brand-light);
+        border-color: var(--brand-mid);
+        color: var(--brand);
+    }
+
+    .vm-pg-btn.active {
+        background: var(--brand);
+        border-color: var(--brand);
+        color: #fff;
+        cursor: default;
+    }
+
+    .vm-pg-btn:disabled {
+        opacity: .38;
+        cursor: not-allowed;
+    }
+
+    .vm-pg-btn svg {
+        width: 14px;
+        height: 14px;
+    }
+
     /* ── Responsive ── */
     @media (max-width: 900px) {
         .vm-stats {
@@ -1022,7 +1090,7 @@
                         <th>Type</th>
                         <th>Fuel</th>
                         <th>Seats</th>
-                        <th>Rate / KM</th>
+
                         <th>Advance</th>
                         <th>Status</th>
                         <th>Actions</th>
@@ -1041,6 +1109,10 @@
                                 'fuel_type' => isset($vehicle['fuel_type']) ? $vehicle['fuel_type'] : '',
                                 'seats' => isset($vehicle['seats']) ? (int) $vehicle['seats'] : 0,
                                 'rate_per_day' => isset($vehicle['rate_per_day']) ? (float) $vehicle['rate_per_day'] : 0,
+                                'price_6_hours' => isset($vehicle['price_6_hours']) ? (float) $vehicle['price_6_hours'] : 0,
+                                'price_12_hours' => isset($vehicle['price_12_hours']) ? (float) $vehicle['price_12_hours'] : 0,
+                                'price_24_hours' => isset($vehicle['price_24_hours']) ? (float) $vehicle['price_24_hours'] : 0,
+                                'extra_hour_charge' => isset($vehicle['extra_hour_charge']) ? (float) $vehicle['extra_hour_charge'] : 0,
                                 'advance_amount' => isset($vehicle['advance_amount']) ? (float) $vehicle['advance_amount'] : 0,
                                 'vehicle_status' => isset($vehicle['status']) ? $vehicle['status'] : '',
                                 'booking_code' => !empty($active_booking['booking_code']) ? $active_booking['booking_code'] : '',
@@ -1051,7 +1123,7 @@
                                 'trip_route' => !empty($active_booking['trip_route']) ? $active_booking['trip_route'] : '',
                                 'pickup_date' => !empty($active_booking['pickup_date']) ? date('d M Y', strtotime($active_booking['pickup_date'])) : '',
                                 'return_date' => !empty($active_booking['return_date']) ? date('d M Y', strtotime($active_booking['return_date'])) : '',
-                                'estimated_km' => !empty($active_booking['estimated_km']) ? (int) $active_booking['estimated_km'] : 0,
+
                                 'amount' => !empty($active_booking['amount']) ? (float) $active_booking['amount'] : 0,
                                 'paid_amount' => !empty($active_booking['paid_amount']) ? (float) $active_booking['paid_amount'] : 0,
                                 'balance_amount' => !empty($active_booking['balance_amount']) ? (float) $active_booking['balance_amount'] : 0,
@@ -1059,7 +1131,7 @@
                                 'booking_created_at' => !empty($active_booking['created_at']) ? date('d M Y, h:i A', strtotime($active_booking['created_at'])) : '',
                             );
                             ?>
-                            <tr>
+                            <tr data-row="1">
                                 <td><span class="vm-row-num"><?php echo (int)$index + 1; ?></span></td>
                                 <td>
                                     <div class="vm-vehicle-info">
@@ -1080,7 +1152,7 @@
                                 <td><?php echo html_escape($vehicle['vehicle_type']); ?></td>
                                 <td><?php echo html_escape($vehicle['fuel_type']); ?></td>
                                 <td><?php echo (int)$vehicle['seats']; ?></td>
-                                <td class="vm-mono">₹<?php echo number_format((float)$vehicle['rate_per_day'], 0); ?></td>
+
                                 <td class="vm-mono">₹<?php echo number_format((float)$vehicle['advance_amount'], 0); ?></td>
                                 <td>
                                     <span class="vm-badge <?php echo html_escape($vehicle['status']); ?>">
@@ -1106,7 +1178,11 @@
                                             data-type="<?php echo html_escape($vehicle['vehicle_type']); ?>"
                                             data-fuel="<?php echo html_escape($vehicle['fuel_type']); ?>"
                                             data-seats="<?php echo (int)$vehicle['seats']; ?>"
-                                            data-rate="<?php echo (float)$vehicle['rate_per_day']; ?>"
+
+                                            data-price-6-hours="<?php echo isset($vehicle['price_6_hours']) ? (float)$vehicle['price_6_hours'] : 0; ?>"
+                                            data-price-12-hours="<?php echo isset($vehicle['price_12_hours']) ? (float)$vehicle['price_12_hours'] : 0; ?>"
+                                            data-price-24-hours="<?php echo isset($vehicle['price_24_hours']) ? (float)$vehicle['price_24_hours'] : 0; ?>"
+                                            data-extra-hour-charge="<?php echo isset($vehicle['extra_hour_charge']) ? (float)$vehicle['extra_hour_charge'] : 0; ?>"
                                             data-advance="<?php echo (float)$vehicle['advance_amount']; ?>"
                                             data-status="<?php echo html_escape($vehicle['status']); ?>"
                                             data-image="<?php echo html_escape($vehicle_image); ?>">
@@ -1145,6 +1221,12 @@
                     <?php endif; ?>
                 </tbody>
             </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="vm-pagination" id="vmPagination">
+            <div class="vm-page-info" id="vmPageInfo"></div>
+            <div class="vm-page-btns" id="vmPageBtns"></div>
         </div>
     </div>
 </div>
@@ -1212,10 +1294,7 @@
                             <div class="vm-detail-key">Route</div>
                             <div class="vm-detail-val" id="vmBookingRoute">-</div>
                         </div>
-                        <div class="vm-detail-row">
-                            <div class="vm-detail-key">Distance</div>
-                            <div class="vm-detail-val" id="vmBookingDistance">-</div>
-                        </div>
+
                         <div class="vm-detail-row">
                             <div class="vm-detail-key">Estimated Fare</div>
                             <div class="vm-detail-val" id="vmBookingAmount">-</div>
@@ -1276,9 +1355,27 @@
                     <input type="number" name="seats" id="seats" placeholder="5" min="1" required>
                 </div>
 
+
+
                 <div class="vm-fg">
-                    <label>Rate per KM (₹)</label>
-                    <input type="number" step="0.01" name="rate_per_km" id="rate_per_km" placeholder="12.00" required>
+                    <label>6 Hours Price (₹)</label>
+                    <input type="number" step="0.01" min="0" name="price_6_hours" id="price_6_hours" placeholder="1800.00" required>
+                </div>
+
+                <div class="vm-fg">
+                    <label>12 Hours Price (₹)</label>
+                    <input type="number" step="0.01" min="0" name="price_12_hours" id="price_12_hours" placeholder="3200.00" required>
+                </div>
+
+                <div class="vm-fg">
+                    <label>24 Hours Price (₹)</label>
+                    <input type="number" step="0.01" min="0" name="price_24_hours" id="price_24_hours" placeholder="5000.00" required>
+                </div>
+
+                <div class="vm-fg">
+                    <label>Extra Charge Per Hour (₹)</label>
+                    <input type="number" step="0.01" min="0" name="extra_hour_charge" id="extra_hour_charge" placeholder="300.00" required>
+                    <span class="hint">Extra charge for every additional hour beyond 6, 12, or 24 hour package.</span>
                 </div>
 
                 <div class="vm-fg">
@@ -1343,6 +1440,104 @@
         var uploadSub = document.getElementById('uploadSub');
         var baseStore = '<?php echo base_url('admin/vehicles/store'); ?>';
         var baseUpdate = '<?php echo base_url('admin/vehicles/update/'); ?>';
+
+        /* ── Pagination ── */
+        var PER_PAGE = 10;
+        var currentPage = 1;
+        var allRows = [];
+
+        function initPagination() {
+            allRows = Array.prototype.slice.call(
+                document.querySelectorAll('.vm-table tbody tr[data-row]')
+            );
+            renderPage(1);
+        }
+
+        function renderPage(page) {
+            currentPage = page;
+            var total = allRows.length;
+            var totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
+            if (currentPage > totalPages) currentPage = totalPages;
+
+            var start = (currentPage - 1) * PER_PAGE;
+            var end = start + PER_PAGE;
+
+            allRows.forEach(function(row, i) {
+                row.style.display = (i >= start && i < end) ? '' : 'none';
+            });
+
+            // Page info
+            var infoEl = document.getElementById('vmPageInfo');
+            if (infoEl) {
+                if (total === 0) {
+                    infoEl.innerHTML = 'No vehicles';
+                } else {
+                    infoEl.innerHTML =
+                        'Showing <strong>' + (start + 1) + '–' + Math.min(end, total) +
+                        '</strong> of <strong>' + total + '</strong> vehicles';
+                }
+            }
+
+            buildButtons(totalPages);
+        }
+
+        function buildButtons(totalPages) {
+            var container = document.getElementById('vmPageBtns');
+            if (!container) return;
+            container.innerHTML = '';
+
+            // Prev
+            var prev = makeBtn(null, currentPage === 1, false, 'prev');
+            prev.innerHTML = '<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 3L6 8l4 5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+            prev.setAttribute('aria-label', 'Previous page');
+            container.appendChild(prev);
+
+            // Page numbers
+            getPageNumbers(currentPage, totalPages).forEach(function(p) {
+                if (p === '…') {
+                    var dots = document.createElement('span');
+                    dots.textContent = '…';
+                    dots.style.cssText = 'padding:0 4px;color:var(--text-3);font-size:13px;line-height:34px;';
+                    container.appendChild(dots);
+                } else {
+                    var btn = makeBtn(p, false, p === currentPage, 'number');
+                    btn.textContent = p;
+                    btn.setAttribute('aria-label', 'Page ' + p);
+                    container.appendChild(btn);
+                }
+            });
+
+            // Next
+            var next = makeBtn(null, currentPage === totalPages, false, 'next');
+            next.innerHTML = '<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 3l4 5-4 5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+            next.setAttribute('aria-label', 'Next page');
+            container.appendChild(next);
+        }
+
+        function makeBtn(label, disabled, active, type) {
+            var btn = document.createElement('button');
+            btn.className = 'vm-pg-btn' + (active ? ' active' : '');
+            btn.type = 'button';
+            btn.disabled = !!disabled;
+            btn.addEventListener('click', function() {
+                if (type === 'prev') renderPage(currentPage - 1);
+                else if (type === 'next') renderPage(currentPage + 1);
+                else if (type === 'number' && !active) renderPage(label);
+            });
+            return btn;
+        }
+
+        function getPageNumbers(cur, total) {
+            if (total <= 7) {
+                var arr = [];
+                for (var i = 1; i <= total; i++) arr.push(i);
+                return arr;
+            }
+            if (cur <= 3) return [1, 2, 3, '…', total];
+            if (cur >= total - 2) return [1, '…', total - 2, total - 1, total];
+            return [1, '…', cur - 1, cur, cur + 1, '…', total];
+        }
+        /* ── End Pagination ── */
 
         function fmtMoney(value) {
             var num = parseFloat(value || 0);
@@ -1473,7 +1668,10 @@
                 setVal('vehicle_type', btn.dataset.type);
                 setVal('fuel_type', btn.dataset.fuel);
                 setVal('seats', btn.dataset.seats);
-                setVal('rate_per_km', btn.dataset.rate);
+                setVal('price_6_hours', btn.getAttribute('data-price-6-hours'));
+                setVal('price_12_hours', btn.getAttribute('data-price-12-hours'));
+                setVal('price_24_hours', btn.getAttribute('data-price-24-hours'));
+                setVal('extra_hour_charge', btn.getAttribute('data-extra-hour-charge'));
                 setVal('advance_amount', btn.dataset.advance);
                 setVal('status', btn.dataset.status);
                 var img = btn.dataset.image;
@@ -1506,8 +1704,7 @@
                 var customerPhone = detail.customer_phone || 'Vehicle is currently not linked to any active booking.';
 
                 document.getElementById('vmBookingViewTitle').textContent = detail.vehicle_name || 'Vehicle Details';
-                document.getElementById('vmBookingViewSubtitle').textContent =
-                    [detail.registration_no, detail.vehicle_type, detail.fuel_type].filter(Boolean).join(' • ') || 'Vehicle information';
+                document.getElementById('vmBookingViewSubtitle').textContent = [detail.registration_no, detail.vehicle_type, detail.fuel_type].filter(Boolean).join(' • ') || 'Vehicle information';
                 document.getElementById('vmBookingViewStatus').textContent = statusText;
                 document.getElementById('vmBookingCustomerAvatar').textContent = getInitials(customerName);
                 document.getElementById('vmBookingCustomerName').textContent = customerName;
@@ -1518,14 +1715,16 @@
                 document.getElementById('vmBookingCreatedAt').textContent = detail.booking_created_at || '-';
                 document.getElementById('vmBookingTripDates').textContent = detail.trip_label || '-';
                 document.getElementById('vmBookingRoute').textContent = detail.trip_route || '-';
-                document.getElementById('vmBookingDistance').textContent = detail.estimated_km ? (detail.estimated_km + ' km') : '-';
                 document.getElementById('vmBookingAmount').textContent = detail.amount ? fmtMoney(detail.amount) : '-';
-                document.getElementById('vmBookingBalance').textContent = (detail.paid_amount || detail.balance_amount)
-                    ? (fmtMoney(detail.paid_amount || 0) + ' paid • ' + fmtMoney(detail.balance_amount || 0) + ' balance')
-                    : 'No payment recorded';
+                document.getElementById('vmBookingBalance').textContent = (detail.paid_amount || detail.balance_amount) ?
+                    (fmtMoney(detail.paid_amount || 0) + ' paid • ' + fmtMoney(detail.balance_amount || 0) + ' balance') :
+                    'No payment recorded';
                 document.getElementById('vmVehicleMeta').textContent =
                     'Seats: ' + (detail.seats || '-') +
-                    ' • Rate/KM: ' + fmtMoney(detail.rate_per_day || 0) +
+                    ' • 6H: ' + fmtMoney(detail.price_6_hours || 0) +
+                    ' • 12H: ' + fmtMoney(detail.price_12_hours || 0) +
+                    ' • 24H: ' + fmtMoney(detail.price_24_hours || 0) +
+                    ' • Extra/Hr: ' + fmtMoney(detail.extra_hour_charge || 0) +
                     ' • Advance: ' + fmtMoney(detail.advance_amount || 0) +
                     ' • Pickup: ' + (detail.pickup_date || '-') +
                     ' • Return: ' + (detail.return_date || '-');
@@ -1533,5 +1732,8 @@
                 openBookingViewModal();
             });
         });
+
+        // Init pagination last
+        initPagination();
     })();
 </script>

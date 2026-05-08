@@ -415,34 +415,11 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
+        gap: 12px;
         margin-top: auto;
     }
 
-    .vc-price-label {
-        font-size: 10px;
-        font-weight: 600;
-        color: var(--ink-muted);
-        letter-spacing: .1em;
-        text-transform: uppercase;
-        margin-bottom: 2px;
-    }
-
-    .vc-price-value {
-        font-family: var(--font-display);
-        font-size: 22px;
-        font-weight: 600;
-        color: var(--ink);
-        letter-spacing: -.02em;
-    }
-
-    .vc-price-unit {
-        font-size: 12px;
-        color: var(--ink-muted);
-        font-family: var(--font-body);
-        font-weight: 400;
-        margin-left: 2px;
-    }
-
+    /* Advance tag */
     .vc-advance-tag {
         display: inline-flex;
         align-items: center;
@@ -455,8 +432,43 @@
         color: #7A5C00;
         padding: 4px 10px;
         margin-top: 8px;
+        /* ← add this */
     }
 
+    /* Starts-from price block */
+    .vc-starts-from {
+        display: flex;
+        align-items: baseline;
+        gap: 4px;
+        margin-top: 8px;
+    }
+
+    .vc-starts-from-label {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--ink-muted);
+        letter-spacing: .05em;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .vc-starts-from-price {
+        font-family: var(--font-display);
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--ink);
+        letter-spacing: -.02em;
+        line-height: 1;
+    }
+
+    .vc-starts-from-unit {
+        font-size: 11px;
+        color: var(--ink-muted);
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    /* Book button */
     .vc-book-btn {
         display: inline-flex;
         align-items: center;
@@ -470,6 +482,7 @@
         border-radius: var(--radius-sm);
         text-decoration: none;
         transition: background .18s, transform .15s;
+        flex-shrink: 0;
     }
 
     .vc-book-btn:hover {
@@ -539,7 +552,7 @@
         line-height: 1.6;
     }
 
-    /* ── PAGINATION ── */
+    /* Pagination */
     .vc-pagination-wrap {
         display: flex;
         align-items: center;
@@ -705,8 +718,7 @@
                                 return trim((string)$v['vehicle_type']);
                             }, $vehicles))));
                             sort($types);
-                            foreach ($types as $type):
-                            ?>
+                            foreach ($types as $type): ?>
                                 <option value="<?php echo html_escape(strtolower($type)); ?>"><?php echo html_escape($type); ?></option>
                             <?php endforeach; ?>
                         </select>
@@ -720,8 +732,7 @@
                                 return trim((string)$v['fuel_type']);
                             }, $vehicles))));
                             sort($fuels);
-                            foreach ($fuels as $fuel):
-                            ?>
+                            foreach ($fuels as $fuel): ?>
                                 <option value="<?php echo html_escape(strtolower($fuel)); ?>"><?php echo html_escape($fuel); ?></option>
                             <?php endforeach; ?>
                         </select>
@@ -735,8 +746,7 @@
                                 return (int)$v['seats'];
                             }, $vehicles))));
                             sort($seats);
-                            foreach ($seats as $seat):
-                            ?>
+                            foreach ($seats as $seat): ?>
                                 <option value="<?php echo (int)$seat; ?>"><?php echo (int)$seat; ?>+ Seats</option>
                             <?php endforeach; ?>
                         </select>
@@ -760,7 +770,18 @@
 
             <div class="vc-grid" id="vehicleGrid">
                 <?php foreach ($vehicles as $vehicle): ?>
-                    <?php $vehicle_image = isset($vehicle['image']) ? trim($vehicle['image']) : ''; ?>
+                    <?php
+                    $vehicle_image = isset($vehicle['image']) ? trim($vehicle['image']) : '';
+                    /* Calculate lowest package price for "starts from" display */
+                    $pkg_prices = array_filter(array(
+                        (float)(isset($vehicle['price_6_hours'])  ? $vehicle['price_6_hours']  : 0),
+                        (float)(isset($vehicle['price_12_hours']) ? $vehicle['price_12_hours'] : 0),
+                        (float)(isset($vehicle['price_24_hours']) ? $vehicle['price_24_hours'] : 0),
+                    ), function ($p) {
+                        return $p > 0;
+                    });
+                    $min_price = $pkg_prices ? min($pkg_prices) : 0;
+                    ?>
                     <article
                         class="vc-card js-vehicle-card"
                         data-name="<?php echo html_escape(strtolower($vehicle['name'])); ?>"
@@ -786,6 +807,7 @@
                         <div class="vc-card-body">
                             <div class="vc-card-name"><?php echo html_escape($vehicle['name']); ?></div>
                             <div class="vc-card-reg"><?php echo html_escape($vehicle['registration_no']); ?></div>
+
                             <div class="vc-spec-grid">
                                 <div class="vc-spec-item">
                                     <div class="vc-spec-label">Fuel</div>
@@ -796,15 +818,26 @@
                                     <div class="vc-spec-value"><?php echo (int)$vehicle['seats']; ?> Seats</div>
                                 </div>
                             </div>
+
                             <div class="vc-divider"></div>
+
                             <div class="vc-card-footer">
                                 <div>
-                                    <div class="vc-price-label">Rate / KM</div>
-                                    <div class="vc-price-value">&#8377;<?php echo number_format((float)$vehicle['rate_per_day'], 2); ?><span class="vc-price-unit">/km</span></div>
+
+                                    <div class="vc-starts-from">
+                                        <span class="vc-starts-from-label">Starts from</span>
+                                        <span class="vc-starts-from-price">
+                                            &#8377;<?php echo number_format($min_price, 0); ?>
+                                        </span>
+                                        <span class="vc-starts-from-unit">/ 6 hrs</span>
+                                    </div>
+                                    <!-- Advance tag -->
                                     <div class="vc-advance-tag">
                                         &#8377;<?php echo number_format((float)$vehicle['advance_amount'], 0); ?> advance
                                     </div>
+
                                 </div>
+
                                 <a class="vc-book-btn" href="<?php echo base_url('bookings/create?vehicle_id=' . (int)$vehicle['id']); ?>">
                                     Book
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -845,7 +878,6 @@
     <script>
         (function() {
 
-            /* ── refs ── */
             var search = document.getElementById('vehicleSearch');
             var selType = document.getElementById('filterType');
             var selFuel = document.getElementById('filterFuel');
@@ -857,17 +889,13 @@
             var pagNav = document.getElementById('vcPagination');
 
             var allCards = Array.prototype.slice.call(document.querySelectorAll('.js-vehicle-card'));
-
-            /* ── state ── */
             var currentPage = 1;
-            var visibleCards = allCards.slice(); // cards that pass current filters
+            var visibleCards = allCards.slice();
 
-            /* ── per-page: 9 desktop / 6 mobile ── */
             function perPage() {
                 return window.innerWidth <= 768 ? 6 : 9;
             }
 
-            /* ── filter ── */
             function applyFilters() {
                 var sv = (search.value || '').toLowerCase().trim();
                 var tv = (selType.value || '').toLowerCase();
@@ -890,32 +918,26 @@
                     );
                 });
 
-                /* reset to page 1 whenever filters change */
                 currentPage = 1;
                 render();
             }
 
-            /* ── render cards for current page ── */
             function render() {
                 var pp = perPage();
                 var total = visibleCards.length;
                 var totalPages = Math.max(1, Math.ceil(total / pp));
-
                 if (currentPage > totalPages) currentPage = totalPages;
 
                 var start = (currentPage - 1) * pp;
                 var end = start + pp;
 
-                /* hide all, show only page slice */
                 allCards.forEach(function(c) {
                     c.style.display = 'none';
                 });
                 visibleCards.forEach(function(c, i) {
                     c.style.display = (i >= start && i < end) ? '' : 'none';
-                    /* re-trigger fade animation */
                     if (i >= start && i < end) {
                         c.style.animation = 'none';
-                        /* eslint-disable-next-line no-unused-expressions */
                         c.offsetHeight; /* reflow */
                         c.style.animation = '';
                         c.style.animationDelay = ((i - start) * 0.05) + 's';
@@ -924,12 +946,10 @@
 
                 emptyEl.style.display = total === 0 ? '' : 'none';
 
-                /* count text */
                 if (countEl) {
                     if (total === 0) {
                         countEl.innerHTML = 'No vehicles found';
                     } else {
-                        var showing = Math.min(end, total) - start;
                         countEl.innerHTML =
                             'Showing <strong>' + (start + 1) + '–' + Math.min(end, total) +
                             '</strong> of <strong>' + total + '</strong> vehicle' + (total !== 1 ? 's' : '');
@@ -939,64 +959,39 @@
                 buildPagination(totalPages);
             }
 
-            /* ── build pagination nav ── */
             function buildPagination(totalPages) {
                 pagNav.innerHTML = '';
                 if (totalPages <= 1) return;
 
                 var pages = getPageNumbers(currentPage, totalPages);
 
-                /* Prev button */
                 pagNav.appendChild(makeBtn(null, currentPage === 1, false, 'prev',
                     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>'
                 ));
 
                 pages.forEach(function(p) {
-                    if (p === '…') {
-                        pagNav.appendChild(makeBtn('…', false, false, 'ellipsis'));
-                    } else {
-                        pagNav.appendChild(makeBtn(p, false, p === currentPage, 'number'));
-                    }
+                    pagNav.appendChild(p === '…' ?
+                        makeBtn('…', false, false, 'ellipsis') :
+                        makeBtn(p, false, p === currentPage, 'number')
+                    );
                 });
 
-                /* Next button */
                 pagNav.appendChild(makeBtn(null, currentPage === totalPages, false, 'next',
                     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>'
                 ));
             }
 
-            /* ── smart page number list ── */
-            /* Rules:
-                 first  → 1 2 3 … last
-                 middle → 1 … p-1 p p+1 … last
-                 last   → 1 … last-2 last-1 last
-            */
             function getPageNumbers(cur, total) {
                 if (total <= 5) {
-                    /* show all pages when there are 5 or fewer */
                     var arr = [];
                     for (var i = 1; i <= total; i++) arr.push(i);
                     return arr;
                 }
-
-                /* first 3 pages */
-                if (cur <= 3) {
-                    var result = [1, 2, 3];
-                    if (total > 4) result.push('…');
-                    result.push(total);
-                    return result;
-                }
-
-                /* last 3 pages */
-                if (cur >= total - 2) {
-                    return [1, '…', total - 2, total - 1, total];
-                }
-
-                /* middle */
+                if (cur <= 3) return [1, 2, 3, '…', total];
+                if (cur >= total - 2) return [1, '…', total - 2, total - 1, total];
                 return [1, '…', cur - 1, cur, cur + 1, '…', total];
             }
 
-            /* ── create a single pagination button ── */
             function makeBtn(label, disabled, active, type, innerHtml) {
                 var btn = document.createElement('button');
                 btn.className = 'vc-page-btn' +
@@ -1026,8 +1021,7 @@
                 if (type === 'next') {
                     btn.setAttribute('aria-label', 'Next page');
                     btn.addEventListener('click', function() {
-                        var pp = perPage();
-                        var totalPages = Math.ceil(visibleCards.length / pp);
+                        var totalPages = Math.ceil(visibleCards.length / perPage());
                         if (currentPage < totalPages) {
                             currentPage++;
                             render();
@@ -1038,7 +1032,6 @@
                 return btn;
             }
 
-            /* smooth scroll back to top of grid on page change */
             function scrollToGrid() {
                 var top = grid.getBoundingClientRect().top + window.pageYOffset - 24;
                 window.scrollTo({
@@ -1047,13 +1040,11 @@
                 });
             }
 
-            /* ── event listeners ── */
             [search, selType, selFuel, selSeats, selAdv].forEach(function(el) {
                 el.addEventListener('input', applyFilters);
                 el.addEventListener('change', applyFilters);
             });
 
-            /* re-render on resize (desktop ↔ mobile per-page change) */
             var resizeTimer;
             window.addEventListener('resize', function() {
                 clearTimeout(resizeTimer);
@@ -1063,7 +1054,6 @@
                 }, 200);
             });
 
-            /* ── initial render ── */
             render();
 
         })();

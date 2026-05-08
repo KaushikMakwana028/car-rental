@@ -474,6 +474,10 @@
         flex-wrap: nowrap;
     }
 
+    .bk-actions form {
+        display: contents;
+    }
+
     .bk-action-btn {
         display: inline-flex;
         align-items: center;
@@ -780,6 +784,173 @@
         gap: 10px;
     }
 
+    /* ── Pagination ── */
+    .bk-pagination {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 16px;
+        border-top: 0.5px solid var(--bk-border);
+        background: var(--bk-card-soft);
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .bk-page-info {
+        font-size: 11px;
+        color: var(--bk-muted);
+    }
+
+    .bk-page-info strong {
+        color: var(--bk-text);
+        font-weight: 600;
+    }
+
+    .bk-page-btns {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        flex-wrap: wrap;
+    }
+
+    .bk-pg-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 28px;
+        height: 28px;
+        padding: 0 6px;
+        border-radius: var(--r-md);
+        border: 0.5px solid var(--bk-border-med);
+        background: var(--bk-card);
+        color: var(--bk-muted);
+        font: 600 11px/1 var(--font);
+        cursor: pointer;
+        transition: background 0.12s, border-color 0.12s, color 0.12s;
+        white-space: nowrap;
+        font-family: var(--font);
+    }
+
+    .bk-pg-btn:hover:not(:disabled):not(.active) {
+        background: var(--bk-primary-soft);
+        border-color: var(--bk-primary-mid);
+        color: var(--bk-primary-deep);
+    }
+
+    .bk-pg-btn.active {
+        background: var(--bk-primary);
+        border-color: var(--bk-primary);
+        color: #fff;
+        cursor: default;
+    }
+
+    .bk-pg-btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+    }
+
+    .bk-pg-btn svg {
+        width: 12px;
+        height: 12px;
+    }
+
+    .bk-pg-dots {
+        font-size: 11px;
+        color: var(--bk-hint);
+        padding: 0 2px;
+        line-height: 28px;
+    }
+
+    /* ── Icon action buttons ── */
+    .bk-icon-btn {
+        width: 30px;
+        height: 30px;
+        padding: 0;
+        justify-content: center;
+        position: relative;
+        font-size: 14px;
+        border-radius: var(--r-md);
+    }
+
+    .bk-icon-btn i {
+        font-size: 14px;
+        line-height: 1;
+    }
+
+    .bk-icon-btn.danger {
+        background: #FCEBEB;
+        border-color: #F7C1C1;
+        color: var(--bk-danger);
+    }
+
+    .bk-icon-btn.danger:hover {
+        background: #F7C1C1;
+    }
+
+    /* Photo count pip */
+    .bk-photo-pip {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        min-width: 15px;
+        height: 15px;
+        padding: 0 3px;
+        background: var(--bk-primary-deep);
+        color: #fff;
+        border-radius: 999px;
+        font-size: 9px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+        border: 1.5px solid var(--bk-card);
+    }
+
+    /* Tooltip on hover */
+    .bk-icon-btn[title] {
+        overflow: visible;
+    }
+
+    .bk-icon-btn::after {
+        content: attr(title);
+        position: absolute;
+        bottom: calc(100% + 6px);
+        left: 50%;
+        transform: translateX(-50%);
+        background: #1e293b;
+        color: #fff;
+        font-size: 10px;
+        font-weight: 500;
+        padding: 3px 7px;
+        border-radius: 5px;
+        white-space: nowrap;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.15s;
+        z-index: 100;
+        font-family: var(--font);
+    }
+
+    .bk-icon-btn::before {
+        content: '';
+        position: absolute;
+        bottom: calc(100% + 2px);
+        left: 50%;
+        transform: translateX(-50%);
+        border: 4px solid transparent;
+        border-top-color: #1e293b;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.15s;
+        z-index: 100;
+    }
+
+    .bk-icon-btn:hover::after,
+    .bk-icon-btn:hover::before {
+        opacity: 1;
+    }
+
     /* ── Responsive ── */
     @media (max-width: 900px) {
         .bk-stats {
@@ -901,8 +1072,7 @@ foreach ($bookings as &$booking) {
         : ($booking['trip_label'] ?? '—');
     $booking['trip_days'] = ($ps && $rs && $rs >= $ps)
         ? max(1, (int) round(($rs - $ps) / 86400) + 1) : 1;
-    $booking['rate_per_km_estimate'] = !empty($booking['estimated_km'])
-        ? round(((float) $booking['amount']) / max(1, (int) $booking['estimated_km']), 2) : 0;
+
     $booking['table_search'] = strtolower(trim(
         ($booking['booking_code'] ?? '') . ' ' .
             ($booking['customer_name'] ?? '') . ' ' .
@@ -995,7 +1165,7 @@ unset($booking);
                         <th>Customer</th>
                         <th>Vehicle</th>
                         <th>Trip</th>
-                        <th>KM</th>
+                        <th>Duration</th>
                         <th>Amount</th>
                         <th>Payment</th>
                         <th>Status</th>
@@ -1008,9 +1178,7 @@ unset($booking);
                             <?php
                             $has_balance = ((float) $booking['balance_amount'] > 0.01);
                             $is_fully_paid = (float) $booking['paid_amount'] >= (float) $booking['amount'] && (float) $booking['amount'] > 0;
-                            $collection_message = $is_fully_paid
-                                ? 'Hello ' . trim((string) $booking['customer_name']) . ', thank you for completing your payment. We have received the full amount of Rs ' . number_format((float) $booking['paid_amount'], 2) . ' for booking ' . trim((string) $booking['booking_code']) . '. Your booking is confirmed successfully. We wish you a comfortable journey and hope you travel with us again soon.'
-                                : 'Hello ' . trim((string) $booking['customer_name']) . ', thank you for your payment. For booking ' . trim((string) $booking['booking_code']) . ', we have received a total of Rs ' . number_format((float) $booking['paid_amount'], 2) . '. Your booking is being processed successfully.';
+                            $collection_message = app_booking_confirmation_whatsapp_message($booking);
                             $collection_whatsapp_url = ((float) $booking['paid_amount'] > 0 && trim((string) $booking['customer_phone']) !== '')
                                 ? admin_whatsapp_url($booking['customer_phone'], $collection_message)
                                 : '';
@@ -1022,9 +1190,7 @@ unset($booking);
                                 'registration_no'    => $booking['registration_no'],
                                 'trip_dates_label'   => $booking['trip_dates_label'],
                                 'trip_days'          => $booking['trip_days'],
-                                'display_km'         => $booking['display_km'],
-                                'estimated_km'       => (int) $booking['estimated_km'],
-                                'rate_per_km_estimate' => $booking['rate_per_km_estimate'],
+
                                 'pickup_location'    => $booking['pickup_location'],
                                 'drop_location'      => $booking['drop_location'],
                                 'amount'             => (float) $booking['amount'],
@@ -1032,6 +1198,10 @@ unset($booking);
                                 'balance_amount'     => (float) $booking['balance_amount'],
                                 'advance_due'        => (float) $booking['advance_due'],
                                 'payment_status'     => $booking['payment_status'],
+                                'pickup_time'  => !empty($booking['pickup_time'])  ? $booking['pickup_time']  : '',
+                                'return_time'  => !empty($booking['return_time'])  ? $booking['return_time']  : '',
+                                'booking_type' => !empty($booking['booking_type']) ? $booking['booking_type'] : 'km',
+                                'hours_slot'   => !empty($booking['hours_slot'])   ? (int)$booking['hours_slot'] : 0,
                                 'payment_badge'      => $booking['payment_badge'],
                                 'status'             => $booking['display_status'],
                                 'status_label'       => ucfirst($booking['display_status']),
@@ -1069,8 +1239,28 @@ unset($booking);
                                     <span class="td-muted"><?php echo html_escape($booking['pickup_location']); ?> → <?php echo html_escape($booking['drop_location']); ?></span>
                                 </td>
                                 <td>
-                                    <span class="td-strong"><?php echo html_escape($booking['display_km']); ?></span>
-                                    <span class="td-muted"><?php echo (float) $booking['rate_per_km_estimate'] > 0 ? 'Rs ' . number_format((float) $booking['rate_per_km_estimate'], 2) . '/km' : 'Est.'; ?></span>
+                                    <?php
+                                    $btype = !empty($booking['booking_type']) ? $booking['booking_type'] : 'km';
+                                    $hslot = !empty($booking['hours_slot'])   ? (int)$booking['hours_slot'] : 0;
+                                    $pt    = !empty($booking['pickup_time'])  ? $booking['pickup_time']  : '';
+                                    $rt    = !empty($booking['return_time'])  ? $booking['return_time']  : '';
+                                    ?>
+                                    <?php if ($btype === 'hours' && $hslot > 0): ?>
+                                        <span class="td-strong">⏱ <?php echo $hslot; ?> Hours</span>
+                                        <?php if ($pt && $rt): ?>
+                                            <span class="td-muted"><?php echo date('h:i A', strtotime($pt)); ?> – <?php echo date('h:i A', strtotime($rt)); ?></span>
+                                        <?php else: ?>
+                                            <span class="td-muted">Hours-based</span>
+                                        <?php endif; ?>
+                                        <span class="td-muted js-late-badge"
+                                            data-slot="<?php echo $hslot; ?>"
+                                            data-rdate="<?php echo html_escape($booking['return_date']); ?>"
+                                            data-rtime="<?php echo html_escape($rt); ?>">
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="td-strong">Legacy (KM)</span>
+                                        <span class="td-muted">Prior to Hour-based System</span>
+                                    <?php endif; ?>
                                 </td>
                                 <td>
                                     <span class="td-strong">Rs <?php echo number_format((float) $booking['amount'], 0); ?></span>
@@ -1085,17 +1275,43 @@ unset($booking);
                                 </td>
                                 <td>
                                     <div class="bk-actions">
-                                        <button class="bk-action-btn js-bk-view" type="button">View</button>
+                                        <!-- View -->
+                                        <button class="bk-action-btn bk-icon-btn js-bk-view" type="button" title="View Details">
+                                            <i class="ti ti-eye"></i>
+                                        </button>
+
+                                        <!-- Photos -->
+                                        <a class="bk-action-btn bk-icon-btn blue" href="<?php echo base_url('admin/bookings/photos/' . (int) $booking['id']); ?>" title="Car Photos">
+                                            <i class="ti ti-camera"></i>
+                                            <?php if (!empty($booking['booking_photo_count'])): ?>
+                                                <span class="bk-photo-pip"><?php echo (int)$booking['booking_photo_count']; ?></span>
+                                            <?php endif; ?>
+                                        </a>
+
+                                        <!-- Collect / Summary -->
                                         <?php if ($has_balance): ?>
-                                            <button class="bk-action-btn blue js-bk-collect" type="button">Collect</button>
-                                        <?php elseif (!empty($booking['payment_request_receipt'])): ?>
-                                            <a class="bk-action-btn" href="<?php echo base_url($booking['payment_request_receipt']); ?>" target="_blank">Receipt</a>
+                                            <button class="bk-action-btn bk-icon-btn blue js-bk-collect" type="button" title="Collect Payment">
+                                                <i class="ti ti-coin-rupee"></i>
+                                            </button>
                                         <?php else: ?>
-                                            <button class="bk-action-btn js-bk-view" type="button">Summary</button>
+                                            <button class="bk-action-btn bk-icon-btn js-bk-view" type="button" title="View Summary">
+                                                <i class="ti ti-file-description"></i>
+                                            </button>
                                         <?php endif; ?>
+
+                                        <!-- WhatsApp -->
                                         <?php if ($collection_whatsapp_url !== ''): ?>
-                                            <a class="bk-action-btn" href="<?php echo html_escape($collection_whatsapp_url); ?>" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+                                            <a class="bk-action-btn bk-icon-btn" href="<?php echo html_escape($collection_whatsapp_url); ?>" target="_blank" rel="noopener noreferrer" title="Send WhatsApp">
+                                                <i class="ti ti-brand-whatsapp"></i>
+                                            </a>
                                         <?php endif; ?>
+
+                                        <!-- Delete -->
+                                        <form method="post" action="<?php echo base_url('admin/bookings/delete/' . (int)$booking['id']); ?>" class="js-swal-confirm-form" data-swal-title="Delete booking?" data-swal-text="This booking and its payment records will be permanently removed." data-swal-confirm="Delete">
+                                            <button class="bk-action-btn bk-icon-btn danger" type="submit" title="Delete Booking">
+                                                <i class="ti ti-trash"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>
@@ -1118,6 +1334,12 @@ unset($booking);
                     <?php endif; ?>
                 </tbody>
             </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="bk-pagination" id="bkPagination">
+            <div class="bk-page-info" id="bkPageInfo"></div>
+            <div class="bk-page-btns" id="bkPageBtns"></div>
         </div>
     </div>
 </div>
@@ -1148,7 +1370,7 @@ unset($booking);
                     <strong id="bkDDates">—</strong>
                 </div>
                 <div class="bk-detail-card">
-                    <span>Distance</span>
+                    <span>Duration</span>
                     <strong id="bkDKm">—</strong>
                 </div>
             </div>
@@ -1237,6 +1459,132 @@ unset($booking);
         var activeFilter = 'all';
         var currentCollect = null;
 
+        /* ── Pagination state ── */
+        var PER_PAGE = 10;
+        var currentPage = 1;
+        var visibleRows = [];
+
+        /* ── Pagination render ── */
+        function renderPage(page) {
+            currentPage = page;
+            var total = visibleRows.length;
+            var totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            var start = (currentPage - 1) * PER_PAGE;
+            var end = start + PER_PAGE;
+
+            /* Show/hide rows */
+            rows.forEach(function(row) {
+                row.style.display = 'none';
+            });
+            visibleRows.forEach(function(row, i) {
+                row.style.display = (i >= start && i < end) ? '' : 'none';
+            });
+
+            /* Page info */
+            var infoEl = document.getElementById('bkPageInfo');
+            if (infoEl) {
+                if (total === 0) {
+                    infoEl.innerHTML = 'No bookings found';
+                } else {
+                    infoEl.innerHTML = 'Showing <strong>' + (start + 1) + '–' + Math.min(end, total) + '</strong> of <strong>' + total + '</strong> bookings';
+                }
+            }
+
+            buildPageButtons(totalPages);
+        }
+
+        function buildPageButtons(totalPages) {
+            var container = document.getElementById('bkPageBtns');
+            if (!container) return;
+            container.innerHTML = '';
+            if (totalPages <= 1) return;
+
+            /* Prev arrow */
+            var prev = makePgBtn(null, currentPage === 1, false, 'prev');
+            prev.innerHTML = '<svg viewBox="0 0 12 12" fill="none"><path d="M7.5 2L4 6l3.5 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+            prev.setAttribute('aria-label', 'Previous');
+            container.appendChild(prev);
+
+            /* Page numbers with smart ellipsis */
+            getPageNumbers(currentPage, totalPages).forEach(function(p) {
+                if (p === '…') {
+                    var dots = document.createElement('span');
+                    dots.className = 'bk-pg-dots';
+                    dots.textContent = '…';
+                    container.appendChild(dots);
+                } else {
+                    var btn = makePgBtn(p, false, p === currentPage, 'number');
+                    btn.textContent = p;
+                    btn.setAttribute('aria-label', 'Page ' + p);
+                    container.appendChild(btn);
+                }
+            });
+
+            /* Next arrow */
+            var next = makePgBtn(null, currentPage === totalPages, false, 'next');
+            next.innerHTML = '<svg viewBox="0 0 12 12" fill="none"><path d="M4.5 2L8 6l-3.5 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+            next.setAttribute('aria-label', 'Next');
+            container.appendChild(next);
+        }
+
+        function makePgBtn(label, disabled, active, type) {
+            var btn = document.createElement('button');
+            btn.className = 'bk-pg-btn' + (active ? ' active' : '');
+            btn.type = 'button';
+            btn.disabled = !!disabled;
+            btn.addEventListener('click', function() {
+                if (type === 'prev') renderPage(currentPage - 1);
+                else if (type === 'next') renderPage(currentPage + 1);
+                else if (type === 'number' && !active) renderPage(label);
+            });
+            return btn;
+        }
+
+        /* Smart page number pattern:
+           Start:  1 2 3 … last
+           Middle: 1 … p-1 p p+1 … last
+           End:    1 … last-2 last-1 last  */
+        function getPageNumbers(cur, total) {
+            if (total <= 5) {
+                var arr = [];
+                for (var i = 1; i <= total; i++) arr.push(i);
+                return arr;
+            }
+            if (cur <= 3) return [1, 2, 3, '…', total];
+            if (cur >= total - 2) return [1, '…', total - 2, total - 1, total];
+            return [1, '…', cur - 1, cur, cur + 1, '…', total];
+        }
+
+        /* ── Filters + search + pagination together ── */
+        function applyFilters() {
+            var q = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+            /* First hide all, then build visibleRows */
+            visibleRows = [];
+            rows.forEach(function(row) {
+                var st = row.getAttribute('data-status') || '';
+                var sr = row.getAttribute('data-search') || '';
+                var match = (activeFilter === 'all' || st === activeFilter) && (q === '' || sr.indexOf(q) !== -1);
+                if (match) visibleRows.push(row);
+                else row.style.display = 'none';
+            });
+
+            /* Reset to page 1 on every filter/search change */
+            currentPage = 1;
+            renderPage(1);
+        }
+
+        function setFilter(f) {
+            activeFilter = f;
+            chips.forEach(function(c) {
+                c.classList.toggle('active', c.getAttribute('data-filter') === f);
+            });
+            applyFilters();
+        }
+
         function fmt(v) {
             var n = parseFloat(v || 0);
             return 'Rs ' + n.toFixed(2).replace(/\.00$/, '');
@@ -1260,23 +1608,34 @@ unset($booking);
             }
         }
 
-        function applyFilters() {
-            var q = searchInput ? searchInput.value.toLowerCase().trim() : '';
-            rows.forEach(function(row) {
-                var st = row.getAttribute('data-status') || '';
-                var sr = row.getAttribute('data-search') || '';
-                var show = (activeFilter === 'all' || st === activeFilter) && (q === '' || sr.indexOf(q) !== -1);
-                row.style.display = show ? '' : 'none';
-            });
+        function formatTime12(t) {
+            if (!t) return '';
+            var parts = t.split(':');
+            var h = parseInt(parts[0], 10);
+            var m = parts[1] || '00';
+            var ampm = h >= 12 ? 'PM' : 'AM';
+            h = h % 12 || 12;
+            return h + ':' + m + ' ' + ampm;
         }
 
-        function setFilter(f) {
-            activeFilter = f;
-            chips.forEach(function(c) {
-                c.classList.toggle('active', c.getAttribute('data-filter') === f);
+        function computeLateBadges() {
+            var now = Date.now();
+            document.querySelectorAll('.js-late-badge').forEach(function(el) {
+                var slot = parseInt(el.getAttribute('data-slot') || '0', 10);
+                var rdate = el.getAttribute('data-rdate') || '';
+                var rtime = el.getAttribute('data-rtime') || '';
+                if (!rdate || !rtime || slot <= 0) return;
+                var returnMs = new Date(rdate + 'T' + rtime + ':00').getTime();
+                if (isNaN(returnMs)) return;
+                var diffHours = (now - returnMs) / (1000 * 60 * 60);
+                if (diffHours <= 0) {
+                    el.innerHTML = '<span style="display:inline-block;margin-top:3px;padding:1px 6px;border-radius:999px;font-size:10px;font-weight:700;background:#e1f5ee;color:#0F6E56;"><i class="ti ti-clock-check" style="font-size:10px;vertical-align:-1px;margin-right:2px;"></i>' + Math.ceil(-diffHours) + 'h remaining</span>';
+                } else {
+                    el.innerHTML = '<span style="display:inline-block;margin-top:3px;padding:1px 6px;border-radius:999px;font-size:10px;font-weight:700;background:#FCEBEB;color:#A32D2D;"><i class="ti ti-alert-triangle" style="font-size:10px;vertical-align:-1px;margin-right:2px;"></i>' + Math.ceil(diffHours) + 'h late</span>';
+                }
             });
-            applyFilters();
         }
+        computeLateBadges();
 
         function parseDetail(row) {
             try {
@@ -1293,14 +1652,20 @@ unset($booking);
             document.getElementById('bkDCustomer').innerHTML = esc(d.customer_name) + (d.customer_phone ? '<br><span class="td-muted">' + esc(d.customer_phone) + '</span>' : '');
             document.getElementById('bkDVehicle').innerHTML = esc(d.vehicle_name) + (d.registration_no ? '<br><span class="td-muted">' + esc(d.registration_no) + '</span>' : '');
             document.getElementById('bkDDates').innerHTML = esc(d.trip_dates_label) + '<br><span class="td-muted">' + esc((d.trip_days || 1) + ' day(s)') + '</span>';
-            document.getElementById('bkDKm').innerHTML = esc(d.display_km || '—') + (d.rate_per_km_estimate > 0 ? '<br><span class="td-muted">Rs ' + d.rate_per_km_estimate + '/km</span>' : '');
+            var btype = d.booking_type || 'km';
+            var hslot = parseInt(d.hours_slot || 0, 10);
+            var ptFmt = d.pickup_time ? formatTime12(d.pickup_time) : '';
+            var rtFmt = d.return_time ? formatTime12(d.return_time) : '';
+            if (btype === 'hours' && hslot > 0) {
+                document.getElementById('bkDKm').innerHTML = '⏱ ' + hslot + '-hour package<br><span class="td-muted">' + (ptFmt && rtFmt ? ptFmt + ' – ' + rtFmt : 'Times not set') + '</span>';
+            } else {
+                document.getElementById('bkDKm').innerHTML = 'Legacy (KM)<br><span class="td-muted">Prior to Hour-based System</span>';
+            }
             document.getElementById('bkDAmount').textContent = fmt(d.amount || 0);
             document.getElementById('bkDAdvance').textContent = fmt(d.advance_due || 0);
             document.getElementById('bkDPaid').textContent = fmt(d.paid_amount || 0);
             document.getElementById('bkDBalance').textContent = fmt(d.balance_amount || 0);
-            if (detailNote) {
-                detailNote.textContent = d.thank_you_message || 'Payment summary will appear here.';
-            }
+            if (detailNote) detailNote.textContent = d.thank_you_message || 'Payment summary will appear here.';
 
             currentCollect = {
                 bookingId: row.getAttribute('data-booking-id') || '',
@@ -1309,9 +1674,7 @@ unset($booking);
                 amount: row.getAttribute('data-amount') || '0',
                 paid: row.getAttribute('data-paid') || '0',
                 balance: row.getAttribute('data-balance') || '0',
-                whatsappUrl: d.collection_whatsapp_url || '',
-                nextTotal: parseFloat(d.amount || 0),
-                paidSoFar: parseFloat(d.paid_amount || 0)
+                whatsappUrl: d.collection_whatsapp_url || ''
             };
             detailCollectBtn.style.display = parseFloat(currentCollect.balance) > 0.01 ? 'inline-flex' : 'none';
             if (detailWhatsappBtn) {
@@ -1342,6 +1705,7 @@ unset($booking);
             }
         }
 
+        /* ── Event listeners ── */
         chips.forEach(function(c) {
             c.addEventListener('click', function() {
                 setFilter(c.getAttribute('data-filter') || 'all');
@@ -1389,12 +1753,14 @@ unset($booking);
                 closeModal(document.getElementById(btn.getAttribute('data-close-modal')));
             });
         });
+
         [detailModal, collectModal].forEach(function(m) {
             if (!m) return;
             m.addEventListener('click', function(e) {
                 if (e.target === m) closeModal(m);
             });
         });
+
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 closeModal(detailModal);
@@ -1402,6 +1768,7 @@ unset($booking);
             }
         });
 
+        /* ── Init ── */
         applyFilters();
     })();
 </script>

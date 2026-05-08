@@ -25,6 +25,8 @@
         --info-bg: #eff6ff;
         --info-border: #bfdbfe;
         --info-text: #1d4ed8;
+        --danger-border: #fecdd3;
+        --danger-text: #be123c;
         --radius-sm: 8px;
         --radius-md: 12px;
         --radius-lg: 16px;
@@ -692,8 +694,32 @@ function dr_initials($name)
                                         </span>
                                     </div>
                                 </div>
+
+                                <!-- Delete all docs button -->
+                                <form method="post"
+                                    action="<?php echo base_url('admin/documents/delete-customer/' . (int)$customer['id']); ?>"
+                                    class="js-swal-confirm-form"
+                                    data-swal-title="Delete all documents?"
+                                    data-swal-text="All documents for <?php echo html_escape($customer['full_name']); ?> will be permanently deleted."
+                                    data-swal-confirm="Delete All"
+                                    style="display:inline;">
+                                    <button type="submit" style="
+            display:inline-flex;align-items:center;gap:5px;height:32px;
+            padding:0 12px;border-radius:8px;
+            border:1.5px solid var(--danger-border);
+            background:var(--danger-bg);color:var(--danger-text);
+            font:600 12px/1 var(--font);cursor:pointer;white-space:nowrap;
+        ">
+                                        <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+                                            <path d="M2 4h12M5 4V2.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5V4M6 7v5M10 7v5M3 4l.8 9a1 1 0 0 0 1 .9h6.4a1 1 0 0 0 1-.9L13 4"
+                                                stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                        Delete All
+                                    </button>
+                                </form>
+
                                 <div class="dr-toggle" aria-hidden="true">
-                                    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <svg viewBox="0 0 16 16" fill="none">
                                         <path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                                     </svg>
                                 </div>

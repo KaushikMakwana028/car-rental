@@ -571,8 +571,8 @@
                             </svg>
                         </div>
                         <div class="link-item-text">
-                            <strong>Create Account</strong>
-                            Register a new user account
+                            <strong>Customer Portal</strong>
+                            Access the customer dashboard and manage bookings easily.
                         </div>
                     </div>
                     <svg class="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

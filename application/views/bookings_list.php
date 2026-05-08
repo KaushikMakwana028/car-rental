@@ -69,7 +69,7 @@ foreach ($bookings as $booking) {
                     <th>Vehicle</th>
                     <th>Trip Type</th>
                     <th>Route</th>
-                    <th>Distance</th>
+
                     <th>Amount</th>
                     <th>Payment</th>
                     <th>Status</th>
@@ -94,10 +94,7 @@ foreach ($bookings as $booking) {
                             <span class="table-title"><?php echo html_escape($booking['pickup_location']); ?></span>
                             <span class="table-note">Drop: <?php echo html_escape($booking['drop_location']); ?></span>
                         </td>
-                        <td>
-                            <span class="table-title"><?php echo html_escape($booking['display_km']); ?></span>
-                            <span class="table-note">Estimated distance</span>
-                        </td>
+
                         <td>
                             <span class="table-title">&#8377;<?php echo number_format((float) $booking['amount'], 2); ?></span>
                             <span class="table-note">Balance &#8377;<?php echo number_format((float) $booking['balance_amount'], 2); ?></span>
@@ -119,7 +116,7 @@ foreach ($bookings as $booking) {
                 <?php endforeach; ?>
             <?php else: ?>
                 <tr>
-                    <td colspan="9">
+                    <td colspan="8">
                         <div class="empty-state">You have not created any bookings yet. Start by choosing a car and submitting your trip details.</div>
                     </td>
                 </tr>

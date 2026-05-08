@@ -90,45 +90,111 @@
                     <input type="checkbox" name="documents_verified" value="1" style="width:auto;min-height:auto;">
                     Documents checked by admin
                 </label>
-                <div class="helper">Check this when documents are already verified manually. No document image upload is needed from admin side.</div>
+                <div class="helper">Check this when documents are already verified manually.</div>
             </div>
-            <div>
+
+            <!-- Vehicle -->
+            <div class="full">
                 <label>Vehicle</label>
-
-
                 <select name="vehicle_id" id="admin_vehicle_id" required style="width:100%;">
                     <option value="">Select vehicle</option>
-
                     <?php foreach ($vehicles as $vehicle): ?>
                         <option
-                            value="<?php echo $vehicle['id']; ?>"
-                            data-rate="<?php echo (float) $vehicle['rate_per_day']; ?>"
-                            data-advance="<?php echo (float) $vehicle['advance_amount']; ?>">
-                            <?php echo html_escape(
-                                $vehicle['name'] . ' - ' .
-                                    $vehicle['registration_no'] .
-                                    ' - Rate/KM: ' . number_format((float) $vehicle['rate_per_day'], 2) .
-                                    ' - Advance: ' . number_format((float) $vehicle['advance_amount'], 2)
-                            ); ?>
+                            value="<?php echo (int)$vehicle['id']; ?>"
+
+                            data-advance="<?php echo (float)$vehicle['advance_amount']; ?>"
+                            data-p6="<?php echo (float)(isset($vehicle['price_6_hours'])   ? $vehicle['price_6_hours']   : 0); ?>"
+                            data-p12="<?php echo (float)(isset($vehicle['price_12_hours']) ? $vehicle['price_12_hours']  : 0); ?>"
+                            data-p24="<?php echo (float)(isset($vehicle['price_24_hours']) ? $vehicle['price_24_hours']  : 0); ?>"
+                            data-extra="<?php echo (float)(isset($vehicle['extra_hour_charge']) ? $vehicle['extra_hour_charge'] : 0); ?>">
+                            <?php echo html_escape($vehicle['name'] . ' - ' . $vehicle['registration_no']
+                                . ' - Advance: ' . number_format((float)$vehicle['advance_amount'], 2)); ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div><label>Pickup Date</label><input type="date" name="pickup_date" required></div>
-            <div><label>Return Date</label><input type="date" name="return_date" required></div>
+
+            <!-- Hour pricing preview -->
+            <div class="full" id="adm_hour_preview" style="display:none;">
+                <label>Hour Package Rates</label>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px;">
+                    <div style="background:#EEF3FA;border-radius:8px;padding:10px;text-align:center;">
+                        <div style="font-size:10px;font-weight:700;color:#456383;text-transform:uppercase;letter-spacing:.06em;">6 Hours</div>
+                        <div style="font-size:16px;font-weight:800;color:#17355C;margin-top:3px;" id="adm_hp6">₹0</div>
+                    </div>
+                    <div style="background:#EEF3FA;border-radius:8px;padding:10px;text-align:center;">
+                        <div style="font-size:10px;font-weight:700;color:#456383;text-transform:uppercase;letter-spacing:.06em;">12 Hours</div>
+                        <div style="font-size:16px;font-weight:800;color:#17355C;margin-top:3px;" id="adm_hp12">₹0</div>
+                    </div>
+                    <div style="background:#EEF3FA;border-radius:8px;padding:10px;text-align:center;">
+                        <div style="font-size:10px;font-weight:700;color:#456383;text-transform:uppercase;letter-spacing:.06em;">24 Hours</div>
+                        <div style="font-size:16px;font-weight:800;color:#17355C;margin-top:3px;" id="adm_hp24">₹0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Extra hour charge -->
+            <div class="full" id="adm_extra_box" style="display:none;">
+                <div style="background:#fff8e1;border:1.5px solid #f1c14f;border-radius:10px;padding:12px 16px;">
+                    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:#7a5c00;">⚡ Extra Hour Charge</div>
+                    <div style="font-size:22px;font-weight:800;color:#17355C;margin-top:3px;" id="adm_extra_val">₹0</div>
+                    <div style="font-size:11px;color:#73849A;margin-top:2px;">Charged per additional hour beyond the booked slot.</div>
+                </div>
+            </div>
+
+
+
+            <div><label>Pickup Date</label><input type="date" name="pickup_date" id="pickup_date" required></div>
+            <div><label>Return Date</label><input type="date" name="return_date" id="return_date" required></div>
+            <!-- Pickup Time -->
+            <div id="adm_pickup_time_wrap">
+                <label>Pickup Time</label>
+                <input type="time" name="pickup_time" id="adm_pickup_time" required>
+            </div>
+            <div id="adm_return_time_wrap">
+                <label>Return Time</label>
+                <input type="time" name="return_time" id="adm_return_time" required>
+            </div>
+
+            <!-- Hours duration display -->
+            <div class="full" id="adm_hours_dur_wrap">
+                <div id="adm_hours_dur_box" style="background:#EEF3FA;border:1.5px solid #B5D4F4;border-radius:10px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+                    <div>
+                        <div style="font-size:12px;font-weight:700;color:#185FA5;text-transform:uppercase;letter-spacing:.08em;">⏱ Calculated Duration</div>
+                        <div style="font-size:11px;color:#456383;margin-top:2px;" id="adm_hours_dur_note">Select pickup and return date &amp; time to calculate.</div>
+                    </div>
+                    <div style="text-align:right;flex-shrink:0;">
+                        <div style="font-size:26px;font-weight:800;color:#17355C;line-height:1;" id="adm_hours_dur_value">—</div>
+                        <div style="font-size:11px;color:#73849A;margin-top:2px;">hours total</div>
+                    </div>
+                </div>
+            </div>
             <div><label>Pickup Location</label><input type="text" name="pickup_location" required></div>
             <div><label>Drop Location</label><input type="text" name="drop_location" required></div>
-            <div><label>Estimated KM</label><input type="number" name="estimated_km" id="admin_estimated_km" min="0" required></div>
-            <div>
+
+            <!-- Hours slot -->
+            <div id="adm_hrs_wrap">
+                <label>Select Duration</label>
+                <select id="adm_hours_slot" name="hours_slot" required>
+                    <option value="">-- Select slot --</option>
+                    <option value="6">6 Hours</option>
+                    <option value="12">12 Hours</option>
+                    <option value="24">24 Hours</option>
+                </select>
+            </div>
+
+            <!-- Expected amount -->
+            <div id="adm_amount_wrap">
                 <label>Expected Amount</label>
                 <input type="number" step="0.01" name="amount" id="admin_expected_amount" readonly required>
-                <div class="helper">This amount is auto-calculated from Estimated KM × Rate per KM.</div>
             </div>
+
             <div>
                 <label>Required Advance</label>
                 <input type="text" id="admin_advance_amount" readonly>
-                <div class="helper">Shows the advance amount for the selected vehicle.</div>
+                <div class="helper">Advance amount for the selected vehicle.</div>
             </div>
+
             <div class="full">
                 <label>Status</label>
                 <select name="status">
@@ -143,50 +209,138 @@
     </form>
 </div>
 
-<!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<!-- Select2 CSS -->
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-
-<!-- Select2 JS -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
     $(document).ready(function() {
 
-        // Searchable dropdown
         $('#admin_vehicle_id').select2({
             placeholder: "Search vehicle...",
             allowClear: true,
             width: '100%'
         });
 
-        var vehicle = document.getElementById('admin_vehicle_id');
-        var km = document.getElementById('admin_estimated_km');
-        var amount = document.getElementById('admin_expected_amount');
-        var advance = document.getElementById('admin_advance_amount');
+        function admGetData() {
+            var opt = document.getElementById('admin_vehicle_id');
+            var sel = opt ? opt.options[opt.selectedIndex] : null;
+            if (!sel || !sel.value) return null;
+            return {
 
-        function updateAmount() {
-
-            var selected = vehicle.options[vehicle.selectedIndex];
-
-            var rate = selected ? parseFloat(selected.getAttribute('data-rate') || '0') : 0;
-
-            var advanceAmount = selected ? parseFloat(selected.getAttribute('data-advance') || '0') : 0;
-
-            var distance = parseFloat(km.value || '0');
-
-            var total = rate * distance;
-
-            amount.value = total ? total.toFixed(2) : '';
-
-            advance.value = advanceAmount ? 'Rs. ' + advanceAmount.toFixed(2) : '';
+                advance: parseFloat(sel.getAttribute('data-advance') || '0'),
+                p6: parseFloat(sel.getAttribute('data-p6') || '0'),
+                p12: parseFloat(sel.getAttribute('data-p12') || '0'),
+                p24: parseFloat(sel.getAttribute('data-p24') || '0'),
+                extra: parseFloat(sel.getAttribute('data-extra') || '0'),
+            };
         }
 
-        $('#admin_vehicle_id').on('change', updateAmount);
+        function admFmt(n) {
+            return '₹' + Number(n).toLocaleString('en-IN', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            });
+        }
 
-        km.addEventListener('input', updateAmount);
+        /* ── Calculate exact hours between two date+time combos ── */
+        function admCalcHours() {
+            var pd = document.getElementById('pickup_date') ? document.getElementById('pickup_date').value : '';
+            var rd = document.getElementById('return_date') ? document.getElementById('return_date').value : '';
+            var pt = document.getElementById('adm_pickup_time') ? document.getElementById('adm_pickup_time').value : '';
+            var rt = document.getElementById('adm_return_time') ? document.getElementById('adm_return_time').value : '';
+            if (!pd || !rd || !pt || !rt) return null;
+            var pickupMs = new Date(pd + 'T' + pt + ':00').getTime();
+            var returnMs = new Date(rd + 'T' + rt + ':00').getTime();
+            if (isNaN(pickupMs) || isNaN(returnMs)) return null;
+            if (returnMs <= pickupMs) return -1;
+            return (returnMs - pickupMs) / (1000 * 60 * 60);
+        }
 
+        /* ── Update hours duration display ── */
+        function admUpdateHoursDuration() {
+            var hours = admCalcHours();
+            var box = document.getElementById('adm_hours_dur_box');
+            var val = document.getElementById('adm_hours_dur_value');
+            var note = document.getElementById('adm_hours_dur_note');
+            if (hours === null) {
+                val.textContent = '—';
+                note.textContent = 'Select pickup and return date & time to calculate.';
+                box.style.borderColor = '#B5D4F4';
+                box.style.background = '#EEF3FA';
+                return;
+            }
+            if (hours === -1) {
+                val.textContent = '!';
+                note.textContent = '⚠ Return time must be after pickup time.';
+                box.style.borderColor = '#f5c6c6';
+                box.style.background = '#fff5f5';
+                return;
+            }
+            var display = Math.ceil(hours * 2) / 2;
+            val.textContent = display % 1 === 0 ? display.toFixed(0) : display.toFixed(1);
+            var suggested = hours <= 6 ? '6' : hours <= 12 ? '12' : '24';
+            note.textContent = display + ' hrs total. ' + (hours > 24 ?
+                '⚠ Duration exceeds 24 hours.' :
+                'Suggested slot: ' + suggested + '-hour package.');
+            if (hours > 0 && hours <= 24) {
+                document.getElementById('adm_hours_slot').value = suggested;
+            }
+            var isExact = (hours === 6 || hours === 12 || hours === 24);
+            box.style.borderColor = isExact ? '#86efac' : '#B5D4F4';
+            box.style.background = isExact ? '#f0fdf4' : '#EEF3FA';
+            admUpdateAmount();
+        }
+
+
+
+        function admUpdateAmount() {
+            var d = admGetData();
+            if (!d) {
+                document.getElementById('admin_expected_amount').value = '';
+                document.getElementById('admin_advance_amount').value = '';
+                document.getElementById('adm_hour_preview').style.display = 'none';
+                document.getElementById('adm_extra_box').style.display = 'none';
+                return;
+            }
+            document.getElementById('adm_hour_preview').style.display = '';
+            document.getElementById('adm_hp6').textContent = admFmt(d.p6);
+            document.getElementById('adm_hp12').textContent = admFmt(d.p12);
+            document.getElementById('adm_hp24').textContent = admFmt(d.p24);
+            if (d.extra > 0) {
+                document.getElementById('adm_extra_box').style.display = '';
+                document.getElementById('adm_extra_val').textContent = admFmt(d.extra);
+            } else {
+                document.getElementById('adm_extra_box').style.display = 'none';
+            }
+            document.getElementById('admin_advance_amount').value = d.advance ? 'Rs. ' + d.advance.toFixed(2) : '';
+
+            var h = document.getElementById('adm_hours_slot').value;
+            var price = h === '6' ? d.p6 : h === '12' ? d.p12 : h === '24' ? d.p24 : 0;
+            document.getElementById('admin_expected_amount').value = price > 0 ? price.toFixed(2) : '';
+        }
+
+        /* ── Event listeners ── */
+        $('#admin_vehicle_id').on('change', admUpdateAmount);
+        document.getElementById('adm_hours_slot').addEventListener('change', admUpdateAmount);
+
+        /* Date + time changes recalculate hours duration */
+        ['pickup_date', 'return_date'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.addEventListener('change', function() {
+                admUpdateHoursDuration();
+                admUpdateAmount();
+            });
+        });
+        ['adm_pickup_time', 'adm_return_time'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.addEventListener('change', function() {
+                admUpdateHoursDuration();
+                admUpdateAmount();
+            });
+        });
+
+        admUpdateHoursDuration();
+        admUpdateAmount();
     });
 </script>

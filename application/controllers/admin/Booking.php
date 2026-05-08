@@ -1,5 +1,5 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
 class Booking extends Admin_Controller
 {
@@ -22,16 +22,15 @@ class Booking extends Admin_Controller
 
     public function store()
     {
-        $vehicle_id = (int) $this->input->post('vehicle_id');
-        $estimated_km = (int) $this->input->post('estimated_km');
-        $customer_name = trim($this->input->post('customer_name', true));
-        $customer_phone = trim($this->input->post('customer_phone', true));
-        $customer_email = trim($this->input->post('customer_email', true));
-        $aadhaar_number = trim($this->input->post('aadhaar_number', true));
+        $vehicle_id             = (int) $this->input->post('vehicle_id');
+        $hours_slot             = (int) $this->input->post('hours_slot');
+        $customer_name          = trim($this->input->post('customer_name', true));
+        $customer_phone         = trim($this->input->post('customer_phone', true));
+        $customer_email         = trim($this->input->post('customer_email', true));
+        $aadhaar_number         = trim($this->input->post('aadhaar_number', true));
         $driving_license_number = trim($this->input->post('driving_license_number', true));
-        $documents_verified = $this->input->post('documents_verified') ? true : false;
-        $vehicle = $this->General_model->get_row('vehicles', array('id' => $vehicle_id));
-        $calculated_amount = !empty($vehicle) ? ((float) $vehicle['rate_per_day'] * $estimated_km) : 0;
+        $documents_verified     = $this->input->post('documents_verified') ? true : false;
+        $vehicle                = $this->General_model->get_row('vehicles', array('id' => $vehicle_id));
 
         if ($customer_name === '' || $customer_phone === '') {
             $this->session->set_flashdata('error', 'Customer name and phone are required.');
@@ -39,27 +38,144 @@ class Booking extends Admin_Controller
         }
 
         if ($documents_verified && ($aadhaar_number === '' || $driving_license_number === '')) {
-            $this->session->set_flashdata('error', 'Enter Aadhaar number and driving license number when documents are marked as checked.');
+            $this->session->set_flashdata('error', 'Enter Aadhaar and driving license number when documents are marked as checked.');
             redirect('admin/bookings/create');
         }
+
+        if (empty($vehicle)) {
+            $this->session->set_flashdata('error', 'Please select a valid vehicle.');
+            redirect('admin/bookings/create');
+        }
+
+        /* Calculate amount based on booking type */
+        $price_map = array(
+            6  => (float)$vehicle['price_6_hours'],
+            12 => (float)$vehicle['price_12_hours'],
+            24 => (float)$vehicle['price_24_hours'],
+        );
+        $calculated_amount = isset($price_map[$hours_slot]) ? $price_map[$hours_slot] : 0;
+        $booking_type      = 'hours';
 
         $customer_id = $this->General_model->resolve_customer_account($customer_name, $customer_phone, $customer_email);
 
         $payload = array(
-            'customer_id' => $customer_id,
-            'vehicle_id' => $vehicle_id,
-            'pickup_date' => $this->input->post('pickup_date', true),
-            'return_date' => $this->input->post('return_date', true),
-            'pickup_location' => trim($this->input->post('pickup_location', true)),
-            'drop_location' => trim($this->input->post('drop_location', true)),
-            'estimated_km' => $estimated_km,
-            'amount' => $calculated_amount,
-            'status' => $this->input->post('status', true) ?: 'pending',
+            'customer_id'      => $customer_id,
+            'vehicle_id'       => $vehicle_id,
+            'pickup_date'      => $this->input->post('pickup_date', true),
+            'return_date'      => $this->input->post('return_date', true),
+            'pickup_time'      => $this->input->post('pickup_time', true) ?: null,  // ADD THIS
+            'return_time'      => $this->input->post('return_time', true) ?: null,  // ADD THIS
+            'pickup_location'  => trim($this->input->post('pickup_location', true)),
+            'drop_location'    => trim($this->input->post('drop_location', true)),
+            'booking_type'     => $booking_type,
+            'hours_slot'       => $hours_slot,
+            'amount'           => $calculated_amount,
+            'status'           => $this->input->post('status', true) ?: 'pending',
         );
 
         $booking_id = (int) $this->General_model->create_booking($payload);
         $this->General_model->sync_manual_booking_documents($customer_id, $booking_id, $aadhaar_number, $driving_license_number, $documents_verified);
         $this->session->set_flashdata('success', 'Booking created successfully.');
+        redirect('admin/bookings');
+    }
+
+    public function photos($booking_id)
+    {
+        $booking = $this->General_model->get_bookings(array('bookings.id' => (int) $booking_id));
+        if (empty($booking)) {
+            show_404();
+        }
+
+        $data['page_title'] = 'Booking Photos';
+        $data['current_user'] = $this->current_user;
+        $data['booking'] = $booking[0];
+        $data['booking_photos'] = $this->General_model->get_booking_photos((int) $booking_id);
+        $data['booking_photo_table_ready'] = $this->db->table_exists('booking_vehicle_photos');
+        $this->render_view('admin/booking_photos', $data);
+    }
+
+    public function upload_photos($booking_id)
+    {
+        $booking_id = (int) $booking_id;
+        $booking = $this->General_model->get_bookings(array('bookings.id' => $booking_id));
+        if (empty($booking)) {
+            show_404();
+        }
+
+        if (!$this->db->table_exists('booking_vehicle_photos')) {
+            $this->session->set_flashdata('error', 'Booking photo table is missing. Please run the provided database query first.');
+            redirect('admin/bookings/photos/' . $booking_id);
+        }
+
+        if (empty($_FILES['booking_photos']['name']) || empty($_FILES['booking_photos']['name'][0])) {
+            $this->session->set_flashdata('error', 'Please choose at least one car photo to upload.');
+            redirect('admin/bookings/photos/' . $booking_id);
+        }
+
+        $upload_dir = FCPATH . 'uploads/booking-photos/' . $booking_id . '/';
+        if (!is_dir($upload_dir)) {
+            @mkdir($upload_dir, 0777, true);
+        }
+
+        $allowed_extensions = array('jpg', 'jpeg', 'png', 'webp');
+        $note = trim($this->input->post('note', true));
+        $uploaded_count = 0;
+
+        foreach ($_FILES['booking_photos']['name'] as $index => $original_name) {
+            if (!isset($_FILES['booking_photos']['error'][$index]) || $_FILES['booking_photos']['error'][$index] !== UPLOAD_ERR_OK) {
+                continue;
+            }
+
+            $extension = strtolower(pathinfo($original_name, PATHINFO_EXTENSION));
+            if (!in_array($extension, $allowed_extensions, true)) {
+                continue;
+            }
+
+            $file_name = 'booking_' . $booking_id . '_' . time() . '_' . $index . '.' . $extension;
+            $target_path = $upload_dir . $file_name;
+
+            if (!move_uploaded_file($_FILES['booking_photos']['tmp_name'][$index], $target_path)) {
+                continue;
+            }
+
+            $this->General_model->create_booking_photo(array(
+                'booking_id' => $booking_id,
+                'file_name' => $original_name,
+                'file_path' => 'uploads/booking-photos/' . $booking_id . '/' . $file_name,
+                'note' => $note,
+                'uploaded_by' => isset($this->current_user['id']) ? (int) $this->current_user['id'] : 0,
+            ));
+            $uploaded_count++;
+        }
+
+        if ($uploaded_count <= 0) {
+            $this->session->set_flashdata('error', 'No valid image was uploaded. Please use JPG, JPEG, PNG, or WEBP files.');
+            redirect('admin/bookings/photos/' . $booking_id);
+        }
+
+        $this->session->set_flashdata('success', $uploaded_count . ' car photo(s) uploaded successfully.');
+        redirect('admin/bookings/photos/' . $booking_id);
+    }
+
+    public function delete($booking_id)
+    {
+        $booking_id = (int) $booking_id;
+        $booking = $this->General_model->get_bookings(array('bookings.id' => $booking_id));
+
+        if (empty($booking)) {
+            show_404();
+        }
+
+        // Delete related payments first
+        $this->General_model->delete('payments', array('booking_id' => $booking_id));
+
+        // Delete booking photos records
+        $this->General_model->delete('booking_vehicle_photos', array('booking_id' => $booking_id));
+
+        // Delete the booking itself
+        $this->General_model->delete('bookings', array('id' => $booking_id));
+
+        $this->session->set_flashdata('success', 'Booking deleted successfully.');
         redirect('admin/bookings');
     }
 }

@@ -759,21 +759,55 @@ function cm_initials($name)
                                     <?php echo !empty($customer['last_booking']) ? date('d M Y', strtotime($customer['last_booking'])) : 'No bookings'; ?>
                                 </td>
                                 <td>
-                                    <button class="cm-view-btn customer-view-btn" type="button"
-                                        data-name="<?php echo html_escape($customer['full_name']); ?>"
-                                        data-email="<?php echo html_escape($customer['email']); ?>"
-                                        data-phone="<?php echo html_escape($customer['phone']); ?>"
-                                        data-bookings="<?php echo (int)$customer['total_bookings']; ?>"
-                                        data-spent="<?php echo number_format((float)$customer['total_spent'], 2, '.', ''); ?>"
-                                        data-docs="<?php echo html_escape($customer['doc_status']); ?>"
-                                        data-last-booking="<?php echo !empty($customer['last_booking']) ? date('d M Y', strtotime($customer['last_booking'])) : 'No bookings'; ?>"
-                                        data-detail="<?php echo html_escape(json_encode($customer['detail'])); ?>">
-                                        <svg viewBox="0 0 16 16" fill="none">
-                                            <path d="M1 8s3-5 7-5 7 5 7 5-3 5-7 5-7-5-7-5Z" stroke="currentColor" stroke-width="1.4" />
-                                            <circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.4" />
-                                        </svg>
-                                        View
-                                    </button>
+                                    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+                                        <button class="cm-view-btn customer-view-btn" type="button"
+                                            data-name="<?php echo html_escape($customer['full_name']); ?>"
+                                            data-email="<?php echo html_escape($customer['email']); ?>"
+                                            data-phone="<?php echo html_escape($customer['phone']); ?>"
+                                            data-bookings="<?php echo (int)$customer['total_bookings']; ?>"
+                                            data-spent="<?php echo number_format((float)$customer['total_spent'], 2, '.', ''); ?>"
+                                            data-docs="<?php echo html_escape($customer['doc_status']); ?>"
+                                            data-last-booking="<?php echo !empty($customer['last_booking']) ? date('d M Y', strtotime($customer['last_booking'])) : 'No bookings'; ?>"
+                                            data-detail="<?php echo html_escape(json_encode($customer['detail'])); ?>">
+                                            <svg viewBox="0 0 16 16" fill="none">
+                                                <path d="M1 8s3-5 7-5 7 5 7 5-3 5-7 5-7-5-7-5Z" stroke="currentColor" stroke-width="1.4" />
+                                                <circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.4" />
+                                            </svg>
+                                            View
+                                        </button>
+
+                                        <?php if ((int)$customer['total_bookings'] === 0): ?>
+                                            <form method="post"
+                                                action="<?php echo base_url('admin/customers/delete/' . (int)$customer['id']); ?>"
+                                                class="js-swal-confirm-form"
+                                                data-swal-title="Delete customer?"
+                                                data-swal-text="<?php echo html_escape($customer['full_name']); ?> and all their documents will be permanently removed."
+                                                data-swal-confirm="Delete"
+                                                style="display:inline;">
+                                                <button class="cm-view-btn" type="submit"
+                                                    style="border-color:var(--danger-bd);color:var(--danger-tx);background:var(--danger-bg);">
+                                                    <svg viewBox="0 0 16 16" fill="none">
+                                                        <path d="M2 4h12M5 4V2.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5V4M6 7v5M10 7v5M3 4l.8 9a1 1 0 0 0 1 .9h6.4a1 1 0 0 0 1-.9L13 4"
+                                                            stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+                                                    </svg>
+                                                    Delete
+                                                </button>
+                                            </form>
+                                        <?php else: ?>
+                                            <span style="
+                display:inline-flex;align-items:center;gap:4px;
+                padding:6px 10px;border-radius:var(--radius-sm);
+                background:var(--surface-alt);border:1.5px solid var(--border);
+                color:var(--text-3);font:600 11px/1 var(--font);
+                cursor:not-allowed;" title="Delete their <?php echo (int)$customer['total_bookings']; ?> booking(s) first">
+                                                <svg viewBox="0 0 16 16" fill="none" width="12" height="12">
+                                                    <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4" />
+                                                    <path d="M8 5v4M8 10.5v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+                                                </svg>
+                                                <?php echo (int)$customer['total_bookings']; ?> booking<?php echo (int)$customer['total_bookings'] > 1 ? 's' : ''; ?>
+                                            </span>
+                                        <?php endif; ?>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

@@ -1,5 +1,5 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
 /*
 | -------------------------------------------------------------------------
@@ -63,10 +63,15 @@ $route['admin/profile/password'] = 'admin/profile/password';
 $route['admin/bookings'] = 'admin/booking/index';
 $route['admin/bookings/create'] = 'admin/booking/create';
 $route['admin/bookings/store'] = 'admin/booking/store';
+$route['admin/bookings/photos/(:num)'] = 'admin/booking/photos/$1';
+$route['admin/bookings/photos/upload/(:num)'] = 'admin/booking/upload_photos/$1';
+$route['admin/bookings/delete/(:num)'] = 'admin/booking/delete/$1';
 $route['admin/customers'] = 'admin/customer/index';
+$route['admin/customers/delete/(:num)'] = 'admin/customer/delete/$1';
 $route['admin/documents'] = 'admin/document/index';
 $route['admin/documents/review/(:num)'] = 'admin/document/review/$1';
 $route['admin/documents/update-status'] = 'admin/document/update_status';
+$route['admin/documents/delete-customer/(:num)'] = 'admin/document/delete_customer_documents/$1';
 $route['admin/vehicles'] = 'admin/vehicle/index';
 $route['admin/vehicles/create'] = 'admin/vehicle/create';
 $route['admin/vehicles/store'] = 'admin/vehicle/store';

@@ -204,10 +204,19 @@ class General_model extends CI_Model
 
     public function get_dashboard_counts($role = 'admin', $user_id = 0)
     {
+        $vehicles = $this->get_vehicles_with_live_status();
+        $available_vehicles = 0;
+
+        foreach ($vehicles as $vehicle) {
+            if (isset($vehicle['status']) && $vehicle['status'] === 'available') {
+                $available_vehicles++;
+            }
+        }
+
         $counts = array(
             'total_customers' => (int) $this->db->where('role', 0)->count_all_results('users'),
-            'total_vehicles' => (int) $this->db->count_all('vehicles'),
-            'available_vehicles' => (int) $this->db->where('status', 'available')->count_all_results('vehicles'),
+            'total_vehicles' => count($vehicles),
+            'available_vehicles' => $available_vehicles,
             'total_bookings' => (int) $this->db->where('status !=', 'draft')->count_all_results('bookings'),
             'pending_bookings' => (int) $this->db->where(array('status' => 'pending'))->count_all_results('bookings'),
         );
@@ -230,7 +239,7 @@ class General_model extends CI_Model
         $include_drafts = !empty($filters['include_drafts']);
         unset($filters['include_drafts']);
 
-        $this->db->select('bookings.*, users.full_name AS customer_name, users.phone AS customer_phone, vehicles.name AS vehicle_name, vehicles.registration_no, vehicles.advance_amount');
+        $this->db->select('bookings.*, users.full_name AS customer_name, users.phone AS customer_phone, vehicles.name AS vehicle_name, vehicles.registration_no, vehicles.advance_amount, vehicles.image AS vehicle_image');
         $this->db->from('bookings');
         $this->db->join('users', 'users.id = bookings.customer_id', 'left');
         $this->db->join('vehicles', 'vehicles.id = bookings.vehicle_id', 'left');
@@ -264,7 +273,18 @@ class General_model extends CI_Model
 
     public function get_available_vehicles()
     {
-        return $this->get_all('vehicles', array('status' => 'available'), 'id DESC');
+        $vehicles = $this->get_vehicles_with_live_status();
+
+        return array_values(array_filter($vehicles, function ($vehicle) {
+            return isset($vehicle['status']) && $vehicle['status'] === 'available';
+        }));
+    }
+
+    public function get_vehicles_with_live_status()
+    {
+        $vehicles = $this->get_all('vehicles', array(), 'id DESC');
+
+        return $this->apply_live_vehicle_status($vehicles);
     }
 
     public function create_booking($data)
@@ -276,10 +296,6 @@ class General_model extends CI_Model
         $data['updated_at'] = date('Y-m-d H:i:s');
 
         $booking_id = $this->insert('bookings', $data);
-
-        if (!$skip_vehicle_booking && !empty($data['vehicle_id'])) {
-            $this->update('vehicles', array('id' => $data['vehicle_id']), array('status' => 'booked'));
-        }
 
         return $booking_id;
     }
@@ -594,7 +610,7 @@ class General_model extends CI_Model
             return array();
         }
 
-        $this->db->select('payment_requests.*, bookings.created_at AS booking_created_at, users.full_name AS customer_name, users.email AS customer_email, users.phone AS customer_phone, vehicles.name AS vehicle_name, vehicles.registration_no');
+        $this->db->select('payment_requests.*, bookings.created_at AS booking_created_at, bookings.pickup_date, bookings.return_date, bookings.pickup_location, bookings.drop_location, bookings.amount AS booking_amount, vehicles.advance_amount, users.full_name AS customer_name, users.email AS customer_email, users.phone AS customer_phone, vehicles.name AS vehicle_name, vehicles.registration_no, vehicles.image AS vehicle_image');
         $this->db->from('payment_requests');
         $this->db->join('bookings', 'bookings.id = payment_requests.booking_id', 'left');
         $this->db->join('users', 'users.id = payment_requests.customer_id', 'left');
@@ -621,7 +637,7 @@ class General_model extends CI_Model
             return array();
         }
 
-        $this->db->select('payment_requests.*, bookings.created_at AS booking_created_at, users.full_name AS customer_name, users.email AS customer_email, users.phone AS customer_phone, vehicles.name AS vehicle_name, vehicles.registration_no');
+        $this->db->select('payment_requests.*, bookings.created_at AS booking_created_at, bookings.pickup_date, bookings.return_date, bookings.pickup_location, bookings.drop_location, bookings.amount AS booking_amount, vehicles.advance_amount, users.full_name AS customer_name, users.email AS customer_email, users.phone AS customer_phone, vehicles.name AS vehicle_name, vehicles.registration_no, vehicles.image AS vehicle_image');
         $this->db->from('payment_requests');
         $this->db->join('bookings', 'bookings.id = payment_requests.booking_id', 'left');
         $this->db->join('users', 'users.id = payment_requests.customer_id', 'left');
@@ -650,6 +666,35 @@ class General_model extends CI_Model
         }
 
         return (array) $this->db->order_by('id', 'DESC')->get()->row_array();
+    }
+
+    public function get_booking_photos($booking_id)
+    {
+        $booking_id = (int) $booking_id;
+        if ($booking_id <= 0 || !$this->db->table_exists('booking_vehicle_photos')) {
+            return array();
+        }
+
+        return $this->db
+            ->select('booking_vehicle_photos.*, users.full_name AS uploaded_by_name')
+            ->from('booking_vehicle_photos')
+            ->join('users', 'users.id = booking_vehicle_photos.uploaded_by', 'left')
+            ->where('booking_vehicle_photos.booking_id', $booking_id)
+            ->order_by('booking_vehicle_photos.id', 'DESC')
+            ->get()
+            ->result_array();
+    }
+
+    public function create_booking_photo($data)
+    {
+        if (!$this->db->table_exists('booking_vehicle_photos')) {
+            return 0;
+        }
+
+        $data['created_at'] = date('Y-m-d H:i:s');
+        $data['updated_at'] = date('Y-m-d H:i:s');
+
+        return (int) $this->insert('booking_vehicle_photos', $data);
     }
 
     public function update_payment_request($request_id, $data)
@@ -973,6 +1018,7 @@ class General_model extends CI_Model
 
         $payment_totals = $this->get_payment_totals_map($booking_ids);
         $payment_request_map = $this->get_payment_request_map($booking_ids);
+        $photo_count_map = $this->get_booking_photo_counts_map($booking_ids);
 
         foreach ($bookings as &$booking) {
             $paid_amount = isset($payment_totals[$booking['id']]) ? (float) $payment_totals[$booking['id']] : 0;
@@ -984,7 +1030,7 @@ class General_model extends CI_Model
             $booking['booking_code'] = $this->format_booking_code($booking['id'], isset($booking['created_at']) ? $booking['created_at'] : '');
             $booking['trip_label'] = $this->format_trip_range($booking['pickup_date'], $booking['return_date']);
             $booking['trip_route'] = trim($booking['pickup_location'] . ' - ' . $booking['drop_location'], ' -');
-            $booking['display_km'] = !empty($booking['estimated_km']) ? (int) $booking['estimated_km'] . ' km' : 'N/A';
+
             $booking['paid_amount'] = $paid_amount;
             $booking['advance_due'] = $advance_amount;
             $booking['balance_amount'] = $balance_amount;
@@ -999,6 +1045,7 @@ class General_model extends CI_Model
             $booking['payment_request_type'] = !empty($request_row) ? $request_row['payment_type'] : '';
             $booking['payment_request_receipt'] = !empty($request_row) ? $request_row['receipt_path'] : '';
             $booking['payment_request_admin_notes'] = !empty($request_row) ? $request_row['admin_notes'] : '';
+            $booking['booking_photo_count'] = isset($photo_count_map[$booking['id']]) ? (int) $photo_count_map[$booking['id']] : 0;
         }
         unset($booking);
 
@@ -1181,6 +1228,69 @@ class General_model extends CI_Model
         return $map;
     }
 
+    private function apply_live_vehicle_status($vehicles, $reference_date = '')
+    {
+        if (empty($vehicles)) {
+            return array();
+        }
+
+        $booking_map = $this->get_live_vehicle_booking_map($reference_date);
+
+        foreach ($vehicles as &$vehicle) {
+            $vehicle_id = isset($vehicle['id']) ? (int) $vehicle['id'] : 0;
+            $base_status = isset($vehicle['status']) ? strtolower((string) $vehicle['status']) : 'available';
+
+            if ($base_status === 'service') {
+                $vehicle['active_booking'] = array();
+                $vehicle['status'] = 'service';
+                continue;
+            }
+
+            if ($vehicle_id > 0 && isset($booking_map[$vehicle_id])) {
+                $vehicle['status'] = 'booked';
+                $vehicle['active_booking'] = $booking_map[$vehicle_id];
+                continue;
+            }
+
+            $vehicle['status'] = 'available';
+            $vehicle['active_booking'] = array();
+        }
+        unset($vehicle);
+
+        return $vehicles;
+    }
+
+    private function get_live_vehicle_booking_map($reference_date = '')
+    {
+        $reference_date = $reference_date !== '' ? $reference_date : date('Y-m-d');
+        $bookings = $this->get_bookings();
+        $map = array();
+
+        foreach ($bookings as $booking) {
+            $vehicle_id = isset($booking['vehicle_id']) ? (int) $booking['vehicle_id'] : 0;
+            if ($vehicle_id <= 0 || isset($map[$vehicle_id])) {
+                continue;
+            }
+
+            $status = !empty($booking['effective_status']) ? $booking['effective_status'] : $booking['status'];
+            if (!in_array($status, array('pending', 'confirmed'), true)) {
+                continue;
+            }
+
+            if (!app_booking_is_active_on_date(
+                isset($booking['pickup_date']) ? $booking['pickup_date'] : '',
+                isset($booking['return_date']) ? $booking['return_date'] : '',
+                $reference_date
+            )) {
+                continue;
+            }
+
+            $map[$vehicle_id] = $booking;
+        }
+
+        return $map;
+    }
+
     private function get_payment_request_map($booking_ids)
     {
         if (empty($booking_ids) || !$this->db->table_exists('payment_requests')) {
@@ -1200,6 +1310,28 @@ class General_model extends CI_Model
             if (!isset($map[$booking_id])) {
                 $map[$booking_id] = $row;
             }
+        }
+
+        return $map;
+    }
+
+    private function get_booking_photo_counts_map($booking_ids)
+    {
+        if (empty($booking_ids) || !$this->db->table_exists('booking_vehicle_photos')) {
+            return array();
+        }
+
+        $rows = $this->db
+            ->select('booking_id, COUNT(*) AS total_photos', false)
+            ->from('booking_vehicle_photos')
+            ->where_in('booking_id', $booking_ids)
+            ->group_by('booking_id')
+            ->get()
+            ->result_array();
+
+        $map = array();
+        foreach ($rows as $row) {
+            $map[(int) $row['booking_id']] = (int) $row['total_photos'];
         }
 
         return $map;

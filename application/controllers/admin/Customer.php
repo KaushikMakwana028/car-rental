@@ -1,5 +1,5 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
 class Customer extends Admin_Controller
 {
@@ -15,5 +15,49 @@ class Customer extends Admin_Controller
         unset($customer);
 
         $this->render_view('admin/customers_list', $data);
+    }
+
+    public function delete($customer_id)
+    {
+        if ($this->input->method() !== 'post') {
+            show_404();
+        }
+
+        $customer_id = (int) $customer_id;
+
+        if ($customer_id <= 0) {
+            $this->session->set_flashdata('error', 'Invalid customer.');
+            redirect('admin/customers');
+            return;
+        }
+
+        // Check if customer has bookings
+        $booking_count = $this->General_model->count_rows('bookings', array('customer_id' => $customer_id));
+
+        if ($booking_count > 0) {
+            $this->session->set_flashdata('error', 'This customer has ' . $booking_count . ' booking(s) and cannot be deleted. Delete their bookings first.');
+            redirect('admin/customers');
+            return;
+        }
+
+        // Delete documents files from disk first
+        $documents = $this->db->where('customer_id', $customer_id)->get('documents')->result_array();
+        foreach ($documents as $doc) {
+            if (!empty($doc['file_path'])) {
+                $full_path = FCPATH . $doc['file_path'];
+                if (file_exists($full_path)) {
+                    @unlink($full_path);
+                }
+            }
+        }
+
+        // Delete document records
+        $this->db->where('customer_id', $customer_id)->delete('documents');
+
+        // Delete the user/customer account — use your actual table name
+        $this->db->where('id', $customer_id)->delete('users');
+
+        $this->session->set_flashdata('success', 'Customer deleted successfully.');
+        redirect('admin/customers');
     }
 }

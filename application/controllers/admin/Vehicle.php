@@ -7,29 +7,7 @@ class Vehicle extends Admin_Controller
     {
         $data['page_title'] = 'Manage Vehicles';
         $data['current_user'] = $this->current_user;
-        $vehicles = $this->General_model->get_all('vehicles');
-        $bookings = $this->General_model->get_bookings();
-        $booking_map = array();
-
-        foreach ($bookings as $booking) {
-            $vehicle_id = isset($booking['vehicle_id']) ? (int) $booking['vehicle_id'] : 0;
-            if ($vehicle_id <= 0 || isset($booking_map[$vehicle_id])) {
-                continue;
-            }
-
-            $status = !empty($booking['effective_status']) ? $booking['effective_status'] : $booking['status'];
-            if (!in_array($status, array('pending', 'confirmed', 'completed'), true)) {
-                continue;
-            }
-
-            $booking_map[$vehicle_id] = $booking;
-        }
-
-        foreach ($vehicles as &$vehicle) {
-            $vehicle_id = isset($vehicle['id']) ? (int) $vehicle['id'] : 0;
-            $vehicle['active_booking'] = isset($booking_map[$vehicle_id]) ? $booking_map[$vehicle_id] : array();
-        }
-        unset($vehicle);
+        $vehicles = $this->General_model->get_vehicles_with_live_status();
 
         usort($vehicles, function ($left, $right) {
             $priority = array(
@@ -120,11 +98,27 @@ class Vehicle extends Admin_Controller
         $vehicle_type = trim($this->input->post('vehicle_type', true));
         $fuel_type = trim($this->input->post('fuel_type', true));
         $seats = (int) $this->input->post('seats');
-        $rate_per_km = (float) $this->input->post('rate_per_km');
+
+        $price_6_hours = (float) $this->input->post('price_6_hours');
+        $price_12_hours = (float) $this->input->post('price_12_hours');
+        $price_24_hours = (float) $this->input->post('price_24_hours');
+        $extra_hour_charge = (float) $this->input->post('extra_hour_charge');
         $advance_amount = (float) $this->input->post('advance_amount');
         $status = $this->input->post('status', true) ?: 'available';
 
-        if ($name === '' || $registration_no === '' || $vehicle_type === '' || $fuel_type === '' || $seats <= 0 || $rate_per_km < 0 || $advance_amount < 0) {
+        if (
+            $name === '' ||
+            $registration_no === '' ||
+            $vehicle_type === '' ||
+            $fuel_type === '' ||
+            $seats <= 0 ||
+
+            $price_6_hours < 0 ||
+            $price_12_hours < 0 ||
+            $price_24_hours < 0 ||
+            $extra_hour_charge < 0 ||
+            $advance_amount < 0
+        ) {
             $this->session->set_flashdata('error', 'Please fill all vehicle fields correctly before saving.');
             redirect('admin/vehicles');
             return false;
@@ -160,7 +154,11 @@ class Vehicle extends Admin_Controller
             'vehicle_type' => $vehicle_type,
             'fuel_type' => $fuel_type,
             'seats' => $seats,
-            'rate_per_day' => $rate_per_km,
+            'rate_per_day' => 0,
+            'price_6_hours' => $price_6_hours,
+            'price_12_hours' => $price_12_hours,
+            'price_24_hours' => $price_24_hours,
+            'extra_hour_charge' => $extra_hour_charge,
             'image' => $image_path,
             'advance_amount' => $advance_amount,
             'status' => $status,

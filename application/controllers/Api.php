@@ -48,9 +48,15 @@ class Api extends CI_Controller
     public function create_booking()
     {
         $vehicle_id = (int) $this->input->post('vehicle_id');
-        $estimated_km = (int) $this->input->post('estimated_km');
+        $hours_slot = (int) $this->input->post('hours_slot');
         $vehicle = $this->General_model->get_row('vehicles', array('id' => $vehicle_id));
-        $calculated_amount = !empty($vehicle) ? ((float) $vehicle['rate_per_day'] * $estimated_km) : 0;
+        
+        $price_map = array(
+            6  => !empty($vehicle) ? (float)$vehicle['price_6_hours'] : 0,
+            12 => !empty($vehicle) ? (float)$vehicle['price_12_hours'] : 0,
+            24 => !empty($vehicle) ? (float)$vehicle['price_24_hours'] : 0,
+        );
+        $calculated_amount = isset($price_map[$hours_slot]) ? $price_map[$hours_slot] : 0;
 
         $payload = array(
             'customer_id' => (int) $this->input->post('customer_id'),
@@ -59,7 +65,8 @@ class Api extends CI_Controller
             'return_date' => $this->input->post('return_date', true),
             'pickup_location' => trim($this->input->post('pickup_location', true)),
             'drop_location' => trim($this->input->post('drop_location', true)),
-            'estimated_km' => $estimated_km,
+            'booking_type' => 'hours',
+            'hours_slot' => $hours_slot,
             'amount' => $calculated_amount,
             'status' => $this->input->post('status', true) ?: 'pending',
         );

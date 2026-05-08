@@ -76,7 +76,9 @@ foreach ($vehicles as $vehicle) {
                             <div class="spec-row"><span>Type</span><strong><?php echo html_escape($vehicle['vehicle_type']); ?></strong></div>
                             <div class="spec-row"><span>Fuel</span><strong><?php echo html_escape($vehicle['fuel_type']); ?></strong></div>
                             <div class="spec-row"><span>Seats</span><strong><?php echo (int) $vehicle['seats']; ?></strong></div>
-                            <div class="spec-row"><span>Rate / KM</span><strong>&#8377;<?php echo number_format((float) $vehicle['rate_per_day'], 2); ?></strong></div>
+                            <div class="spec-row"><span>6 Hours</span><strong>&#8377;<?php echo number_format((float) (isset($vehicle['price_6_hours']) ? $vehicle['price_6_hours'] : 0), 2); ?></strong></div>
+                            <div class="spec-row"><span>12 Hours</span><strong>&#8377;<?php echo number_format((float) (isset($vehicle['price_12_hours']) ? $vehicle['price_12_hours'] : 0), 2); ?></strong></div>
+                            <div class="spec-row"><span>24 Hours</span><strong>&#8377;<?php echo number_format((float) (isset($vehicle['price_24_hours']) ? $vehicle['price_24_hours'] : 0), 2); ?></strong></div>
                             <div class="spec-row"><span>Advance</span><strong>&#8377;<?php echo number_format((float) $vehicle['advance_amount'], 2); ?></strong></div>
                         </div>
                         <?php if (!empty($document_gate['is_ready'])): ?>

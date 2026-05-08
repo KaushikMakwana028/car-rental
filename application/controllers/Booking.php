@@ -1,5 +1,5 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
 class Booking extends MY_Controller
 {
@@ -45,12 +45,13 @@ class Booking extends MY_Controller
 
     public function store()
     {
-        $booking_id = (int) $this->input->post('booking_id');
-        $customer_id = (int) $this->input->post('customer_id');
-        $vehicle_id = (int) $this->input->post('vehicle_id');
-        $estimated_km = (int) $this->input->post('estimated_km');
-        $customer_name = trim($this->input->post('customer_name', true));
+        $booking_id     = (int) $this->input->post('booking_id');
+        $customer_id    = (int) $this->input->post('customer_id');
+        $vehicle_id     = (int) $this->input->post('vehicle_id');
+        $hours_slot     = (int) $this->input->post('hours_slot');
+        $customer_name  = trim($this->input->post('customer_name', true));
         $customer_phone = trim($this->input->post('customer_phone', true));
+
         $vehicle = $this->General_model->get_row('vehicles', array('id' => $vehicle_id));
 
         if ($customer_name === '' || $customer_phone === '') {
@@ -63,39 +64,55 @@ class Booking extends MY_Controller
             redirect('bookings/create');
         }
 
-        $calculated_amount = (float) $vehicle['rate_per_day'] * $estimated_km;
-        $is_booking_edit = $booking_id > 0 && $customer_id > 0 && $this->customer_can_access_booking($booking_id, $customer_id);
+        /* Calculate amount based on booking type */
+        $price_map = array(
+            6  => (float)$vehicle['price_6_hours'],
+            12 => (float)$vehicle['price_12_hours'],
+            24 => (float)$vehicle['price_24_hours'],
+        );
+        $calculated_amount = isset($price_map[$hours_slot]) ? $price_map[$hours_slot] : 0;
+        $booking_type      = 'hours';
+
+        $is_booking_edit = $booking_id > 0 && $customer_id > 0
+            && $this->customer_can_access_booking($booking_id, $customer_id);
 
         if ($is_booking_edit) {
             $this->General_model->update_user_profile($customer_id, array(
                 'full_name' => $customer_name,
-                'phone' => $customer_phone,
+                'phone'     => $customer_phone,
             ));
         } else {
             $customer_id = (int) $this->General_model->resolve_customer_account($customer_name, $customer_phone);
         }
 
         $payload = array(
-            'customer_id' => $customer_id,
-            'vehicle_id' => $vehicle_id,
-            'pickup_date' => $this->input->post('pickup_date', true),
-            'return_date' => $this->input->post('return_date', true),
-            'pickup_location' => trim($this->input->post('pickup_location', true)),
-            'drop_location' => trim($this->input->post('drop_location', true)),
-            'estimated_km' => $estimated_km,
-            'amount' => $calculated_amount,
-            'status' => 'draft',
+            'customer_id'      => $customer_id,
+            'vehicle_id'       => $vehicle_id,
+            'pickup_date'      => $this->input->post('pickup_date', true),
+            'return_date'      => $this->input->post('return_date', true),
+            'pickup_location'  => trim($this->input->post('pickup_location', true)),
+            'drop_location'    => trim($this->input->post('drop_location', true)),
+            'booking_type'     => $booking_type,
+            'hours_slot'       => $hours_slot,
+            'pickup_time' => $this->input->post('pickup_time', true) ?: null,
+            'return_time' => $this->input->post('return_time', true) ?: null,
+            'amount'           => $calculated_amount,
+            'status'           => 'draft',
             '_skip_vehicle_booking' => true,
         );
 
         if ($is_booking_edit) {
             unset($payload['_skip_vehicle_booking']);
             $payload['updated_at'] = date('Y-m-d H:i:s');
-            $this->General_model->update('bookings', array('id' => $booking_id, 'customer_id' => $customer_id), $payload);
-            $this->session->set_flashdata('success', 'Step 1 updated successfully. Continue with document upload.');
+            $this->General_model->update(
+                'bookings',
+                array('id' => $booking_id, 'customer_id' => $customer_id),
+                $payload
+            );
+            $this->session->set_flashdata('success', 'Step 1 updated. Continue with document upload.');
         } else {
             $booking_id = (int) $this->General_model->create_booking($payload);
-            $this->session->set_flashdata('success', 'Step 1 completed successfully. Your booking details were saved. Continue with document upload.');
+            $this->session->set_flashdata('success', 'Step 1 completed. Continue with document upload.');
         }
 
         $this->set_public_booking_session($customer_id, $booking_id);

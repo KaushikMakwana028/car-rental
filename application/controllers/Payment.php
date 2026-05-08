@@ -112,9 +112,6 @@ class Payment extends MY_Controller
             'status' => 'pending',
             'updated_at' => date('Y-m-d H:i:s'),
         ));
-        $this->General_model->update('vehicles', array('id' => (int) $booking['vehicle_id']), array(
-            'status' => 'booked',
-        ));
         $this->clear_public_booking_session();
         $this->session->set_flashdata('swal', array(
             'icon' => 'success',
