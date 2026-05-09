@@ -180,9 +180,13 @@ $booking_back_url .= (strpos($booking_back_url, '?') === false ? '?' : '&') . 'b
                 $all_uploaded = !empty($document_map['Aadhaar Card']['file_path']) && !empty($document_map['Driving License']['file_path']);
                 ?>
                 <?php if ($all_uploaded): ?>
-                    <a class="btn" href="<?php echo base_url('payments/pay/' . (int)$booking['id'] . '?customer_id=' . (int)$booking['customer_id']); ?>">Continue to Payment</a>
+                    <?php if (!empty($booking['requires_advance'])): ?>
+                        <a class="btn" href="<?php echo base_url('payments/pay/' . (int)$booking['id'] . '?customer_id=' . (int)$booking['customer_id']); ?>">Continue to Payment</a>
+                    <?php else: ?>
+                        <a class="btn" href="<?php echo base_url('documents/complete/' . (int)$booking['id'] . '?customer_id=' . (int)$booking['customer_id']); ?>">Complete Booking</a>
+                    <?php endif; ?>
                 <?php else: ?>
-                    <button class="btn" type="submit">Upload Documents and Continue</button>
+                    <button class="btn" type="submit"><?php echo !empty($booking['requires_advance']) ? 'Upload Documents and Continue' : 'Upload Documents and Complete'; ?></button>
                 <?php endif; ?>
                 <a class="btn-secondary js-swal-confirm" href="<?php echo $cancel_url; ?>" data-swal-title="Cancel booking?" data-swal-text="This incomplete booking draft will be removed." data-swal-confirm="Yes, cancel">Cancel</a>
             </div>
@@ -194,7 +198,7 @@ $booking_back_url .= (strpos($booking_back_url, '?') === false ? '?' : '&') . 'b
         <div class="card-head">
             <div>
                 <h3>Current booking summary.</h3>
-                <p>Upload both documents, then move to advance payment.</p>
+                <p><?php echo !empty($booking['requires_advance']) ? 'Upload both documents, then move to advance payment.' : 'Upload both documents to complete the booking request.'; ?></p>
             </div>
         </div>
         <div class="info-grid" style="grid-template-columns:1fr;">
@@ -212,7 +216,7 @@ $booking_back_url .= (strpos($booking_back_url, '?') === false ? '?' : '&') . 'b
             </div>
             <div class="feature-card">
                 <strong>Advance</strong>
-                <span>&#8377;<?php echo number_format((float) $booking['advance_due'], 2); ?></span>
+                <span><?php echo !empty($booking['requires_advance']) ? ('&#8377;' . number_format((float) $booking['advance_due'], 2)) : 'Optional / Not selected'; ?></span>
             </div>
         </div>
     </aside>

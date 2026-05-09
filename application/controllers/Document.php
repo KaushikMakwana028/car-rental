@@ -30,7 +30,9 @@ class Document extends MY_Controller
         }
 
         $data['page_title'] = 'Upload Documents';
-        $data['page_subtitle'] = 'Upload Aadhaar Card and Driving License files before moving to the advance payment step.';
+        $data['page_subtitle'] = !empty($booking['requires_advance'])
+            ? 'Upload Aadhaar Card and Driving License files before moving to the advance payment step.'
+            : 'Upload Aadhaar Card and Driving License files to complete the booking request.';
         $data['current_user'] = $this->current_user;
         $data['is_customer_logged_in'] = $this->is_logged_in() && $this->current_role() === 0;
         $data['current_step'] = 2;
@@ -142,14 +144,74 @@ class Document extends MY_Controller
             redirect('documents?booking_id=' . $booking_id . '&customer_id=' . $customer_id);
         }
 
+        $booking = $this->General_model->get_booking_for_flow($booking_id, $customer_id);
+        if (empty($booking)) {
+            $this->session->set_flashdata('error', 'Please start your booking again.');
+            redirect('dashboard');
+        }
+
+        if (empty($booking['requires_advance'])) {
+            $this->complete_booking_without_advance($booking);
+            return;
+        }
+
         $this->session->set_flashdata('success', 'Documents uploaded successfully. Please complete payment now.');
         redirect('payments/pay/' . $booking_id . '?customer_id=' . $customer_id);
+    }
+
+    public function complete($booking_id = 0)
+    {
+        $customer_id = (int) $this->input->get('customer_id');
+        if ($customer_id <= 0) {
+            $customer_id = $this->get_active_customer_id();
+        }
+
+        $booking = $this->General_model->get_booking_for_flow((int) $booking_id, $customer_id);
+        if (empty($booking)) {
+            $this->session->set_flashdata('error', 'Please start your booking again.');
+            redirect('dashboard');
+        }
+
+        if (!$this->can_continue_to_payment($customer_id)) {
+            $this->session->set_flashdata('error', 'Upload both required documents before completing the booking.');
+            redirect('documents?booking_id=' . (int) $booking_id . '&customer_id=' . $customer_id);
+        }
+
+        if (!empty($booking['requires_advance'])) {
+            redirect('payments/pay/' . (int) $booking_id . '?customer_id=' . $customer_id);
+        }
+
+        $this->complete_booking_without_advance($booking);
     }
 
     private function can_continue_to_payment($customer_id)
     {
         $summary = $this->General_model->get_required_documents_status((int) $customer_id);
         return (int) $summary['missing_count'] === 0 && (int) $summary['rejected_count'] === 0;
+    }
+
+    private function complete_booking_without_advance($booking)
+    {
+        $booking_id = (int) $booking['id'];
+        $customer_id = (int) $booking['customer_id'];
+
+        $this->General_model->update('bookings', array('id' => $booking_id), array(
+            'status' => 'pending',
+            'updated_at' => date('Y-m-d H:i:s'),
+        ));
+
+        $this->clear_public_booking_session();
+        $this->session->set_flashdata('swal', array(
+            'icon' => 'success',
+            'title' => 'Booking Request Submitted',
+            'text' => 'Your booking request and documents were submitted successfully. Admin will review them shortly.',
+            'identity' => array(
+                'Booking ID' => isset($booking['booking_code']) ? $booking['booking_code'] : ('#' . $booking_id),
+                'Customer' => isset($booking['customer_name']) ? $booking['customer_name'] : '',
+                'Mobile' => isset($booking['customer_phone']) ? $booking['customer_phone'] : '',
+            ),
+        ));
+        redirect('dashboard');
     }
 
     private function upload_document_file($upload_dir, $field_name, $customer_id, $document_type)

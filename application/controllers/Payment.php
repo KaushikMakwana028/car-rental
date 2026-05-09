@@ -29,6 +29,10 @@ class Payment extends MY_Controller
 
         $this->set_public_booking_session($customer_id, $booking_id);
         $booking = $this->General_model->get_booking_for_flow($booking_id, $customer_id);
+        if (empty($booking['requires_advance'])) {
+            $this->session->set_flashdata('success', 'Advance payment is optional for this booking.');
+            redirect('dashboard');
+        }
 
         $data['page_title'] = 'Advance Payment';
         $data['page_subtitle'] = 'Pay the advance amount and upload your receipt to complete the booking request.';
@@ -54,6 +58,11 @@ class Payment extends MY_Controller
 
         if (empty($booking)) {
             $this->session->set_flashdata('error', 'Please start your booking again.');
+            redirect('dashboard');
+        }
+
+        if (empty($booking['requires_advance'])) {
+            $this->session->set_flashdata('error', 'Advance payment is not required for this booking.');
             redirect('dashboard');
         }
 

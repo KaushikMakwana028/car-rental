@@ -99,6 +99,7 @@ class Vehicle extends Admin_Controller
         $fuel_type = trim($this->input->post('fuel_type', true));
         $seats = (int) $this->input->post('seats');
 
+        $rate_per_km = (float) $this->input->post('rate_per_km');
         $price_6_hours = (float) $this->input->post('price_6_hours');
         $price_12_hours = (float) $this->input->post('price_12_hours');
         $price_24_hours = (float) $this->input->post('price_24_hours');
@@ -113,6 +114,7 @@ class Vehicle extends Admin_Controller
             $fuel_type === '' ||
             $seats <= 0 ||
 
+            $rate_per_km < 0 ||
             $price_6_hours < 0 ||
             $price_12_hours < 0 ||
             $price_24_hours < 0 ||
@@ -154,7 +156,7 @@ class Vehicle extends Admin_Controller
             'vehicle_type' => $vehicle_type,
             'fuel_type' => $fuel_type,
             'seats' => $seats,
-            'rate_per_day' => 0,
+            'rate_per_day' => $rate_per_km,
             'price_6_hours' => $price_6_hours,
             'price_12_hours' => $price_12_hours,
             'price_24_hours' => $price_24_hours,

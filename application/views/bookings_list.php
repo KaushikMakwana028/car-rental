@@ -89,7 +89,10 @@ foreach ($bookings as $booking) {
                             <span class="table-title"><?php echo html_escape($booking['vehicle_name']); ?></span>
                             <span class="table-note"><?php echo html_escape($booking['registration_no']); ?></span>
                         </td>
-                        <td><span class="pill"><?php echo html_escape($booking['trip_label']); ?></span></td>
+                        <td>
+                            <span class="pill"><?php echo html_escape($booking['trip_mode_label']); ?></span>
+                            <span class="table-note"><?php echo html_escape($booking['trip_label']); ?></span>
+                        </td>
                         <td>
                             <span class="table-title"><?php echo html_escape($booking['pickup_location']); ?></span>
                             <span class="table-note">Drop: <?php echo html_escape($booking['drop_location']); ?></span>
@@ -108,9 +111,13 @@ foreach ($bookings as $booking) {
                         </td>
                         <td><span class="badge badge-<?php echo html_escape($booking_status); ?>"><?php echo html_escape(ucfirst($booking_status)); ?></span></td>
                         <td>
-                            <a class="btn-secondary" href="<?php echo base_url('payments/pay/' . (int) $booking['id']); ?>">
-                                <?php echo !empty($booking['payment_request_id']) ? 'Update Receipt' : 'Pay Advance'; ?>
-                            </a>
+                            <?php if (!empty($booking['requires_advance'])): ?>
+                                <a class="btn-secondary" href="<?php echo base_url('payments/pay/' . (int) $booking['id']); ?>">
+                                    <?php echo !empty($booking['payment_request_id']) ? 'Update Receipt' : 'Pay Advance'; ?>
+                                </a>
+                            <?php else: ?>
+                                <span class="table-note">No advance needed</span>
+                            <?php endif; ?>
                         </td>
                     </tr>
                 <?php endforeach; ?>

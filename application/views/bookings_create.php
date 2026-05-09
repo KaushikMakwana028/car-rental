@@ -164,6 +164,7 @@
                         <?php foreach ($vehicles as $v): ?>
                             <option
                                 value="<?php echo (int)$v['id']; ?>"
+                                data-rate-km="<?php echo (float)(isset($v['rate_per_day']) ? $v['rate_per_day'] : 0); ?>"
                                 data-advance="<?php echo (float)$v['advance_amount']; ?>"
                                 data-p6="<?php echo (float)(isset($v['price_6_hours'])        ? $v['price_6_hours']       : 0); ?>"
                                 data-p12="<?php echo (float)(isset($v['price_12_hours'])      ? $v['price_12_hours']      : 0); ?>"
@@ -175,6 +176,23 @@
                             </option>
                         <?php endforeach; ?>
                     </select>
+                </div>
+
+                <div>
+                    <label>Booking Type</label>
+                    <?php $selected_booking_type = !empty($booking_edit['booking_type']) ? $booking_edit['booking_type'] : 'hours'; ?>
+                    <select name="booking_type" id="booking_type" required>
+                        <option value="hours" <?php echo $selected_booking_type === 'hours' ? 'selected' : ''; ?>>Hour Package</option>
+                        <option value="km" <?php echo $selected_booking_type === 'km' ? 'selected' : ''; ?>>KM Basis</option>
+                    </select>
+                    <div class="helper">Choose <strong>Hour Package</strong> for fixed 6, 12, or 24 hour pricing, or choose <strong>KM Basis</strong> if you want the fare calculated by total kilometers.</div>
+                </div>
+
+                <div id="km_fields" style="display:none;">
+                    <label>Estimated KM</label>
+                    <input type="number" min="1" name="estimated_km" id="estimated_km"
+                        value="<?php echo !empty($booking_edit['estimated_km']) ? (int)$booking_edit['estimated_km'] : ''; ?>"
+                        placeholder="Enter expected distance">
                 </div>
 
                 <!-- ── 3. Pickup Date & Return Date ── -->
@@ -192,13 +210,15 @@
                 <!-- ── 4. Pickup Time & Return Time ── -->
                 <div id="pickup_time_wrap">
                     <label>Pickup Time</label>
-                    <input type="time" name="pickup_time" id="pickup_time"
-                        value="<?php echo !empty($booking_edit['pickup_time']) ? html_escape($booking_edit['pickup_time']) : ''; ?>" required>
+                    <input type="text" name="pickup_time" id="pickup_time" placeholder="Example: 10:30 AM or 22:30"
+                        value="<?php echo !empty($booking_edit['pickup_time']) ? html_escape(date('H:i', strtotime($booking_edit['pickup_time']))) : ''; ?>" required>
+                    <div class="helper">Enter time like `10:30 AM` or `22:30`.</div>
                 </div>
                 <div id="return_time_wrap">
                     <label>Return Time</label>
-                    <input type="time" name="return_time" id="return_time"
-                        value="<?php echo !empty($booking_edit['return_time']) ? html_escape($booking_edit['return_time']) : ''; ?>" required>
+                    <input type="text" name="return_time" id="return_time" placeholder="Example: 06:30 PM or 18:30"
+                        value="<?php echo !empty($booking_edit['return_time']) ? html_escape(date('H:i', strtotime($booking_edit['return_time']))) : ''; ?>" required>
+                    <div class="helper">Enter time like `06:30 PM` or `18:30`.</div>
                 </div>
 
                 <!-- ── 5. Calculated Duration Box ── -->
@@ -247,8 +267,13 @@
                 <!-- ── 8. Advance Payment ── -->
                 <div>
                     <label>Advance Payment</label>
+                    <?php $requires_advance = isset($booking_edit['requires_advance']) ? (int) $booking_edit['requires_advance'] : 0; ?>
+                    <label style="display:flex;align-items:center;gap:10px;text-transform:none;letter-spacing:0;font-size:14px;margin-bottom:8px;">
+                        <input type="checkbox" name="requires_advance" id="requires_advance" value="1" style="width:auto;min-height:auto;" <?php echo $requires_advance ? 'checked' : ''; ?>>
+                        I want to pay advance for this booking
+                    </label>
                     <input type="text" id="required_advance" name="required_advance_display" readonly>
-                    <div class="helper">This amount will be paid on the next page.</div>
+                    <div class="helper" id="advance_helper">This amount will be paid on the next page only when advance payment is selected.</div>
                 </div>
 
             </div><!-- /.form-grid -->
@@ -299,9 +324,18 @@
     (function() {
 
         var vehicleSel = document.getElementById('vehicle_id');
+        var bookingTypeSel = document.getElementById('booking_type');
+        var kmFields = document.getElementById('km_fields');
+        var kmInput = document.getElementById('estimated_km');
+        var hoursFields = document.getElementById('hours_fields');
+        var pickupTimeWrap = document.getElementById('pickup_time_wrap');
+        var returnTimeWrap = document.getElementById('return_time_wrap');
+        var hoursDurationWrap = document.getElementById('hours_duration_wrap');
         var slotSel = document.getElementById('hours_slot');
         var amountInp = document.getElementById('expected_amount');
         var advanceInp = document.getElementById('required_advance');
+        var requiresAdvanceChk = document.getElementById('requires_advance');
+        var advanceHelper = document.getElementById('advance_helper');
         var amountLabel = document.getElementById('amount_label');
         var helperEl = document.getElementById('amount_helper');
         var pickupDate = document.getElementById('pickup_date');
@@ -327,6 +361,7 @@
             var opt = vehicleSel ? vehicleSel.options[vehicleSel.selectedIndex] : null;
             if (!opt || !opt.value) return null;
             return {
+                rateKm: parseFloat(opt.getAttribute('data-rate-km') || '0'),
                 advance: parseFloat(opt.getAttribute('data-advance') || '0'),
                 p6: parseFloat(opt.getAttribute('data-p6') || '0'),
                 p12: parseFloat(opt.getAttribute('data-p12') || '0'),
@@ -335,17 +370,84 @@
             };
         }
 
+        function isKmBooking() {
+            return bookingTypeSel && bookingTypeSel.value === 'km';
+        }
+
+        function needsAdvance() {
+            return requiresAdvanceChk && requiresAdvanceChk.checked;
+        }
+
+        function toggleBookingMode() {
+            var kmMode = isKmBooking();
+            if (kmFields) kmFields.style.display = kmMode ? '' : 'none';
+            if (hoursFields) hoursFields.style.display = kmMode ? 'none' : '';
+            if (pickupTimeWrap) pickupTimeWrap.style.display = kmMode ? 'none' : '';
+            if (returnTimeWrap) returnTimeWrap.style.display = kmMode ? 'none' : '';
+            if (hoursDurationWrap) hoursDurationWrap.style.display = kmMode ? 'none' : '';
+            if (pickupTimeInp) pickupTimeInp.required = !kmMode;
+            if (returnTimeInp) returnTimeInp.required = !kmMode;
+            if (slotSel) slotSel.required = !kmMode;
+            if (kmInput) kmInput.required = kmMode;
+            updateAmount();
+        }
+
         function calcHours() {
             var pd = pickupDate ? pickupDate.value : '';
             var rd = returnDate ? returnDate.value : '';
             var pt = pickupTimeInp ? pickupTimeInp.value : '';
             var rt = returnTimeInp ? returnTimeInp.value : '';
             if (!pd || !rd || !pt || !rt) return null;
-            var pickupMs = new Date(pd + 'T' + pt + ':00').getTime();
-            var returnMs = new Date(rd + 'T' + rt + ':00').getTime();
+            var pickupMs = buildDateTime(pd, pt);
+            var returnMs = buildDateTime(rd, rt);
             if (isNaN(pickupMs) || isNaN(returnMs)) return null;
             if (returnMs <= pickupMs) return -1;
             return (returnMs - pickupMs) / (1000 * 60 * 60);
+        }
+
+        function buildDateTime(dateValue, timeValue) {
+            var parsed = parseTimeValue(timeValue);
+            if (!dateValue || !parsed) return NaN;
+            var parts = dateValue.split('-');
+            if (parts.length !== 3) return NaN;
+            return new Date(
+                parseInt(parts[0], 10),
+                parseInt(parts[1], 10) - 1,
+                parseInt(parts[2], 10),
+                parsed.hour,
+                parsed.minute,
+                0
+            ).getTime();
+        }
+
+        function parseTimeValue(raw) {
+            var value = String(raw || '').trim().toUpperCase();
+            var match = value.match(/^(\d{1,2}):(\d{2})(?:\s*(AM|PM))?$/);
+            if (!match) return null;
+            var hour = parseInt(match[1], 10);
+            var minute = parseInt(match[2], 10);
+            var meridiem = match[3] || '';
+
+            if (minute < 0 || minute > 59) return null;
+
+            if (meridiem) {
+                if (hour < 1 || hour > 12) return null;
+                if (meridiem === 'PM' && hour !== 12) hour += 12;
+                if (meridiem === 'AM' && hour === 12) hour = 0;
+            } else if (hour < 0 || hour > 23) {
+                return null;
+            }
+
+            return {
+                hour: hour,
+                minute: minute
+            };
+        }
+
+        function calcHourPackages(hours, slot) {
+            var slotNum = parseInt(slot || '0', 10);
+            if (!hours || hours <= 0 || slotNum <= 0) return 0;
+            return Math.max(1, Math.ceil(hours / slotNum));
         }
 
         function updateHoursDuration() {
@@ -372,15 +474,13 @@
                 displayHours.toFixed(1);
 
             var suggestedSlot = hours <= 6 ? '6' : hours <= 12 ? '12' : '24';
-            if (hours > 0 && hours <= 24 && slotSel) {
+            if (hours > 0 && slotSel) {
                 slotSel.value = suggestedSlot;
             }
 
-            hoursDurNote.textContent = displayHours + ' hrs total. ' + (
-                hours > 24 ?
-                '⚠ Duration exceeds 24 hours. Please split into multiple bookings.' :
-                'Suggested slot: ' + suggestedSlot + '-hour package.'
-            );
+            var suggestedPackageCount = calcHourPackages(hours, suggestedSlot);
+            hoursDurNote.textContent = displayHours + ' hrs total. Suggested slot: ' + suggestedSlot + '-hour package' +
+                (suggestedPackageCount > 1 ? ' x ' + suggestedPackageCount + '.' : '.');
 
             var isExact = (hours === 6 || hours === 12 || hours === 24);
             hoursDurBox.style.borderColor = isExact ? '#86efac' : '#B5D4F4';
@@ -391,6 +491,7 @@
 
         function updateAmount() {
             var d = getVehicleData();
+            var kmMode = isKmBooking();
 
             if (!d) {
                 if (amountInp) amountInp.value = '';
@@ -408,19 +509,35 @@
             }
 
             /* ── Advance field ── */
-            advanceInp.value = d.advance ? 'Rs. ' + d.advance.toFixed(2) : '';
+            advanceInp.value = needsAdvance() && d.advance ? 'Rs. ' + d.advance.toFixed(2) : 'Not selected';
+            if (advanceHelper) {
+                advanceHelper.textContent = needsAdvance()
+                    ? 'This amount will be paid on the next page.'
+                    : 'Advance is optional. If unchecked, your booking will finish after document upload.';
+            }
 
             /* ── Package price based on selected slot ── */
             var h = slotSel ? slotSel.value : '';
-            var price = h === '6' ? d.p6 :
+            var km = kmInput ? parseInt(kmInput.value || '0', 10) : 0;
+            var totalHours = calcHours();
+            var packageCount = calcHourPackages(totalHours, h);
+            var price = kmMode ? (Math.max(0, km) * d.rateKm) : (
+                (h === '6' ? d.p6 :
                 h === '12' ? d.p12 :
-                h === '24' ? d.p24 : 0;
+                h === '24' ? d.p24 : 0) * Math.max(1, packageCount || 1)
+            );
 
             amountInp.value = price > 0 ? price.toFixed(2) : '';
 
-            if (h) {
+            if (kmMode) {
+                amountLabel.textContent = 'Estimated Amount (KM)';
+                helperEl.textContent = d.rateKm > 0 ?
+                    ('Calculated at ' + fmt(d.rateKm) + ' per km.' + (km > 0 ? ' For ' + km + ' km.' : '')) :
+                    'KM rate is not set for this vehicle yet.';
+            } else if (h) {
                 amountLabel.textContent = 'Package Price (' + h + ' Hours)';
-                helperEl.textContent = 'Fixed price for the ' + h + '-hour package.' +
+                helperEl.textContent = 'Fixed price for the ' + h + '-hour package' +
+                    ((packageCount || 0) > 1 ? (' x ' + packageCount) : '') + '.' +
                     (d.extra > 0 ? ' Extra hours charged at ' + fmt(d.extra) + '/hr.' : '');
             } else {
                 amountLabel.textContent = 'Package Price';
@@ -429,7 +546,10 @@
         }
 
         if (vehicleSel) vehicleSel.addEventListener('change', updateAmount);
+        if (bookingTypeSel) bookingTypeSel.addEventListener('change', toggleBookingMode);
+        if (requiresAdvanceChk) requiresAdvanceChk.addEventListener('change', updateAmount);
         if (slotSel) slotSel.addEventListener('change', updateAmount);
+        if (kmInput) kmInput.addEventListener('input', updateAmount);
 
         [pickupDate, returnDate, pickupTimeInp, returnTimeInp].forEach(function(el) {
             if (el) el.addEventListener('change', function() {
@@ -440,7 +560,9 @@
 
         /* Run on load for edit mode pre-filled values */
         updateHoursDuration();
+        toggleBookingMode();
         updateAmount();
 
     })();
 </script>
+

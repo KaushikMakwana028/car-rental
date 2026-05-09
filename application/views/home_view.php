@@ -831,6 +831,9 @@
                                         </span>
                                         <span class="vc-starts-from-unit">/ 6 hrs</span>
                                     </div>
+                                    <div class="vc-card-reg" style="margin-top:4px;">
+                                        KM basis: &#8377;<?php echo number_format((float) (isset($vehicle['rate_per_day']) ? $vehicle['rate_per_day'] : 0), 0); ?> / km
+                                    </div>
                                     <!-- Advance tag -->
                                     <div class="vc-advance-tag">
                                         &#8377;<?php echo number_format((float)$vehicle['advance_amount'], 0); ?> advance

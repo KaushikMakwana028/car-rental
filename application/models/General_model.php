@@ -18,6 +18,8 @@ class General_model extends CI_Model
         parent::__construct();
         $this->ensure_users_profile_columns();
         $this->ensure_users_booking_columns();
+        $this->ensure_vehicle_pricing_columns();
+        $this->ensure_booking_pricing_columns();
         $this->ensure_booking_status_values();
         $this->cleanup_orphan_temporary_customers();
     }
@@ -298,6 +300,87 @@ class General_model extends CI_Model
         $booking_id = $this->insert('bookings', $data);
 
         return $booking_id;
+    }
+
+    public function calculate_booking_amount($vehicle, $booking_type = 'hours', $estimated_km = 0, $hours_slot = 0, $pickup_date = '', $return_date = '', $pickup_time = '', $return_time = '')
+    {
+        if (empty($vehicle)) {
+            return 0;
+        }
+
+        $booking_type = $booking_type === 'km' ? 'km' : 'hours';
+        $estimated_km = max(0, (int) $estimated_km);
+        $hours_slot = (int) $hours_slot;
+
+        if ($booking_type === 'km') {
+            return (float) $vehicle['rate_per_day'] * $estimated_km;
+        }
+
+        $package_price = 0;
+        if ($hours_slot === 6) {
+            $package_price = (float) (isset($vehicle['price_6_hours']) ? $vehicle['price_6_hours'] : 0);
+        }
+
+        if ($hours_slot === 12) {
+            $package_price = (float) (isset($vehicle['price_12_hours']) ? $vehicle['price_12_hours'] : 0);
+        }
+
+        if ($hours_slot === 24) {
+            $package_price = (float) (isset($vehicle['price_24_hours']) ? $vehicle['price_24_hours'] : 0);
+        }
+
+        if ($package_price <= 0 || $hours_slot <= 0) {
+            return 0;
+        }
+
+        $duration_hours = $this->calculate_booking_duration_hours($pickup_date, $return_date, $pickup_time, $return_time);
+        $package_count = $duration_hours > 0 ? (int) ceil($duration_hours / $hours_slot) : 1;
+
+        return $package_price * max(1, $package_count);
+    }
+
+    public function calculate_booking_duration_hours($pickup_date = '', $return_date = '', $pickup_time = '', $return_time = '')
+    {
+        $pickup_date = trim((string) $pickup_date);
+        $return_date = trim((string) $return_date);
+        $pickup_time = trim((string) $pickup_time);
+        $return_time = trim((string) $return_time);
+
+        if ($pickup_date === '' || $return_date === '') {
+            return 0;
+        }
+
+        if ($pickup_time === '') {
+            $pickup_time = '00:00';
+        }
+
+        if ($return_time === '') {
+            $return_time = '00:00';
+        }
+
+        $pickup_stamp = strtotime($pickup_date . ' ' . $pickup_time);
+        $return_stamp = strtotime($return_date . ' ' . $return_time);
+
+        if ($pickup_stamp === false || $return_stamp === false || $return_stamp <= $pickup_stamp) {
+            return 0;
+        }
+
+        return ($return_stamp - $pickup_stamp) / 3600;
+    }
+
+    public function normalize_time_value($time = '')
+    {
+        $time = trim((string) $time);
+        if ($time === '') {
+            return null;
+        }
+
+        $stamp = strtotime($time);
+        if ($stamp === false) {
+            return null;
+        }
+
+        return date('H:i:s', $stamp);
     }
 
     public function purge_draft_booking($booking_id, $customer_id)
@@ -1030,15 +1113,24 @@ class General_model extends CI_Model
             $booking['booking_code'] = $this->format_booking_code($booking['id'], isset($booking['created_at']) ? $booking['created_at'] : '');
             $booking['trip_label'] = $this->format_trip_range($booking['pickup_date'], $booking['return_date']);
             $booking['trip_route'] = trim($booking['pickup_location'] . ' - ' . $booking['drop_location'], ' -');
+            $booking_type = !empty($booking['booking_type']) ? $booking['booking_type'] : 'km';
+            $booking['display_km'] = !empty($booking['estimated_km']) ? (int) $booking['estimated_km'] . ' km' : 'N/A';
+            $booking['booking_type'] = $booking_type;
+            $booking['trip_mode_label'] = $booking_type === 'hours'
+                ? (!empty($booking['hours_slot']) ? (int) $booking['hours_slot'] . ' Hours' : 'Hours')
+                : $booking['display_km'];
 
             $booking['paid_amount'] = $paid_amount;
-            $booking['advance_due'] = $advance_amount;
+            $booking['requires_advance'] = isset($booking['requires_advance']) ? (int) $booking['requires_advance'] : 1;
+            $booking['advance_due'] = $booking['requires_advance'] ? $advance_amount : 0;
             $booking['balance_amount'] = $balance_amount;
             $booking['effective_status'] = $booking['status'];
             if ($booking['effective_status'] === 'pending' && $paid_amount > 0) {
                 $booking['effective_status'] = 'confirmed';
             }
-            $booking['payment_status'] = $this->resolve_payment_status($paid_amount, $advance_amount, $amount);
+            $booking['payment_status'] = $booking['requires_advance']
+                ? $this->resolve_payment_status($paid_amount, $advance_amount, $amount)
+                : 'Not Required';
             $booking['payment_badge'] = strtolower(str_replace(' ', '-', $booking['payment_status']));
             $booking['payment_request_id'] = !empty($request_row) ? (int) $request_row['id'] : 0;
             $booking['payment_request_status'] = !empty($request_row) ? $request_row['status'] : '';
@@ -1083,6 +1175,64 @@ class General_model extends CI_Model
 
         if (!$this->db->field_exists('address', 'users')) {
             $this->db->query("ALTER TABLE `users` ADD COLUMN `address` TEXT DEFAULT NULL AFTER `documents_verified`");
+        }
+    }
+
+    private function ensure_vehicle_pricing_columns()
+    {
+        if (!$this->db->table_exists('vehicles')) {
+            return;
+        }
+
+        if (!$this->db->field_exists('rate_per_day', 'vehicles')) {
+            $this->db->query("ALTER TABLE `vehicles` ADD COLUMN `rate_per_day` DECIMAL(10,2) NOT NULL DEFAULT 0 AFTER `seats`");
+        }
+
+        if (!$this->db->field_exists('price_6_hours', 'vehicles')) {
+            $this->db->query("ALTER TABLE `vehicles` ADD COLUMN `price_6_hours` DECIMAL(10,2) NOT NULL DEFAULT 0 AFTER `rate_per_day`");
+        }
+
+        if (!$this->db->field_exists('price_12_hours', 'vehicles')) {
+            $this->db->query("ALTER TABLE `vehicles` ADD COLUMN `price_12_hours` DECIMAL(10,2) NOT NULL DEFAULT 0 AFTER `price_6_hours`");
+        }
+
+        if (!$this->db->field_exists('price_24_hours', 'vehicles')) {
+            $this->db->query("ALTER TABLE `vehicles` ADD COLUMN `price_24_hours` DECIMAL(10,2) NOT NULL DEFAULT 0 AFTER `price_12_hours`");
+        }
+
+        if (!$this->db->field_exists('extra_hour_charge', 'vehicles')) {
+            $this->db->query("ALTER TABLE `vehicles` ADD COLUMN `extra_hour_charge` DECIMAL(10,2) NOT NULL DEFAULT 0 AFTER `price_24_hours`");
+        }
+    }
+
+    private function ensure_booking_pricing_columns()
+    {
+        if (!$this->db->table_exists('bookings')) {
+            return;
+        }
+
+        if (!$this->db->field_exists('estimated_km', 'bookings')) {
+            $this->db->query("ALTER TABLE `bookings` ADD COLUMN `estimated_km` INT NOT NULL DEFAULT 0 AFTER `drop_location`");
+        }
+
+        if (!$this->db->field_exists('booking_type', 'bookings')) {
+            $this->db->query("ALTER TABLE `bookings` ADD COLUMN `booking_type` VARCHAR(20) NOT NULL DEFAULT 'km' AFTER `estimated_km`");
+        }
+
+        if (!$this->db->field_exists('pickup_time', 'bookings')) {
+            $this->db->query("ALTER TABLE `bookings` ADD COLUMN `pickup_time` TIME NULL DEFAULT NULL AFTER `return_date`");
+        }
+
+        if (!$this->db->field_exists('return_time', 'bookings')) {
+            $this->db->query("ALTER TABLE `bookings` ADD COLUMN `return_time` TIME NULL DEFAULT NULL AFTER `pickup_time`");
+        }
+
+        if (!$this->db->field_exists('hours_slot', 'bookings')) {
+            $this->db->query("ALTER TABLE `bookings` ADD COLUMN `hours_slot` INT NOT NULL DEFAULT 0 AFTER `booking_type`");
+        }
+
+        if (!$this->db->field_exists('requires_advance', 'bookings')) {
+            $this->db->query("ALTER TABLE `bookings` ADD COLUMN `requires_advance` TINYINT(1) NOT NULL DEFAULT 1 AFTER `hours_slot`");
         }
     }
 

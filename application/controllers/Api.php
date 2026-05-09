@@ -48,25 +48,53 @@ class Api extends CI_Controller
     public function create_booking()
     {
         $vehicle_id = (int) $this->input->post('vehicle_id');
+        $booking_type = $this->input->post('booking_type', true) === 'km' ? 'km' : 'hours';
+        $estimated_km = (int) $this->input->post('estimated_km');
         $hours_slot = (int) $this->input->post('hours_slot');
+        $requires_advance = $this->input->post('requires_advance') ? 1 : 0;
+        $pickup_time = $this->General_model->normalize_time_value($this->input->post('pickup_time', true));
+        $return_time = $this->General_model->normalize_time_value($this->input->post('return_time', true));
         $vehicle = $this->General_model->get_row('vehicles', array('id' => $vehicle_id));
-        
-        $price_map = array(
-            6  => !empty($vehicle) ? (float)$vehicle['price_6_hours'] : 0,
-            12 => !empty($vehicle) ? (float)$vehicle['price_12_hours'] : 0,
-            24 => !empty($vehicle) ? (float)$vehicle['price_24_hours'] : 0,
-        );
-        $calculated_amount = isset($price_map[$hours_slot]) ? $price_map[$hours_slot] : 0;
+
+        if (empty($vehicle)) {
+            return $this->respond(array(
+                'status' => false,
+                'message' => 'Invalid vehicle selected.',
+            ), 422);
+        }
+
+        if ($booking_type === 'km' && $estimated_km <= 0) {
+            return $this->respond(array(
+                'status' => false,
+                'message' => 'Estimated kilometers are required for KM booking.',
+            ), 422);
+        }
+
+        if ($booking_type === 'hours' && !in_array($hours_slot, array(6, 12, 24), true)) {
+            return $this->respond(array(
+                'status' => false,
+                'message' => 'A valid hour package is required for hour booking.',
+            ), 422);
+        }
+
+        $pickup_date = $this->input->post('pickup_date', true);
+        $return_date = $this->input->post('return_date', true);
+        $calculated_amount = $this->General_model->calculate_booking_amount($vehicle, $booking_type, $estimated_km, $hours_slot, $pickup_date, $return_date, $pickup_time, $return_time);
+
 
         $payload = array(
             'customer_id' => (int) $this->input->post('customer_id'),
             'vehicle_id' => $vehicle_id,
-            'pickup_date' => $this->input->post('pickup_date', true),
-            'return_date' => $this->input->post('return_date', true),
+            'pickup_date' => $pickup_date,
+            'return_date' => $return_date,
+            'pickup_time' => $pickup_time !== '' ? $pickup_time : null,
+            'return_time' => $return_time !== '' ? $return_time : null,
             'pickup_location' => trim($this->input->post('pickup_location', true)),
             'drop_location' => trim($this->input->post('drop_location', true)),
-            'booking_type' => 'hours',
-            'hours_slot' => $hours_slot,
+            'estimated_km' => $booking_type === 'km' ? $estimated_km : 0,
+            'booking_type' => $booking_type,
+            'hours_slot' => $booking_type === 'hours' ? $hours_slot : 0,
+            'requires_advance' => $requires_advance,
             'amount' => $calculated_amount,
             'status' => $this->input->post('status', true) ?: 'pending',
         );

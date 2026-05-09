@@ -23,13 +23,18 @@ class Booking extends Admin_Controller
     public function store()
     {
         $vehicle_id             = (int) $this->input->post('vehicle_id');
+        $booking_type           = $this->input->post('booking_type', true) === 'km' ? 'km' : 'hours';
+        $estimated_km           = (int) $this->input->post('estimated_km');
         $hours_slot             = (int) $this->input->post('hours_slot');
+        $requires_advance       = $this->input->post('requires_advance') ? 1 : 0;
         $customer_name          = trim($this->input->post('customer_name', true));
         $customer_phone         = trim($this->input->post('customer_phone', true));
         $customer_email         = trim($this->input->post('customer_email', true));
         $aadhaar_number         = trim($this->input->post('aadhaar_number', true));
         $driving_license_number = trim($this->input->post('driving_license_number', true));
         $documents_verified     = $this->input->post('documents_verified') ? true : false;
+        $pickup_time            = $this->General_model->normalize_time_value($this->input->post('pickup_time', true));
+        $return_time            = $this->General_model->normalize_time_value($this->input->post('return_time', true));
         $vehicle                = $this->General_model->get_row('vehicles', array('id' => $vehicle_id));
 
         if ($customer_name === '' || $customer_phone === '') {
@@ -47,28 +52,35 @@ class Booking extends Admin_Controller
             redirect('admin/bookings/create');
         }
 
-        /* Calculate amount based on booking type */
-        $price_map = array(
-            6  => (float)$vehicle['price_6_hours'],
-            12 => (float)$vehicle['price_12_hours'],
-            24 => (float)$vehicle['price_24_hours'],
-        );
-        $calculated_amount = isset($price_map[$hours_slot]) ? $price_map[$hours_slot] : 0;
-        $booking_type      = 'hours';
+        if ($booking_type === 'km' && $estimated_km <= 0) {
+            $this->session->set_flashdata('error', 'Please enter estimated kilometers for KM booking.');
+            redirect('admin/bookings/create');
+        }
+
+        if ($booking_type === 'hours' && !in_array($hours_slot, array(6, 12, 24), true)) {
+            $this->session->set_flashdata('error', 'Please select a valid hour package.');
+            redirect('admin/bookings/create');
+        }
+
+        $pickup_date = $this->input->post('pickup_date', true);
+        $return_date = $this->input->post('return_date', true);
+        $calculated_amount = $this->General_model->calculate_booking_amount($vehicle, $booking_type, $estimated_km, $hours_slot, $pickup_date, $return_date, $pickup_time, $return_time);
 
         $customer_id = $this->General_model->resolve_customer_account($customer_name, $customer_phone, $customer_email);
 
         $payload = array(
             'customer_id'      => $customer_id,
             'vehicle_id'       => $vehicle_id,
-            'pickup_date'      => $this->input->post('pickup_date', true),
-            'return_date'      => $this->input->post('return_date', true),
-            'pickup_time'      => $this->input->post('pickup_time', true) ?: null,  // ADD THIS
-            'return_time'      => $this->input->post('return_time', true) ?: null,  // ADD THIS
+            'pickup_date'      => $pickup_date,
+            'return_date'      => $return_date,
+            'pickup_time'      => $pickup_time !== '' ? $pickup_time : null,
+            'return_time'      => $return_time !== '' ? $return_time : null,
             'pickup_location'  => trim($this->input->post('pickup_location', true)),
             'drop_location'    => trim($this->input->post('drop_location', true)),
+            'estimated_km'     => $booking_type === 'km' ? $estimated_km : 0,
             'booking_type'     => $booking_type,
-            'hours_slot'       => $hours_slot,
+            'hours_slot'       => $booking_type === 'hours' ? $hours_slot : 0,
+            'requires_advance' => $requires_advance,
             'amount'           => $calculated_amount,
             'status'           => $this->input->post('status', true) ?: 'pending',
         );

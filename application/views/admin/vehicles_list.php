@@ -1178,7 +1178,7 @@
                                             data-type="<?php echo html_escape($vehicle['vehicle_type']); ?>"
                                             data-fuel="<?php echo html_escape($vehicle['fuel_type']); ?>"
                                             data-seats="<?php echo (int)$vehicle['seats']; ?>"
-
+                                            data-rate-km="<?php echo isset($vehicle['rate_per_day']) ? (float)$vehicle['rate_per_day'] : 0; ?>"
                                             data-price-6-hours="<?php echo isset($vehicle['price_6_hours']) ? (float)$vehicle['price_6_hours'] : 0; ?>"
                                             data-price-12-hours="<?php echo isset($vehicle['price_12_hours']) ? (float)$vehicle['price_12_hours'] : 0; ?>"
                                             data-price-24-hours="<?php echo isset($vehicle['price_24_hours']) ? (float)$vehicle['price_24_hours'] : 0; ?>"
@@ -1355,7 +1355,10 @@
                     <input type="number" name="seats" id="seats" placeholder="5" min="1" required>
                 </div>
 
-
+                <div class="vm-fg">
+                    <label>Rate Per KM (₹)</label>
+                    <input type="number" step="0.01" min="0" name="rate_per_km" id="rate_per_km" placeholder="18.00" required>
+                </div>
 
                 <div class="vm-fg">
                     <label>6 Hours Price (₹)</label>
@@ -1668,6 +1671,7 @@
                 setVal('vehicle_type', btn.dataset.type);
                 setVal('fuel_type', btn.dataset.fuel);
                 setVal('seats', btn.dataset.seats);
+                setVal('rate_per_km', btn.getAttribute('data-rate-km'));
                 setVal('price_6_hours', btn.getAttribute('data-price-6-hours'));
                 setVal('price_12_hours', btn.getAttribute('data-price-12-hours'));
                 setVal('price_24_hours', btn.getAttribute('data-price-24-hours'));

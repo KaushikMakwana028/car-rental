@@ -1193,6 +1193,7 @@ unset($booking);
 
                                 'pickup_location'    => $booking['pickup_location'],
                                 'drop_location'      => $booking['drop_location'],
+                                'estimated_km'       => !empty($booking['estimated_km']) ? (int) $booking['estimated_km'] : 0,
                                 'amount'             => (float) $booking['amount'],
                                 'paid_amount'        => (float) $booking['paid_amount'],
                                 'balance_amount'     => (float) $booking['balance_amount'],
@@ -1258,8 +1259,8 @@ unset($booking);
                                             data-rtime="<?php echo html_escape($rt); ?>">
                                         </span>
                                     <?php else: ?>
-                                        <span class="td-strong">Legacy (KM)</span>
-                                        <span class="td-muted">Prior to Hour-based System</span>
+                                        <span class="td-strong">🚗 <?php echo !empty($booking['estimated_km']) ? (int) $booking['estimated_km'] . ' km' : 'KM Booking'; ?></span>
+                                        <span class="td-muted">KM-based booking</span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
@@ -1659,7 +1660,10 @@ unset($booking);
             if (btype === 'hours' && hslot > 0) {
                 document.getElementById('bkDKm').innerHTML = '⏱ ' + hslot + '-hour package<br><span class="td-muted">' + (ptFmt && rtFmt ? ptFmt + ' – ' + rtFmt : 'Times not set') + '</span>';
             } else {
-                document.getElementById('bkDKm').innerHTML = 'Legacy (KM)<br><span class="td-muted">Prior to Hour-based System</span>';
+                var kmValue = parseInt(d.estimated_km || 0, 10);
+                document.getElementById('bkDKm').innerHTML = kmValue > 0 ?
+                    ('🚗 ' + kmValue + ' km<br><span class="td-muted">KM-based booking</span>') :
+                    'KM Booking<br><span class="td-muted">Distance not available</span>';
             }
             document.getElementById('bkDAmount').textContent = fmt(d.amount || 0);
             document.getElementById('bkDAdvance').textContent = fmt(d.advance_due || 0);
