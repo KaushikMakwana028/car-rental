@@ -1,10 +1,8 @@
 <style>
-    /* Select2 Full Width */
     .select2-container {
         width: 100% !important;
     }
 
-    /* Main Select Box */
     .select2-container--default .select2-selection--single {
         height: 50px !important;
         border: 1px solid #dcdfe6 !important;
@@ -17,43 +15,116 @@
         box-shadow: none !important;
     }
 
-    /* Selected Text */
     .select2-container--default .select2-selection--single .select2-selection__rendered {
         line-height: 28px !important;
         padding-left: 0 !important;
         color: #333 !important;
     }
 
-    /* Arrow Position */
     .select2-container--default .select2-selection--single .select2-selection__arrow {
         height: 48px !important;
         right: 10px !important;
     }
 
-    /* Dropdown */
     .select2-dropdown {
         border-radius: 10px !important;
         border: 1px solid #dcdfe6 !important;
         overflow: hidden;
     }
 
-    /* Search Input */
     .select2-search__field {
         border-radius: 8px !important;
         padding: 8px !important;
     }
 
-    /* Hover Option */
     .select2-results__option--highlighted {
         background: #4f46e5 !important;
         color: #fff !important;
     }
 
-    /* Focus Border */
     .select2-container--default.select2-container--focus .select2-selection--single {
         border-color: #4f46e5 !important;
     }
+
+    /* Phone lookup */
+    .phone-input-wrapper {
+        position: relative;
+    }
+
+    .phone-input-wrapper input {
+        padding-right: 42px !important;
+    }
+
+    .phone-spinner {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 18px;
+        height: 18px;
+        border: 2.5px solid #e0e7ff;
+        border-top-color: #4f46e5;
+        border-radius: 50%;
+        animation: admSpin 0.65s linear infinite;
+        display: none;
+    }
+
+    @keyframes admSpin {
+        to {
+            transform: translateY(-50%) rotate(360deg);
+        }
+    }
+
+    .lookup-banner {
+        display: none;
+        border-radius: 9px;
+        padding: 9px 13px;
+        font-size: 13px;
+        margin-top: 7px;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .lookup-banner.found {
+        background: #f0fdf4;
+        border: 1.5px solid #86efac;
+        color: #166534;
+    }
+
+    .lookup-banner.new {
+        background: #eff6ff;
+        border: 1.5px solid #93c5fd;
+        color: #1e40af;
+    }
+
+    .lookup-banner.error {
+        background: #fff5f5;
+        border: 1.5px solid #fca5a5;
+        color: #991b1b;
+    }
+
+    /* Green flash on autofill */
+    @keyframes greenFlash {
+        0% {
+            background: #dcfce7;
+            border-color: #86efac;
+        }
+
+        100% {
+            background: #fff;
+            border-color: #dcdfe6;
+        }
+    }
+
+    .autofilled {
+        animation: greenFlash 1.8s ease forwards;
+    }
 </style>
+
+<?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
+
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
 <div class="section-card">
     <div class="card-head">
@@ -64,30 +135,56 @@
     </div>
     <form method="post" action="<?php echo base_url('admin/bookings/store'); ?>">
         <div class="form-grid">
+
+            <!-- 1. Customer Name -->
             <div>
                 <label>Customer Name</label>
-                <input type="text" name="customer_name" placeholder="Enter customer name" required>
+                <input type="text" name="customer_name" id="adm_customer_name"
+                    placeholder="Enter customer name" required>
             </div>
+
+            <!-- 2. Customer Phone with live lookup -->
             <div>
                 <label>Customer Phone</label>
-                <input type="text" name="customer_phone" placeholder="Enter customer phone" required>
+                <div class="phone-input-wrapper">
+                    <input type="text" name="customer_phone" id="adm_customer_phone"
+                        placeholder="Enter customer phone" required
+                        autocomplete="off" maxlength="15" inputmode="numeric">
+                    <div class="phone-spinner" id="adm_phone_spinner"></div>
+                </div>
+                <div class="helper" style="margin-top:5px;">
+                    📋 Enter phone number — existing customer details will auto-fill instantly.
+                </div>
+                <div class="lookup-banner found" id="adm_banner_found"></div>
+                <div class="lookup-banner new" id="adm_banner_new">🆕 New customer — a fresh profile will be created on save.</div>
+                <div class="lookup-banner error" id="adm_banner_error">⚠️ Could not reach server. Please fill details manually.</div>
+                <div class="lookup-banner" id="adm_banner_doc_images" style="display:none;background:#fefce8;border:1.5px solid #fde047;color:#713f12;border-radius:9px;padding:9px 13px;font-size:13px;margin-top:7px;align-items:center;gap:8px;">
+                    📎 This customer has uploaded document images from their portal. You can review them in the <a href="#" id="adm_docs_review_link" style="color:#1d4ed8;font-weight:600;">Documents section</a>.
+                </div>
             </div>
+
+            <!-- 3. Email -->
             <div class="full">
                 <label>Customer Email</label>
-                <input type="email" name="customer_email" placeholder="Optional email for the customer">
+                <input type="email" name="customer_email" id="adm_customer_email"
+                    placeholder="Optional email for the customer">
                 <div class="helper">If this phone or email already exists, the system will reuse that customer automatically.</div>
             </div>
+
+            <!-- 4. Docs -->
             <div>
                 <label>Aadhaar Number</label>
-                <input type="text" name="aadhaar_number" placeholder="Enter Aadhaar number">
+                <input type="text" name="aadhaar_number" id="adm_aadhaar_number"
+                    placeholder="Enter Aadhaar number">
             </div>
             <div>
                 <label>Driving License Number</label>
-                <input type="text" name="driving_license_number" placeholder="Enter license number">
+                <input type="text" name="driving_license_number" id="adm_driving_license_number"
+                    placeholder="Enter license number">
             </div>
             <div class="full">
                 <label style="display:flex;align-items:center;gap:10px;text-transform:none;letter-spacing:0;font-size:14px;">
-                    <input type="checkbox" name="documents_verified" value="1" style="width:auto;min-height:auto;">
+                    <input type="checkbox" name="documents_verified" id="adm_documents_verified" value="1" style="width:auto;min-height:auto;">
                     Documents checked by admin
                 </label>
                 <div class="helper">Check this when documents are already verified manually.</div>
@@ -101,7 +198,6 @@
                     <?php foreach ($vehicles as $vehicle): ?>
                         <option
                             value="<?php echo (int)$vehicle['id']; ?>"
-
                             data-rate-km="<?php echo (float)(isset($vehicle['rate_per_day']) ? $vehicle['rate_per_day'] : 0); ?>"
                             data-advance="<?php echo (float)$vehicle['advance_amount']; ?>"
                             data-p6="<?php echo (float)(isset($vehicle['price_6_hours'])   ? $vehicle['price_6_hours']   : 0); ?>"
@@ -128,7 +224,6 @@
                 <input type="number" min="1" name="estimated_km" id="adm_estimated_km" placeholder="Enter expected distance">
             </div>
 
-            <!-- Hour pricing preview -->
             <div class="full" id="adm_hour_preview" style="display:none;">
                 <label>Hour Package Rates</label>
                 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px;">
@@ -147,7 +242,6 @@
                 </div>
             </div>
 
-            <!-- Extra hour charge -->
             <div class="full" id="adm_extra_box" style="display:none;">
                 <div style="background:#fff8e1;border:1.5px solid #f1c14f;border-radius:10px;padding:12px 16px;">
                     <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:#7a5c00;">⚡ Extra Hour Charge</div>
@@ -156,23 +250,20 @@
                 </div>
             </div>
 
-
-
             <div><label>Pickup Date</label><input type="date" name="pickup_date" id="pickup_date" required></div>
             <div><label>Return Date</label><input type="date" name="return_date" id="return_date" required></div>
-            <!-- Pickup Time -->
+
             <div id="adm_pickup_time_wrap">
                 <label>Pickup Time</label>
-                <input type="text" name="pickup_time" id="adm_pickup_time" placeholder="Example: 10:30 AM or 22:30" required>
-                <div class="helper">Enter time like `10:30 AM` or `22:30`.</div>
+                <input type="text" name="pickup_time" id="adm_pickup_time" placeholder="Select time" required readonly>
+                <div class="helper">Click to select time from picker.</div>
             </div>
             <div id="adm_return_time_wrap">
                 <label>Return Time</label>
-                <input type="text" name="return_time" id="adm_return_time" placeholder="Example: 06:30 PM or 18:30" required>
-                <div class="helper">Enter time like `06:30 PM` or `18:30`.</div>
+                <input type="text" name="return_time" id="adm_return_time" placeholder="Select time" required readonly>
+                <div class="helper">Click to select time from picker.</div>
             </div>
 
-            <!-- Hours duration display -->
             <div class="full" id="adm_hours_dur_wrap">
                 <div id="adm_hours_dur_box" style="background:#EEF3FA;border:1.5px solid #B5D4F4;border-radius:10px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
                     <div>
@@ -185,10 +276,10 @@
                     </div>
                 </div>
             </div>
+
             <div><label>Pickup Location</label><input type="text" name="pickup_location" required></div>
             <div><label>Drop Location</label><input type="text" name="drop_location" required></div>
 
-            <!-- Hours slot -->
             <div id="adm_hrs_wrap">
                 <label>Select Duration</label>
                 <select id="adm_hours_slot" name="hours_slot" required>
@@ -199,10 +290,35 @@
                 </select>
             </div>
 
-            <!-- Expected amount -->
             <div id="adm_amount_wrap">
-                <label>Expected Amount</label>
-                <input type="number" step="0.01" name="amount" id="admin_expected_amount" readonly required>
+                <label>Expected Amount (Base Fare)</label>
+                <input type="number" step="0.01" name="amount" id="admin_expected_amount" required>
+                <div class="helper">Auto-calculated. You can modify if needed for custom pricing.</div>
+            </div>
+
+            <div class="full" style="border-top: 1.5px solid var(--border); padding-top: 16px; margin-top: 8px;">
+                <label style="font-weight: 700; display: block; margin-bottom: 12px;">Expenses Breakdown</label>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                    <div><label>Fuel Expense</label><input type="number" step="0.01" min="0" name="fuel_expense" id="adm_fuel_expense" placeholder="0.00"></div>
+                    <div><label>Toll Expense</label><input type="number" step="0.01" min="0" name="toll_expense" id="adm_toll_expense" placeholder="0.00"></div>
+                    <div><label>Driver Expense</label><input type="number" step="0.01" min="0" name="driver_expense" id="adm_driver_expense" placeholder="0.00"></div>
+                    <div><label>Parking Expense</label><input type="number" step="0.01" min="0" name="parking_expense" id="adm_parking_expense" placeholder="0.00"></div>
+                </div>
+                <div class="helper" style="margin-top: 10px;">These expenses will be deducted from the booking amount.</div>
+            </div>
+
+            <div id="adm_expense_summary" style="background:#fff8e1;border:1.5px solid #f1c14f;border-radius:10px;padding:12px 16px;margin-top:12px;display:none;">
+                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:#7a5c00;">💰 Expense Summary</div>
+                <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:10px;">
+                    <div>
+                        <div style="font-size:10px;color:#73849A;margin-bottom:4px;">Total Expenses</div>
+                        <div style="font-size:16px;font-weight:700;color:#17355C;" id="adm_total_expenses_display">₹0</div>
+                    </div>
+                    <div>
+                        <div style="font-size:10px;color:#73849A;margin-bottom:4px;">Net Amount (After Expenses)</div>
+                        <div style="font-size:16px;font-weight:700;color:#0F6E56;" id="adm_net_amount_display">₹0</div>
+                    </div>
+                </div>
             </div>
 
             <div>
@@ -230,24 +346,174 @@
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
 <script>
     $(document).ready(function() {
 
+        // ═══════════════════════════════════════════════════════════
+        //  CUSTOMER PHONE LIVE LOOKUP
+        // ═══════════════════════════════════════════════════════════
+        var lookupTimer = null;
+        var lastPhone = '';
+        var LOOKUP_URL = '<?php echo base_url("admin/bookings/lookup_customer"); ?>';
+
+        var $phoneInput = $('#adm_customer_phone');
+        var $spinner = $('#adm_phone_spinner');
+        var $bannerFound = $('#adm_banner_found');
+        var $bannerNew = $('#adm_banner_new');
+        var $bannerError = $('#adm_banner_error');
+
+        function hideBanners() {
+            $bannerFound.hide();
+            $bannerNew.hide();
+            $bannerError.hide();
+        }
+
+        function flashField(id, value) {
+            var el = document.getElementById(id);
+            if (!el) return;
+            el.value = value || '';
+            if (value) {
+                el.classList.remove('autofilled');
+                // Force reflow to restart animation
+                void el.offsetWidth;
+                el.classList.add('autofilled');
+            }
+        }
+
+        function doLookup(phone) {
+            if (phone === lastPhone) return;
+            lastPhone = phone;
+
+            hideBanners();
+            $spinner.show();
+
+            $.ajax({
+                url: LOOKUP_URL,
+                type: 'GET', // ← Changed from POST to GET (bypasses CSRF)
+                data: {
+                    phone: phone
+                },
+                dataType: 'json',
+                timeout: 8000,
+                success: function(res) {
+                    $spinner.hide();
+                    if (!res) {
+                        $bannerError.show();
+                        return;
+                    }
+
+                    if (res.found) {
+                        flashField('adm_customer_name', res.customer_name);
+                        flashField('adm_customer_email', res.customer_email);
+                        flashField('adm_aadhaar_number', res.aadhaar_number);
+                        flashField('adm_driving_license_number', res.driving_license_number);
+
+                        var docCb = document.getElementById('adm_documents_verified');
+                        if (docCb) docCb.checked = (res.documents_verified == 1);
+
+                        $bannerFound
+                            .html('✅ Customer <strong>' + $('<span>').text(res.customer_name).html() + '</strong> found — details auto-filled.')
+                            .show();
+
+                        if (res.has_document_images) {
+                            var reviewUrl = '<?php echo base_url("admin/documents"); ?>';
+                            if (res.customer_id) reviewUrl += '?customer_id=' + res.customer_id;
+                            $('#adm_docs_review_link').attr('href', reviewUrl);
+                            $('#adm_banner_doc_images').css('display', 'flex');
+                        }
+                    } else {
+                        $bannerNew.show();
+                    }
+                },
+                error: function(xhr) {
+                    $spinner.hide();
+                    if (xhr.statusText !== 'abort') {
+                        console.error('Lookup failed:', xhr.status, xhr.responseText ? xhr.responseText.substring(0, 300) : '');
+                        $bannerError.show();
+                    }
+                }
+            });
+        }
+
+        function hideBanners() {
+            $bannerFound.hide();
+            $bannerNew.hide();
+            $bannerError.hide();
+            $('#adm_banner_doc_images').hide();
+        }
+
+        $phoneInput.on('input', function() {
+            var rawPhone = $.trim($(this).val()).replace(/\s+/g, '');
+            hideBanners();
+            clearTimeout(lookupTimer);
+
+            // Only lookup when we have enough digits (≥ 7)
+            if (rawPhone.replace(/\D/g, '').length < 7) {
+                $spinner.hide();
+                lastPhone = ''; // reset so same number triggers again after clearing
+                return;
+            }
+
+            // Debounce 600ms
+            lookupTimer = setTimeout(function() {
+                doLookup(rawPhone);
+            }, 600);
+        });
+
+        // ═══════════════════════════════════════════════════════════
+        //  SELECT2
+        // ═══════════════════════════════════════════════════════════
         $('#admin_vehicle_id').select2({
             placeholder: "Search vehicle...",
             allowClear: true,
             width: '100%'
         });
 
+        // ═══════════════════════════════════════════════════════════
+        //  FLATPICKR
+        // ═══════════════════════════════════════════════════════════
+        flatpickr("#adm_pickup_time", {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "h:i K",
+            time_24hr: false,
+            minuteIncrement: 15,
+            onChange: function() {
+                admUpdateHoursDuration();
+                admUpdateAmount();
+            }
+        });
+        flatpickr("#adm_return_time", {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "h:i K",
+            time_24hr: false,
+            minuteIncrement: 15,
+            onChange: function() {
+                admUpdateHoursDuration();
+                admUpdateAmount();
+            }
+        });
+
+        // ═══════════════════════════════════════════════════════════
+        //  EXPENSE LISTENERS
+        // ═══════════════════════════════════════════════════════════
+        ['adm_fuel_expense', 'adm_toll_expense', 'adm_driver_expense', 'adm_parking_expense'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.addEventListener('input', admUpdateExpenses);
+        });
+
+        // ═══════════════════════════════════════════════════════════
+        //  VEHICLE / AMOUNT HELPERS
+        // ═══════════════════════════════════════════════════════════
         function admGetData() {
             var opt = document.getElementById('admin_vehicle_id');
             var sel = opt ? opt.options[opt.selectedIndex] : null;
             if (!sel || !sel.value) return null;
             return {
-
                 rateKm: parseFloat(sel.getAttribute('data-rate-km') || '0'),
                 advance: parseFloat(sel.getAttribute('data-advance') || '0'),
                 p6: parseFloat(sel.getAttribute('data-p6') || '0'),
@@ -289,59 +555,27 @@
         }
 
         function admBuildDateTime(dateValue, timeValue) {
-            var parsed = admParseTimeValue(timeValue);
-            if (!dateValue || !parsed) return NaN;
-            var parts = dateValue.split('-');
-            if (parts.length !== 3) return NaN;
-            return new Date(
-                parseInt(parts[0], 10),
-                parseInt(parts[1], 10) - 1,
-                parseInt(parts[2], 10),
-                parsed.hour,
-                parsed.minute,
-                0
-            ).getTime();
+            if (!dateValue || !timeValue) return NaN;
+            var parts = dateValue.split('-'),
+                timeParts = timeValue.split(':');
+            if (parts.length !== 3 || timeParts.length !== 2) return NaN;
+            return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10),
+                parseInt(timeParts[0], 10), parseInt(timeParts[1], 10), 0).getTime();
         }
 
-        function admParseTimeValue(raw) {
-            var value = String(raw || '').trim().toUpperCase();
-            var match = value.match(/^(\d{1,2}):(\d{2})(?:\s*(AM|PM))?$/);
-            if (!match) return null;
-            var hour = parseInt(match[1], 10);
-            var minute = parseInt(match[2], 10);
-            var meridiem = match[3] || '';
-
-            if (minute < 0 || minute > 59) return null;
-
-            if (meridiem) {
-                if (hour < 1 || hour > 12) return null;
-                if (meridiem === 'PM' && hour !== 12) hour += 12;
-                if (meridiem === 'AM' && hour === 12) hour = 0;
-            } else if (hour < 0 || hour > 23) {
-                return null;
-            }
-
-            return {
-                hour: hour,
-                minute: minute
-            };
-        }
-
-        /* ── Calculate exact hours between two date+time combos ── */
         function admCalcHours() {
-            var pd = document.getElementById('pickup_date') ? document.getElementById('pickup_date').value : '';
-            var rd = document.getElementById('return_date') ? document.getElementById('return_date').value : '';
-            var pt = document.getElementById('adm_pickup_time') ? document.getElementById('adm_pickup_time').value : '';
-            var rt = document.getElementById('adm_return_time') ? document.getElementById('adm_return_time').value : '';
+            var pd = (document.getElementById('pickup_date') || {}).value || '';
+            var rd = (document.getElementById('return_date') || {}).value || '';
+            var pt = (document.getElementById('adm_pickup_time') || {}).value || '';
+            var rt = (document.getElementById('adm_return_time') || {}).value || '';
             if (!pd || !rd || !pt || !rt) return null;
-            var pickupMs = admBuildDateTime(pd, pt);
-            var returnMs = admBuildDateTime(rd, rt);
-            if (isNaN(pickupMs) || isNaN(returnMs)) return null;
-            if (returnMs <= pickupMs) return -1;
-            return (returnMs - pickupMs) / (1000 * 60 * 60);
+            var pm = admBuildDateTime(pd, pt),
+                rm = admBuildDateTime(rd, rt);
+            if (isNaN(pm) || isNaN(rm)) return null;
+            if (rm <= pm) return -1;
+            return (rm - pm) / 3600000;
         }
 
-        /* ── Update hours duration display ── */
         function admUpdateHoursDuration() {
             var hours = admCalcHours();
             var box = document.getElementById('adm_hours_dur_box');
@@ -364,23 +598,37 @@
             var display = Math.ceil(hours * 2) / 2;
             val.textContent = display % 1 === 0 ? display.toFixed(0) : display.toFixed(1);
             var suggested = hours <= 6 ? '6' : hours <= 12 ? '12' : '24';
-            var suggestedPackageCount = admCalcHourPackages(hours, suggested);
-            note.textContent = display + ' hrs total. Suggested slot: ' + suggested + '-hour package' +
-                (suggestedPackageCount > 1 ? ' x ' + suggestedPackageCount + '.' : '.');
-            if (hours > 0) {
-                document.getElementById('adm_hours_slot').value = suggested;
-            }
+            var cnt = admCalcHourPackages(hours, suggested);
+            note.textContent = display + ' hrs total. Suggested slot: ' + suggested + '-hour package' + (cnt > 1 ? ' x ' + cnt + '.' : '.');
+            if (hours > 0) document.getElementById('adm_hours_slot').value = suggested;
             var isExact = (hours === 6 || hours === 12 || hours === 24);
             box.style.borderColor = isExact ? '#86efac' : '#B5D4F4';
             box.style.background = isExact ? '#f0fdf4' : '#EEF3FA';
             admUpdateAmount();
         }
 
-
+        function admUpdateExpenses() {
+            var fuel = parseFloat(document.getElementById('adm_fuel_expense').value || '0');
+            var toll = parseFloat(document.getElementById('adm_toll_expense').value || '0');
+            var driver = parseFloat(document.getElementById('adm_driver_expense').value || '0');
+            var parking = parseFloat(document.getElementById('adm_parking_expense').value || '0');
+            var total = fuel + toll + driver + parking;
+            var base = parseFloat(document.getElementById('admin_expected_amount').value || '0');
+            var net = Math.max(0, base - total);
+            document.getElementById('adm_expense_summary').style.display = total > 0 ? '' : 'none';
+            document.getElementById('adm_total_expenses_display').textContent = '₹' + total.toLocaleString('en-IN', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            });
+            document.getElementById('adm_net_amount_display').textContent = '₹' + net.toLocaleString('en-IN', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            });
+        }
 
         function admUpdateAmount() {
-            var d = admGetData();
-            var kmMode = admIsKmBooking();
+            var d = admGetData(),
+                kmMode = admIsKmBooking();
             if (!d) {
                 document.getElementById('admin_expected_amount').value = '';
                 document.getElementById('admin_advance_amount').value = '';
@@ -398,27 +646,25 @@
             } else {
                 document.getElementById('adm_extra_box').style.display = 'none';
             }
-            document.getElementById('admin_advance_amount').value = document.getElementById('adm_requires_advance').checked && d.advance ? 'Rs. ' + d.advance.toFixed(2) : 'Not selected';
-            document.getElementById('adm_advance_helper').textContent = document.getElementById('adm_requires_advance').checked ?
-                'Advance will be expected for this booking.' :
-                'Advance is optional. Booking can be created without payment.';
-
+            var advCb = document.getElementById('adm_requires_advance');
+            document.getElementById('admin_advance_amount').value = advCb.checked && d.advance ? 'Rs. ' + d.advance.toFixed(2) : 'Not selected';
+            document.getElementById('adm_advance_helper').textContent = advCb.checked ? 'Advance will be expected for this booking.' : 'Advance is optional. Booking can be created without payment.';
             var h = document.getElementById('adm_hours_slot').value;
             var km = parseInt(document.getElementById('adm_estimated_km').value || '0', 10);
-            var totalHours = admCalcHours();
-            var packageCount = admCalcHourPackages(totalHours, h);
-            var price = kmMode ? (Math.max(0, km) * d.rateKm) : ((h === '6' ? d.p6 : h === '12' ? d.p12 : h === '24' ? d.p24 : 0) * Math.max(1, packageCount || 1));
+            var th = admCalcHours();
+            var pc = admCalcHourPackages(th, h);
+            var price = kmMode ? (Math.max(0, km) * d.rateKm) : ((h === '6' ? d.p6 : h === '12' ? d.p12 : h === '24' ? d.p24 : 0) * Math.max(1, pc || 1));
             document.getElementById('admin_expected_amount').value = price > 0 ? price.toFixed(2) : '';
         }
 
-        /* ── Event listeners ── */
+        // ═══════════════════════════════════════════════════════════
+        //  EVENT BINDINGS
+        // ═══════════════════════════════════════════════════════════
         $('#admin_vehicle_id').on('change', admUpdateAmount);
         document.getElementById('adm_booking_type').addEventListener('change', admToggleBookingMode);
         document.getElementById('adm_requires_advance').addEventListener('change', admUpdateAmount);
         document.getElementById('adm_hours_slot').addEventListener('change', admUpdateAmount);
         document.getElementById('adm_estimated_km').addEventListener('input', admUpdateAmount);
-
-        /* Date + time changes recalculate hours duration */
         ['pickup_date', 'return_date'].forEach(function(id) {
             var el = document.getElementById(id);
             if (el) el.addEventListener('change', function() {
@@ -426,19 +672,13 @@
                 admUpdateAmount();
             });
         });
-        ['adm_pickup_time', 'adm_return_time'].forEach(function(id) {
-            var el = document.getElementById(id);
-            if (el) el.addEventListener('change', function() {
-                admUpdateHoursDuration();
-                admUpdateAmount();
-            });
-        });
 
+        // ═══════════════════════════════════════════════════════════
+        //  INIT
+        // ═══════════════════════════════════════════════════════════
         admUpdateHoursDuration();
         admToggleBookingMode();
         admUpdateAmount();
+        admUpdateExpenses();
     });
 </script>
-
-
-

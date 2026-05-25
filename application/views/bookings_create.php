@@ -208,18 +208,33 @@
                 </div>
 
                 <!-- ── 4. Pickup Time & Return Time ── -->
-                <div id="pickup_time_wrap">
-                    <label>Pickup Time</label>
-                    <input type="text" name="pickup_time" id="pickup_time" placeholder="Example: 10:30 AM or 22:30"
-                        value="<?php echo !empty($booking_edit['pickup_time']) ? html_escape(date('H:i', strtotime($booking_edit['pickup_time']))) : ''; ?>" required>
-                    <div class="helper">Enter time like `10:30 AM` or `22:30`.</div>
-                </div>
-                <div id="return_time_wrap">
-                    <label>Return Time</label>
-                    <input type="text" name="return_time" id="return_time" placeholder="Example: 06:30 PM or 18:30"
-                        value="<?php echo !empty($booking_edit['return_time']) ? html_escape(date('H:i', strtotime($booking_edit['return_time']))) : ''; ?>" required>
-                    <div class="helper">Enter time like `06:30 PM` or `18:30`.</div>
-                </div>
+              <div id="pickup_time_wrap">
+    <label>Pickup Time</label>
+
+    <input 
+        type="time"
+        name="pickup_time"
+        id="pickup_time"
+        value="<?php echo !empty($booking_edit['pickup_time']) ? html_escape(date('H:i', strtotime($booking_edit['pickup_time']))) : ''; ?>"
+        required
+    >
+
+    <div class="helper">Select pickup time.</div>
+</div>
+
+<div id="return_time_wrap">
+    <label>Return Time</label>
+
+    <input 
+        type="time"
+        name="return_time"
+        id="return_time"
+        value="<?php echo !empty($booking_edit['return_time']) ? html_escape(date('H:i', strtotime($booking_edit['return_time']))) : ''; ?>"
+        required
+    >
+
+    <div class="helper">Select return time.</div>
+</div>
 
                 <!-- ── 5. Calculated Duration Box ── -->
                 <div class="full" id="hours_duration_wrap">

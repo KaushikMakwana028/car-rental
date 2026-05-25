@@ -1519,4 +1519,127 @@ class General_model extends CI_Model
 
         return 'Pending';
     }
+
+    public function get_vehicles_for_edit()
+    {
+        $this->db->select('
+        vehicles.id,
+        vehicles.name,
+        vehicles.registration_no,
+        vehicles.rate_per_day,
+        vehicles.advance_amount,
+        vehicles.price_6_hours,
+        vehicles.price_12_hours,
+        vehicles.price_24_hours,
+        vehicles.extra_hour_charge,
+        vehicles.status
+    ');
+        $this->db->from('vehicles');
+        $this->db->order_by('vehicles.name', 'ASC');
+
+        $query = $this->db->get();
+
+        return $query->num_rows() > 0 ? $query->result_array() : array();
+    }
+
+    public function get_customer_payment_summary($customer_id)
+    {
+        $customer_id = (int) $customer_id;
+
+        // Get all bookings for customer
+        $bookings = $this->db->where('customer_id', $customer_id)
+            ->get('bookings')
+            ->result_array();
+
+        $total_amount = 0;
+        $paid_amount = 0;
+
+        foreach ($bookings as $booking) {
+            $total_amount += (float) $booking['amount'];
+
+            // Get payments for this booking
+            $payments = $this->db->where('booking_id', $booking['id'])
+                ->get('payments')
+                ->result_array();
+
+            foreach ($payments as $payment) {
+                $paid_amount += (float) $payment['amount'];
+            }
+        }
+
+        $pending_amount = max(0, $total_amount - $paid_amount);
+
+        return array(
+            'total_amount' => $total_amount,
+            'paid_amount' => $paid_amount,
+            'pending_amount' => $pending_amount
+        );
+    }
+    public function get_vehicle_collection_summary($vehicle_id, $year = null, $month = null)
+    {
+        $vehicle_id = (int) $vehicle_id;
+
+        if ($vehicle_id <= 0) {
+            return array(
+                'total_amount' => 0,
+                'received_amount' => 0,
+                'pending_amount' => 0,
+                'total_bookings' => 0
+            );
+        }
+
+        // Use current month/year if not provided
+        if ($year === null) {
+            $year = (int) date('Y');
+        }
+        if ($month === null) {
+            $month = (int) date('m');
+        }
+
+        $year = (int) $year;
+        $month = (int) $month;
+
+        // Get bookings from selected month only (by pickup_date)
+        $this->db->select('id, amount');
+        $this->db->from('bookings');
+        $this->db->where('vehicle_id', $vehicle_id);
+        $this->db->where('YEAR(pickup_date)', $year);
+        $this->db->where('MONTH(pickup_date)', $month);
+        $bookings_query = $this->db->get();
+        $bookings = $bookings_query->result_array();
+
+        $total_amount = 0;
+        $booking_ids = array();
+
+        foreach ($bookings as $booking) {
+            $total_amount += (float) $booking['amount'];
+            $booking_ids[] = (int) $booking['id'];
+        }
+
+        $total_bookings = count($bookings);
+
+        // Get payments for these month's bookings
+        $received_amount = 0;
+
+        if (!empty($booking_ids)) {
+            $this->db->select('COALESCE(SUM(amount), 0) as total_received');
+            $this->db->from('payments');
+            $this->db->where_in('booking_id', $booking_ids);
+
+            $payments_query = $this->db->get();
+
+            if ($payments_query->num_rows() > 0) {
+                $received_amount = (float) $payments_query->row()->total_received;
+            }
+        }
+
+        $pending_amount = max(0, $total_amount - $received_amount);
+
+        return array(
+            'total_amount' => $total_amount,
+            'received_amount' => $received_amount,
+            'pending_amount' => $pending_amount,
+            'total_bookings' => $total_bookings
+        );
+    }
 }

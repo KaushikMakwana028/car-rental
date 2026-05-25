@@ -192,4 +192,45 @@ class Vehicle extends Admin_Controller
         $this->session->set_flashdata('error', strip_tags($this->upload->display_errors('', '')));
         return false;
     }
+    public function get_collection_summary()
+{
+    if (!$this->input->is_ajax_request()) {
+        show_404();
+    }
+    
+    $vehicle_id = (int) $this->input->post('vehicle_id');
+    $year = $this->input->post('year') ? (int) $this->input->post('year') : (int) date('Y');
+    $month = $this->input->post('month') ? (int) $this->input->post('month') : (int) date('m');
+    
+    if ($vehicle_id <= 0) {
+        echo json_encode(array('success' => false, 'message' => 'Invalid vehicle ID'));
+        return;
+    }
+    
+    $vehicle = $this->General_model->get_row('vehicles', array('id' => $vehicle_id));
+    
+    if (empty($vehicle)) {
+        echo json_encode(array('success' => false, 'message' => 'Vehicle not found'));
+        return;
+    }
+    
+    $summary = $this->General_model->get_vehicle_collection_summary($vehicle_id, $year, $month);
+    
+    echo json_encode(array(
+        'success' => true,
+        'data' => array(
+            'vehicle_name' => $vehicle['name'],
+            'registration_no' => $vehicle['registration_no'],
+            'total_amount' => $summary['total_amount'],
+            'received_amount' => $summary['received_amount'],
+            'pending_amount' => $summary['pending_amount'],
+            'total_bookings' => $summary['total_bookings'],
+            'year' => $year,
+            'month' => $month
+        )
+    ));
+}
+public function collection(){
+    // echo " where we can stay as the ";
+}
 }

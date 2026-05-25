@@ -660,22 +660,25 @@
 </style>
 
 <?php
-$total_customers  = count($customers);
+$total_customers = count($customers);
 $active_customers = 0;
-$pending_docs     = 0;
+$pending_docs = 0;
 $customer_revenue = 0;
 
 foreach ($customers as $c) {
-    if ((int)$c['total_bookings'] > 0) $active_customers++;
-    if (!in_array($c['doc_status'], ['approved', 'complete'], true)) $pending_docs++;
-    $customer_revenue += (float)$c['total_spent'];
+    if ((int) $c['total_bookings'] > 0)
+        $active_customers++;
+    if (!in_array($c['doc_status'], ['approved', 'complete'], true))
+        $pending_docs++;
+    $customer_revenue += (float) $c['total_spent'];
 }
 
 function cm_initials($name)
 {
     $parts = array_filter(explode(' ', trim($name)));
     $out = '';
-    foreach (array_slice($parts, 0, 2) as $p) $out .= strtoupper($p[0]);
+    foreach (array_slice($parts, 0, 2) as $p)
+        $out .= strtoupper($p[0]);
     return $out ?: '?';
 }
 ?>
@@ -686,22 +689,23 @@ function cm_initials($name)
     <div class="cm-stats">
         <div class="cm-stat blue">
             <div class="cm-stat-label">Total Customers</div>
-            <div class="cm-stat-value"><?php echo (int)$total_customers; ?></div>
+            <div class="cm-stat-value"><?php echo (int) $total_customers; ?></div>
             <div class="cm-stat-desc">Registered accounts</div>
         </div>
         <div class="cm-stat green">
             <div class="cm-stat-label">Active</div>
-            <div class="cm-stat-value"><?php echo (int)$active_customers; ?></div>
+            <div class="cm-stat-value"><?php echo (int) $active_customers; ?></div>
             <div class="cm-stat-desc">With at least 1 booking</div>
         </div>
         <div class="cm-stat amber">
             <div class="cm-stat-label">Pending Docs</div>
-            <div class="cm-stat-value"><?php echo (int)$pending_docs; ?></div>
+            <div class="cm-stat-value"><?php echo (int) $pending_docs; ?></div>
             <div class="cm-stat-desc">Needs review</div>
         </div>
         <div class="cm-stat teal">
             <div class="cm-stat-label">Total Spent</div>
-            <div class="cm-stat-value" style="font-size:20px;letter-spacing:-.3px;">&#8377;<?php echo number_format($customer_revenue, 0); ?></div>
+            <div class="cm-stat-value" style="font-size:20px;letter-spacing:-.3px;">
+                &#8377;<?php echo number_format($customer_revenue, 0); ?></div>
             <div class="cm-stat-desc">All booking value</div>
         </div>
     </div>
@@ -740,7 +744,8 @@ function cm_initials($name)
                             <tr>
                                 <td>
                                     <div class="cm-customer-cell">
-                                        <div class="cm-avatar"><?php echo html_escape(cm_initials($customer['full_name'])); ?></div>
+                                        <div class="cm-avatar"><?php echo html_escape(cm_initials($customer['full_name'])); ?>
+                                        </div>
                                         <div>
                                             <div class="cm-name"><?php echo html_escape($customer['full_name']); ?></div>
                                             <div class="cm-email"><?php echo html_escape($customer['email']); ?></div>
@@ -748,8 +753,9 @@ function cm_initials($name)
                                     </div>
                                 </td>
                                 <td class="cm-mono"><?php echo html_escape($customer['phone']); ?></td>
-                                <td><?php echo (int)$customer['total_bookings']; ?></td>
-                                <td class="cm-amount">&#8377;<?php echo number_format((float)$customer['total_spent'], 0); ?></td>
+                                <td><?php echo (int) $customer['total_bookings']; ?></td>
+                                <td class="cm-amount">&#8377;<?php echo number_format((float) $customer['total_spent'], 0); ?>
+                                </td>
                                 <td>
                                     <span class="cm-badge <?php echo html_escape(strtolower($customer['doc_status'])); ?>">
                                         <?php echo ucfirst(html_escape($customer['doc_status'])); ?>
@@ -764,31 +770,35 @@ function cm_initials($name)
                                             data-name="<?php echo html_escape($customer['full_name']); ?>"
                                             data-email="<?php echo html_escape($customer['email']); ?>"
                                             data-phone="<?php echo html_escape($customer['phone']); ?>"
-                                            data-bookings="<?php echo (int)$customer['total_bookings']; ?>"
-                                            data-spent="<?php echo number_format((float)$customer['total_spent'], 2, '.', ''); ?>"
+                                            data-bookings="<?php echo (int) $customer['total_bookings']; ?>"
+                                            data-spent="<?php echo number_format((float) $customer['total_spent'], 2, '.', ''); ?>"
+                                            data-total-amount="<?php echo number_format((float) $customer['total_amount'], 2, '.', ''); ?>"
+                                            data-paid-amount="<?php echo number_format((float) $customer['paid_amount'], 2, '.', ''); ?>"
+                                            data-pending-amount="<?php echo number_format((float) $customer['pending_amount'], 2, '.', ''); ?>"
                                             data-docs="<?php echo html_escape($customer['doc_status']); ?>"
                                             data-last-booking="<?php echo !empty($customer['last_booking']) ? date('d M Y', strtotime($customer['last_booking'])) : 'No bookings'; ?>"
                                             data-detail="<?php echo html_escape(json_encode($customer['detail'])); ?>">
                                             <svg viewBox="0 0 16 16" fill="none">
-                                                <path d="M1 8s3-5 7-5 7 5 7 5-3 5-7 5-7-5-7-5Z" stroke="currentColor" stroke-width="1.4" />
+                                                <path d="M1 8s3-5 7-5 7 5 7 5-3 5-7 5-7-5-7-5Z" stroke="currentColor"
+                                                    stroke-width="1.4" />
                                                 <circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.4" />
                                             </svg>
                                             View
                                         </button>
 
-                                        <?php if ((int)$customer['total_bookings'] === 0): ?>
+                                        <?php if ((int) $customer['total_bookings'] === 0): ?>
                                             <form method="post"
-                                                action="<?php echo base_url('admin/customers/delete/' . (int)$customer['id']); ?>"
-                                                class="js-swal-confirm-form"
-                                                data-swal-title="Delete customer?"
+                                                action="<?php echo base_url('admin/customers/delete/' . (int) $customer['id']); ?>"
+                                                class="js-swal-confirm-form" data-swal-title="Delete customer?"
                                                 data-swal-text="<?php echo html_escape($customer['full_name']); ?> and all their documents will be permanently removed."
-                                                data-swal-confirm="Delete"
-                                                style="display:inline;">
+                                                data-swal-confirm="Delete" style="display:inline;">
                                                 <button class="cm-view-btn" type="submit"
                                                     style="border-color:var(--danger-bd);color:var(--danger-tx);background:var(--danger-bg);">
                                                     <svg viewBox="0 0 16 16" fill="none">
-                                                        <path d="M2 4h12M5 4V2.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5V4M6 7v5M10 7v5M3 4l.8 9a1 1 0 0 0 1 .9h6.4a1 1 0 0 0 1-.9L13 4"
-                                                            stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+                                                        <path
+                                                            d="M2 4h12M5 4V2.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5V4M6 7v5M10 7v5M3 4l.8 9a1 1 0 0 0 1 .9h6.4a1 1 0 0 0 1-.9L13 4"
+                                                            stroke="currentColor" stroke-width="1.4" stroke-linecap="round"
+                                                            stroke-linejoin="round" />
                                                     </svg>
                                                     Delete
                                                 </button>
@@ -799,12 +809,15 @@ function cm_initials($name)
                 padding:6px 10px;border-radius:var(--radius-sm);
                 background:var(--surface-alt);border:1.5px solid var(--border);
                 color:var(--text-3);font:600 11px/1 var(--font);
-                cursor:not-allowed;" title="Delete their <?php echo (int)$customer['total_bookings']; ?> booking(s) first">
+                cursor:not-allowed;"
+                                                title="Delete their <?php echo (int) $customer['total_bookings']; ?> booking(s) first">
                                                 <svg viewBox="0 0 16 16" fill="none" width="12" height="12">
                                                     <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4" />
-                                                    <path d="M8 5v4M8 10.5v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+                                                    <path d="M8 5v4M8 10.5v.5" stroke="currentColor" stroke-width="1.4"
+                                                        stroke-linecap="round" />
                                                 </svg>
-                                                <?php echo (int)$customer['total_bookings']; ?> booking<?php echo (int)$customer['total_bookings'] > 1 ? 's' : ''; ?>
+                                                <?php echo (int) $customer['total_bookings']; ?>
+                                                booking<?php echo (int) $customer['total_bookings'] > 1 ? 's' : ''; ?>
                                             </span>
                                         <?php endif; ?>
                                     </div>
@@ -846,28 +859,36 @@ function cm_initials($name)
         <div class="cm-modal-body">
 
             <!-- KV grid -->
-            <div class="cm-kv-grid">
-                <div class="cm-kv">
-                    <div class="cm-kv-label">Phone</div>
-                    <div class="cm-kv-value mono" id="cmModalPhone">—</div>
-                </div>
-                <div class="cm-kv">
-                    <div class="cm-kv-label">Bookings</div>
-                    <div class="cm-kv-value" id="cmModalBookings">0</div>
-                </div>
-                <div class="cm-kv">
-                    <div class="cm-kv-label">Total Spent</div>
-                    <div class="cm-kv-value mono" id="cmModalSpent">₹0</div>
-                </div>
-                <div class="cm-kv">
-                    <div class="cm-kv-label">Doc Status</div>
-                    <div class="cm-kv-value" id="cmModalDocs">—</div>
-                </div>
-                <div class="cm-kv" style="grid-column: span 2;">
-                    <div class="cm-kv-label">Last Booking</div>
-                    <div class="cm-kv-value" id="cmModalLastBooking">—</div>
-                </div>
-            </div>
+           <div class="cm-kv-grid">
+    <div class="cm-kv">
+        <div class="cm-kv-label">Phone</div>
+        <div class="cm-kv-value mono" id="cmModalPhone">—</div>
+    </div>
+    <div class="cm-kv">
+        <div class="cm-kv-label">Bookings</div>
+        <div class="cm-kv-value" id="cmModalBookings">0</div>
+    </div>
+    <div class="cm-kv">
+        <div class="cm-kv-label">Total Amount</div>
+        <div class="cm-kv-value mono" id="cmModalTotalAmount">₹0</div>
+    </div>
+    <div class="cm-kv">
+        <div class="cm-kv-label">Received Amount</div>
+        <div class="cm-kv-value mono" style="color:var(--success-tx);" id="cmModalPaidAmount">₹0</div>
+    </div>
+    <div class="cm-kv">
+        <div class="cm-kv-label">Pending Amount</div>
+        <div class="cm-kv-value mono" style="color:var(--danger-tx);" id="cmModalPendingAmount">₹0</div>
+    </div>
+    <div class="cm-kv">
+        <div class="cm-kv-label">Doc Status</div>
+        <div class="cm-kv-value" id="cmModalDocs">—</div>
+    </div>
+    <div class="cm-kv" style="grid-column: span 2;">
+        <div class="cm-kv-label">Last Booking</div>
+        <div class="cm-kv-value" id="cmModalLastBooking">—</div>
+    </div>
+</div>
 
             <!-- Summary note -->
             <div class="cm-note" id="cmModalNote"></div>
@@ -889,21 +910,24 @@ function cm_initials($name)
 </div>
 
 <script>
-    (function() {
+    (function () {
         var overlay = document.getElementById('customerModal');
         var closeBtn = document.getElementById('closeCustomerModal');
 
-        var elAvatar = document.getElementById('cmModalAvatar');
-        var elName = document.getElementById('cmModalName');
-        var elEmail = document.getElementById('cmModalEmail');
-        var elPhone = document.getElementById('cmModalPhone');
-        var elBookings = document.getElementById('cmModalBookings');
-        var elSpent = document.getElementById('cmModalSpent');
-        var elDocs = document.getElementById('cmModalDocs');
-        var elLastBooking = document.getElementById('cmModalLastBooking');
-        var elNote = document.getElementById('cmModalNote');
-        var elDocsList = document.getElementById('cmModalDocs-list');
-        var elBkgsList = document.getElementById('cmModalBookings-list');
+       var elAvatar = document.getElementById('cmModalAvatar');
+var elName = document.getElementById('cmModalName');
+var elEmail = document.getElementById('cmModalEmail');
+var elPhone = document.getElementById('cmModalPhone');
+var elBookings = document.getElementById('cmModalBookings');
+var elSpent = document.getElementById('cmModalSpent');
+var elTotalAmount = document.getElementById('cmModalTotalAmount');
+var elPaidAmount = document.getElementById('cmModalPaidAmount');
+var elPendingAmount = document.getElementById('cmModalPendingAmount');
+var elDocs = document.getElementById('cmModalDocs');
+var elLastBooking = document.getElementById('cmModalLastBooking');
+var elNote = document.getElementById('cmModalNote');
+var elDocsList = document.getElementById('cmModalDocs-list');
+var elBkgsList = document.getElementById('cmModalBookings-list');
 
         function esc(v) {
             return String(v || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -911,7 +935,7 @@ function cm_initials($name)
 
         function initials(name) {
             var parts = name.trim().split(/\s+/).slice(0, 2);
-            return parts.map(function(p) {
+            return parts.map(function (p) {
                 return p[0].toUpperCase();
             }).join('');
         }
@@ -927,7 +951,7 @@ function cm_initials($name)
                 elDocsList.innerHTML = '<div class="cm-list-empty">No document data for this customer.</div>';
                 return;
             }
-            elDocsList.innerHTML = docs.map(function(d) {
+            elDocsList.innerHTML = docs.map(function (d) {
                 var sub = d.status === 'missing' ? 'Not uploaded' : (d.booking_label || 'General');
                 var note = d.admin_notes ? ' &middot; ' + esc(d.admin_notes) : '';
                 return '<div class="cm-list-item">' +
@@ -945,7 +969,7 @@ function cm_initials($name)
                 elBkgsList.innerHTML = '<div class="cm-list-empty">No bookings yet for this customer.</div>';
                 return;
             }
-            elBkgsList.innerHTML = bookings.map(function(b) {
+            elBkgsList.innerHTML = bookings.map(function (b) {
                 var title = (b.booking_code || 'Booking') + ' – ' + (b.vehicle_name || 'Vehicle');
                 var sub = (b.pickup_location || '—') + ' → ' + (b.drop_location || '—');
                 var meta = '₹' + esc(b.amount || '0') + ' · ' + esc(b.payment_status || '—');
@@ -970,46 +994,62 @@ function cm_initials($name)
             document.body.style.overflow = '';
         }
 
-        document.querySelectorAll('.customer-view-btn').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                var name = btn.dataset.name || 'Customer';
-                var email = btn.dataset.email || '—';
-                var phone = btn.dataset.phone || '—';
-                var bookings = parseInt(btn.dataset.bookings, 10) || 0;
-                var spent = parseFloat(btn.dataset.spent) || 0;
-                var docs = btn.dataset.docs || '—';
-                var lastBkg = btn.dataset.lastBooking || '—';
-                var detail = {};
-                try {
-                    detail = JSON.parse(btn.dataset.detail || '{}');
-                } catch (e) {}
+       document.querySelectorAll('.customer-view-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        var name = btn.dataset.name || 'Customer';
+        var email = btn.dataset.email || '—';
+        var phone = btn.dataset.phone || '—';
+        var bookings = parseInt(btn.dataset.bookings, 10) || 0;
+        var spent = parseFloat(btn.dataset.spent) || 0;
+        var totalAmount = parseFloat(btn.dataset.totalAmount) || 0;
+        var paidAmount = parseFloat(btn.dataset.paidAmount) || 0;
+        var pendingAmount = parseFloat(btn.dataset.pendingAmount) || 0;
+        var docs = btn.dataset.docs || '—';
+        var lastBkg = btn.dataset.lastBooking || '—';
+        var detail = {};
+        try {
+            detail = JSON.parse(btn.dataset.detail || '{}');
+        } catch (e) {}
 
-                elAvatar.textContent = initials(name);
-                elName.textContent = name;
-                elEmail.textContent = email;
-                elPhone.textContent = phone;
-                elBookings.textContent = bookings;
-                elSpent.textContent = '₹' + spent.toLocaleString('en-IN', {
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 0
-                });
-                elDocs.textContent = docs.charAt(0).toUpperCase() + docs.slice(1);
-                elLastBooking.textContent = lastBkg;
-                elNote.textContent = bookings > 0 ?
-                    name + ' has ' + bookings + ' booking(s) with a total spend of ₹' + spent.toFixed(0) + '.' :
-                    name + ' is registered but has not created any booking yet.';
-
-                renderDocs(detail.documents || []);
-                renderBookings(detail.bookings || []);
-                openModal();
-            });
+        elAvatar.textContent = initials(name);
+        elName.textContent = name;
+        elEmail.textContent = email;
+        elPhone.textContent = phone;
+        elBookings.textContent = bookings;
+       if (elSpent) {
+    elSpent.textContent = '₹' + spent.toLocaleString('en-IN', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    });
+}
+        elTotalAmount.textContent = '₹' + totalAmount.toLocaleString('en-IN', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
         });
+        elPaidAmount.textContent = '₹' + paidAmount.toLocaleString('en-IN', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        });
+        elPendingAmount.textContent = '₹' + pendingAmount.toLocaleString('en-IN', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        });
+        elDocs.textContent = docs.charAt(0).toUpperCase() + docs.slice(1);
+        elLastBooking.textContent = lastBkg;
+        elNote.textContent = bookings > 0 ?
+            name + ' has ' + bookings + ' booking(s) with total bookings worth ₹' + totalAmount.toFixed(0) + ', received ₹' + paidAmount.toFixed(0) + ', and ₹' + pendingAmount.toFixed(0) + ' pending.' :
+            name + ' is registered but has not created any booking yet.';
 
+        renderDocs(detail.documents || []);
+        renderBookings(detail.bookings || []);
+        openModal();
+    });
+});
         closeBtn.addEventListener('click', closeModal);
-        overlay.addEventListener('click', function(e) {
+        overlay.addEventListener('click', function (e) {
             if (e.target === overlay) closeModal();
         });
-        document.addEventListener('keydown', function(e) {
+        document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape' && overlay.classList.contains('open')) closeModal();
         });
     })();

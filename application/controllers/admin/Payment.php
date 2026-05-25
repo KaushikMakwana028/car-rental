@@ -139,6 +139,7 @@ class Payment extends Admin_Controller
             'booking_id' => (int) $this->input->post('booking_id'),
             'payment_type' => trim($this->input->post('payment_type', true)),
             'amount' => (float) $this->input->post('amount'),
+            'other_expenses' => (float) $this->input->post('other_expenses') ?: 0.00,
             'payment_mode' => trim($this->input->post('payment_mode', true)),
             'reference_no' => trim($this->input->post('reference_no', true)),
             'notes' => trim($this->input->post('notes', true)),

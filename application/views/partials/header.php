@@ -13,13 +13,36 @@ $hide_page_hero = !empty($hide_page_hero);
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#1f4f8f">
-    <title><?php echo $page_title !== '' ? html_escape($page_title) . ' | ' : ''; ?>Cab Booking Fast</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f4f8f">
+
+<title><?php echo $page_title !== '' ? html_escape($page_title) . ' | ' : ''; ?>Surya Deep Car Rent | Cab Booking Fast</title>
+
+<meta name="title" content="Surya Deep Car Rent - Car Rental & Cab Booking Service">
+<meta name="description" content="Book reliable car rental and cab services with Surya Deep Car Rent. Affordable pricing, comfortable rides, airport pickup, local and outstation travel services.">
+<meta name="keywords" content="Surya Deep Car Rent, suryadeepcarrent, cab booking fast, car rental, taxi service, airport cab, outstation cab, car hire">
+<meta name="author" content="Vision Technolabs">
+<meta name="robots" content="index, follow">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Surya Deep Car Rent | Cab Booking Fast">
+<meta property="og:description" content="Affordable and reliable cab booking and car rental service.">
+<meta property="og:url" content="https://suryadeepcarrent.com/">
+<meta property="og:site_name" content="Surya Deep Car Rent">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Surya Deep Car Rent | Cab Booking Fast">
+<meta name="twitter:description" content="Affordable and reliable cab booking and car rental service.">
+
+<link rel="canonical" href="https://suryadeepcarrent.com/">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         /* ── Reset & Tokens ───────────────────────────────────────── */
         *,
@@ -33,6 +56,7 @@ $hide_page_hero = !empty($hide_page_hero);
         html {
             scroll-behavior: smooth;
             -webkit-text-size-adjust: 100%;
+            overflow-x: hidden;
         }
 
         :root {
@@ -67,6 +91,7 @@ $hide_page_hero = !empty($hide_page_hero);
             color: var(--ink);
             background: var(--bg);
             -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
         }
 
         a {
@@ -101,6 +126,9 @@ $hide_page_hero = !empty($hide_page_hero);
             background: linear-gradient(180deg, #fffdf5 0%, #fff9e9 100%);
             border-bottom: 1px solid var(--border);
             box-shadow: 0 8px 22px rgba(23, 53, 92, .06);
+            /* Prevent header itself from causing horizontal scroll */
+            width: 100%;
+            overflow: hidden;
         }
 
         .hrow {
@@ -108,24 +136,28 @@ $hide_page_hero = !empty($hide_page_hero);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 20px;
+            gap: 12px;
+            /* Both children can shrink if viewport is tight */
+            overflow: hidden;
         }
 
-        /* Logo block */
+        /* ── Logo ── */
         .hlogo {
             display: inline-flex;
             align-items: center;
             flex-shrink: 0;
             text-decoration: none;
+            /* Give logo a max share of the row */
+            max-width: 50%;
         }
 
         .hlogo-img-wrap {
             width: 148px;
+            max-width: 100%;
             height: auto;
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-shrink: 0;
             overflow: visible;
         }
 
@@ -135,38 +167,20 @@ $hide_page_hero = !empty($hide_page_hero);
             object-fit: contain;
         }
 
-        .hlogo-text {
-            display: none;
-        }
-
-        .hlogo-brand {
-            font-family: var(--font-display);
-            font-size: 24px;
-            font-weight: 700;
-            line-height: 1.1;
-            color: var(--ink);
-            letter-spacing: -0.02em;
-        }
-
-        .hlogo-tagline {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--muted);
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            margin-top: 2px;
-        }
-
-        /* Admin contact pill */
+        /* ── Contact pill ── */
         .hcontact {
             display: flex;
             align-items: center;
-            gap: 14px;
-            padding: 12px 18px 12px 12px;
+            gap: 10px;
+            padding: 10px 16px 10px 10px;
             background: linear-gradient(135deg, #fffef9 0%, #fff4cd 100%);
             border: 1px solid var(--border-md);
             border-radius: 999px;
             box-shadow: var(--shadow-xs);
+            /* Allow pill to shrink and never overflow */
+            min-width: 0;
+            flex-shrink: 1;
+            overflow: hidden;
         }
 
         .hcontact-avatar {
@@ -188,15 +202,20 @@ $hide_page_hero = !empty($hide_page_hero);
         .hcontact-info {
             display: flex;
             flex-direction: column;
+            min-width: 0;
+            /* allows text children to truncate */
         }
 
         .hcontact-name {
             font-family: var(--font-display);
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
             color: var(--ink);
             line-height: 1.2;
+            /* Truncate long names instead of overflowing */
             white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .hcontact-phone {
@@ -205,6 +224,8 @@ $hide_page_hero = !empty($hide_page_hero);
             color: var(--muted);
             margin-top: 2px;
             white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
             display: flex;
             align-items: center;
             gap: 4px;
@@ -213,6 +234,7 @@ $hide_page_hero = !empty($hide_page_hero);
         .hcontact-phone::before {
             content: '📞';
             font-size: 11px;
+            flex-shrink: 0;
         }
 
         /* ── MAIN ─────────────────────────────────────────────────── */
@@ -613,7 +635,10 @@ $hide_page_hero = !empty($hide_page_hero);
             background: #fff;
         }
 
-        /* ── Responsive ───────────────────────────────────────────── */
+        /* ══════════════════════════════════════
+           RESPONSIVE
+        ══════════════════════════════════════ */
+
         @media (max-width: 980px) {
 
             .split-grid,
@@ -626,41 +651,8 @@ $hide_page_hero = !empty($hide_page_hero);
             }
         }
 
+        /* Tablet ≤ 700px */
         @media (max-width: 700px) {
-            .hrow {
-                min-height: 72px;
-                gap: 14px;
-            }
-
-            .hlogo-img-wrap {
-                width: 118px;
-                height: auto;
-            }
-
-            .hlogo-img-wrap img {
-                width: 100%;
-                height: auto;
-            }
-
-            .hcontact {
-                padding: 8px 12px 8px 10px;
-                gap: 10px;
-            }
-
-            .hcontact-avatar {
-                width: 36px;
-                height: 36px;
-                font-size: 15px;
-            }
-
-            .hcontact-name {
-                font-size: 14px;
-            }
-
-            .hcontact-phone {
-                font-size: 11px;
-            }
-
             .page-hero {
                 padding: 22px 20px;
             }
@@ -674,25 +666,138 @@ $hide_page_hero = !empty($hide_page_hero);
             }
         }
 
-        @media (max-width: 480px) {
-            .wrap {
-                padding: 0 16px;
-            }
-
+        /* ── Mobile header: stack into two rows ── */
+        @media (max-width: 600px) {
             .wrap {
                 padding: 0 14px;
             }
+
+            /* Stack logo row + contact row vertically */
+            .hrow {
+                min-height: unset;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0;
+                padding: 10px 0 12px;
+            }
+
+            /* Row 1: logo left-aligned */
+            .hlogo {
+                max-width: 100%;
+                padding-bottom: 10px;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .hlogo-img-wrap {
+                width: 120px;
+            }
+
+            /* Row 2: contact pill full-width, horizontal layout */
+            .hcontact {
+                margin-top: 10px;
+                border-radius: var(--r-md);
+                /* rectangle, not pill — more room */
+                padding: 9px 14px;
+                gap: 10px;
+                width: 100%;
+                max-width: 100%;
+                flex-shrink: unset;
+            }
+
+            .hcontact-avatar {
+                width: 36px;
+                height: 36px;
+                font-size: 15px;
+                flex-shrink: 0;
+            }
+
+            .hcontact-info {
+                flex-direction: row;
+                /* name + phone side by side */
+                align-items: center;
+                gap: 6px;
+                flex-wrap: wrap;
+                min-width: 0;
+            }
+
+            .hcontact-name {
+                font-size: 13px;
+                white-space: nowrap;
+                overflow: visible;
+                /* no truncation — full width available */
+                text-overflow: unset;
+            }
+
+            /* Divider dot between name and phone */
+            .hcontact-name::after {
+                content: '·';
+                margin-left: 6px;
+                color: var(--muted);
+                font-weight: 400;
+            }
+
+            .hcontact-phone {
+                font-size: 12px;
+                margin-top: 0;
+                white-space: nowrap;
+                overflow: visible;
+            }
+        }
+
+        /* Extra small ≤ 380px — keep two-row but tighten further */
+        @media (max-width: 380px) {
+            .wrap {
+                padding: 0 10px;
+            }
+
+            .hlogo-img-wrap {
+                width: 100px;
+            }
+
+            .hcontact {
+                padding: 8px 12px;
+                gap: 8px;
+            }
+
+            .hcontact-avatar {
+                width: 30px;
+                height: 30px;
+                font-size: 13px;
+            }
+
+            .hcontact-name {
+                font-size: 12px;
+            }
+
+            .hcontact-phone {
+                font-size: 11px;
+            }
         }
     </style>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "Surya Deep Car Rent",
+  "url": "https://suryadeepcarrent.com/assets/home/logo.png",
+  "logo": "https://suryadeepcarrent.com/logo.png",
+  "description": "Car rental and cab booking service.",
+  "telephone": "+918128800558",
+  "address": {
+    "@type": "PostalAddress",
+    "addressCountry": "IN"
+  }
+}
+</script>
 </head>
 
 <body>
 
-    <!-- ═══════════════════════════════════════════════════════════ HEADER -->
+    <!-- ══════════════════════════════════════════════════ HEADER -->
     <header class="site-header">
         <div class="wrap hrow">
 
-            <!-- Logo + Brand Name -->
+            <!-- Logo -->
             <a class="hlogo" href="<?php echo base_url('dashboard'); ?>" aria-label="Go to Dashboard">
                 <div class="hlogo-img-wrap">
                     <img src="<?php echo $brand_logo; ?>" alt="Cab Booking Fast Logo">
@@ -712,7 +817,7 @@ $hide_page_hero = !empty($hide_page_hero);
 
         </div>
     </header>
-    <!-- ═══════════════════════════════════════════════════════════ /HEADER -->
+    <!-- ══════════════════════════════════════════════════ /HEADER -->
 
     <main class="main">
         <div class="wrap">

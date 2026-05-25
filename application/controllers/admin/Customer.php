@@ -3,19 +3,25 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Customer extends Admin_Controller
 {
-    public function index()
-    {
-        $data['page_title'] = 'Customers';
-        $data['current_user'] = $this->current_user;
-        $data['customers'] = $this->General_model->get_customers_overview();
+   public function index()
+{
+    $data['page_title'] = 'Customers';
+    $data['current_user'] = $this->current_user;
+    $data['customers'] = $this->General_model->get_customers_overview();
 
-        foreach ($data['customers'] as &$customer) {
-            $customer['detail'] = $this->General_model->get_customer_activity_detail((int) $customer['id']);
-        }
-        unset($customer);
-
-        $this->render_view('admin/customers_list', $data);
+    foreach ($data['customers'] as &$customer) {
+        $customer['detail'] = $this->General_model->get_customer_activity_detail((int) $customer['id']);
+        
+        // ADD THIS: Get payment summary
+        $payment_summary = $this->General_model->get_customer_payment_summary((int) $customer['id']);
+        $customer['total_amount'] = $payment_summary['total_amount'];
+        $customer['paid_amount'] = $payment_summary['paid_amount'];
+        $customer['pending_amount'] = $payment_summary['pending_amount'];
     }
+    unset($customer);
+
+    $this->render_view('admin/customers_list', $data);
+}
 
     public function delete($customer_id)
     {

@@ -1031,6 +1031,342 @@
             font-size: 28px;
         }
     }
+    .vm-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--text-2);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.vm-icon-btn i {
+    font-size: 16px;
+    line-height: 1;
+}
+
+.vm-icon-btn:hover {
+    background: var(--surface-alt);
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: translateY(-1px);
+}
+
+.vm-icon-btn.view {
+    border-color: #3b82f6;
+    color: #3b82f6;
+    background: #eff6ff;
+}
+
+.vm-icon-btn.view:hover {
+    background: #3b82f6;
+    color: #fff;
+}
+
+.vm-icon-btn.collection {
+    border-color: #10b981;
+    color: #10b981;
+    background: #ecfdf5;
+}
+
+.vm-icon-btn.collection:hover {
+    background: #10b981;
+    color: #fff;
+}
+
+.vm-icon-btn.edit {
+    border-color: #f59e0b;
+    color: #f59e0b;
+    background: #fffbeb;
+}
+
+.vm-icon-btn.edit:hover {
+    background: #f59e0b;
+    color: #fff;
+}
+
+.vm-icon-btn.delete {
+    border-color: #ef4444;
+    color: #ef4444;
+    background: #fef2f2;
+}
+
+.vm-icon-btn.delete:hover {
+    background: #ef4444;
+    color: #fff;
+}
+
+/* Tooltip on hover */
+.vm-icon-btn::after {
+    content: attr(title);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%) scale(0.9);
+    background: #1f2937;
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: all 0.2s ease;
+    z-index: 100;
+}
+
+.vm-icon-btn::before {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 2px);
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: #1f2937;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 100;
+}
+
+.vm-icon-btn:hover::after,
+.vm-icon-btn:hover::before {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+}
+
+/* ═══ Collection Modal Styles ═══ */
+.vm-collection-filter {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    padding: 16px;
+    background: var(--surface-alt);
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.vm-filter-group {
+    flex: 1;
+}
+
+.vm-filter-group label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-3);
+    margin-bottom: 6px;
+}
+
+.vm-filter-select {
+    width: 100%;
+    height: 38px;
+    padding: 0 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--text-1);
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.vm-filter-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.vm-filter-btn {
+    height: 38px;
+    padding: 0 16px;
+    border: none;
+    border-radius: 6px;
+    background: var(--primary);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.vm-filter-btn:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+}
+
+.vm-filter-btn i {
+    font-size: 16px;
+}
+
+.vm-collection-loading {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-3);
+}
+
+.vm-spinner {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 16px;
+    border: 3px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.vm-collection-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.vm-coll-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    border-radius: 10px;
+    border: 1.5px solid;
+}
+
+.vm-coll-card.blue {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+}
+
+.vm-coll-card.amber {
+    background: #fffbeb;
+    border-color: #fde68a;
+}
+
+.vm-coll-card.green {
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+}
+
+.vm-coll-card.red {
+    background: #fef2f2;
+    border-color: #fecaca;
+}
+
+.vm-coll-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.vm-coll-card.blue .vm-coll-icon {
+    background: #3b82f6;
+    color: #fff;
+}
+
+.vm-coll-card.amber .vm-coll-icon {
+    background: #f59e0b;
+    color: #fff;
+}
+
+.vm-coll-card.green .vm-coll-icon {
+    background: #10b981;
+    color: #fff;
+}
+
+.vm-coll-card.red .vm-coll-icon {
+    background: #ef4444;
+    color: #fff;
+}
+
+.vm-coll-icon i {
+    font-size: 22px;
+}
+
+.vm-coll-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-3);
+    margin-bottom: 4px;
+}
+
+.vm-coll-value {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.vm-coll-card.blue .vm-coll-value {
+    color: #1e40af;
+}
+
+.vm-coll-card.amber .vm-coll-value {
+    color: #b45309;
+}
+
+.vm-coll-card.green .vm-coll-value {
+    color: #047857;
+}
+
+.vm-coll-card.red .vm-coll-value {
+    color: #b91c1c;
+}
+
+.vm-collection-note {
+    display: flex;
+    gap: 12px;
+    padding: 14px 16px;
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text-2);
+}
+
+.vm-collection-note i {
+    font-size: 18px;
+    color: #3b82f6;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.vm-collection-note strong {
+    font-weight: 600;
+    color: var(--text-1);
+}
+
+@media (max-width: 640px) {
+    .vm-collection-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .vm-collection-filter {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
 </style>
 
 <div class="vm-wrap">
@@ -1159,48 +1495,52 @@
                                         <?php echo ucfirst(html_escape($vehicle['status'])); ?>
                                     </span>
                                 </td>
-                                <td>
-                                    <div class="vm-actions">
-                                        <?php if ($vehicle['status'] === 'booked'): ?>
-                                            <button class="vm-btn view js-open-booking-view" type="button"
-                                                data-detail="<?php echo html_escape(json_encode($booking_detail)); ?>">
-                                                <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M1.5 8s2.4-4 6.5-4 6.5 4 6.5 4-2.4 4-6.5 4-6.5-4-6.5-4Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" />
-                                                    <circle cx="8" cy="8" r="2.2" stroke="currentColor" stroke-width="1.4" />
-                                                </svg>
-                                                View
-                                            </button>
-                                        <?php endif; ?>
-                                        <button class="vm-btn edit edit-vehicle-btn" type="button"
-                                            data-id="<?php echo (int)$vehicle['id']; ?>"
-                                            data-name="<?php echo html_escape($vehicle['name']); ?>"
-                                            data-registration="<?php echo html_escape($vehicle['registration_no']); ?>"
-                                            data-type="<?php echo html_escape($vehicle['vehicle_type']); ?>"
-                                            data-fuel="<?php echo html_escape($vehicle['fuel_type']); ?>"
-                                            data-seats="<?php echo (int)$vehicle['seats']; ?>"
-                                            data-rate-km="<?php echo isset($vehicle['rate_per_day']) ? (float)$vehicle['rate_per_day'] : 0; ?>"
-                                            data-price-6-hours="<?php echo isset($vehicle['price_6_hours']) ? (float)$vehicle['price_6_hours'] : 0; ?>"
-                                            data-price-12-hours="<?php echo isset($vehicle['price_12_hours']) ? (float)$vehicle['price_12_hours'] : 0; ?>"
-                                            data-price-24-hours="<?php echo isset($vehicle['price_24_hours']) ? (float)$vehicle['price_24_hours'] : 0; ?>"
-                                            data-extra-hour-charge="<?php echo isset($vehicle['extra_hour_charge']) ? (float)$vehicle['extra_hour_charge'] : 0; ?>"
-                                            data-advance="<?php echo (float)$vehicle['advance_amount']; ?>"
-                                            data-status="<?php echo html_escape($vehicle['status']); ?>"
-                                            data-image="<?php echo html_escape($vehicle_image); ?>">
-                                            <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M11.5 2.5a1.414 1.414 0 0 1 2 2L5 13 2 14l1-3 8.5-8.5Z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
-                                            </svg>
-                                            Edit
-                                        </button>
-                                        <form method="post" action="<?php echo base_url('admin/vehicles/delete/' . (int)$vehicle['id']); ?>" class="js-swal-confirm-form" data-swal-title="Delete vehicle?" data-swal-text="This vehicle will be removed permanently." data-swal-confirm="Delete">
-                                            <button class="vm-btn delete" type="submit">
-                                                <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M2 4h12M5 4V2.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5V4M6 7v5M10 7v5M3 4l.8 9a1 1 0 0 0 1 .9h6.4a1 1 0 0 0 1-.9L13 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
-                                                </svg>
-                                                Delete
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
+                              <td>
+    <div class="vm-actions">
+        <?php if ($vehicle['status'] === 'booked'): ?>
+            <button class="vm-icon-btn view js-open-booking-view" type="button" title="View Active Booking"
+                data-detail="<?php echo html_escape(json_encode($booking_detail)); ?>">
+                <i class="ti ti-eye"></i>
+            </button>
+        <?php endif; ?>
+        
+        <button class="vm-icon-btn collection js-open-collection" type="button" title="View Collection Summary"
+            data-vehicle-id="<?php echo (int)$vehicle['id']; ?>"
+            data-vehicle-name="<?php echo html_escape($vehicle['name']); ?>"
+            data-registration="<?php echo html_escape($vehicle['registration_no']); ?>">
+            <i class="ti ti-report-money"></i>
+        </button>
+        
+        <button class="vm-icon-btn edit edit-vehicle-btn" type="button" title="Edit Vehicle"
+            data-id="<?php echo (int)$vehicle['id']; ?>"
+            data-name="<?php echo html_escape($vehicle['name']); ?>"
+            data-registration="<?php echo html_escape($vehicle['registration_no']); ?>"
+            data-type="<?php echo html_escape($vehicle['vehicle_type']); ?>"
+            data-fuel="<?php echo html_escape($vehicle['fuel_type']); ?>"
+            data-seats="<?php echo (int)$vehicle['seats']; ?>"
+            data-rate-km="<?php echo isset($vehicle['rate_per_day']) ? (float)$vehicle['rate_per_day'] : 0; ?>"
+            data-price-6-hours="<?php echo isset($vehicle['price_6_hours']) ? (float)$vehicle['price_6_hours'] : 0; ?>"
+            data-price-12-hours="<?php echo isset($vehicle['price_12_hours']) ? (float)$vehicle['price_12_hours'] : 0; ?>"
+            data-price-24-hours="<?php echo isset($vehicle['price_24_hours']) ? (float)$vehicle['price_24_hours'] : 0; ?>"
+            data-extra-hour-charge="<?php echo isset($vehicle['extra_hour_charge']) ? (float)$vehicle['extra_hour_charge'] : 0; ?>"
+            data-advance="<?php echo (float)$vehicle['advance_amount']; ?>"
+            data-status="<?php echo html_escape($vehicle['status']); ?>"
+            data-image="<?php echo html_escape($vehicle_image); ?>">
+            <i class="ti ti-edit"></i>
+        </button>
+        
+        <form method="post" action="<?php echo base_url('admin/vehicles/delete/' . (int)$vehicle['id']); ?>" 
+            class="js-swal-confirm-form" 
+            data-swal-title="Delete vehicle?" 
+            data-swal-text="This vehicle will be removed permanently." 
+            data-swal-confirm="Delete"
+            style="display:inline;">
+            <button class="vm-icon-btn delete" type="submit" title="Delete Vehicle">
+                <i class="ti ti-trash"></i>
+            </button>
+        </form>
+    </div>
+</td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
@@ -1423,6 +1763,110 @@
                 <button class="vm-mbtn save" type="submit" id="vehicleSubmitBtn">Add Vehicle</button>
             </div>
         </form>
+    </div>
+</div>
+<!-- ══ COLLECTION MODAL ══ -->
+<div class="vm-modal-overlay" id="vehicleCollectionModal">
+    <div class="vm-modal">
+        <div class="vm-modal-head">
+            <div>
+                <h3>Collection Summary</h3>
+                <p id="collectionModalVehicle">Vehicle collection details for selected month</p>
+            </div>
+            <button class="vm-modal-close" type="button" id="closeCollectionModal" aria-label="Close">
+                <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 3l10 10M13 3 3 13" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+                </svg>
+            </button>
+        </div>
+        
+        <div class="vm-modal-body">
+            <!-- Month/Year Filter -->
+            <div class="vm-collection-filter">
+                <div class="vm-filter-group">
+                    <label>Month</label>
+                    <select id="collectionMonth" class="vm-filter-select">
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                </div>
+                <div class="vm-filter-group">
+                    <label>Year</label>
+                    <select id="collectionYear" class="vm-filter-select">
+                        <!-- Will be populated by JavaScript -->
+                    </select>
+                </div>
+                <button class="vm-filter-btn" type="button" id="applyCollectionFilter">
+                    <i class="ti ti-refresh"></i>
+                    Apply
+                </button>
+            </div>
+            
+            <!-- Loading State -->
+            <div class="vm-collection-loading" id="collectionLoading">
+                <div class="vm-spinner"></div>
+                <p>Loading collection data...</p>
+            </div>
+            
+            <!-- Collection Stats -->
+            <div class="vm-collection-stats" id="collectionStats" style="display:none;">
+                <div class="vm-coll-card blue">
+                    <div class="vm-coll-icon">
+                        <i class="ti ti-calendar-stats"></i>
+                    </div>
+                    <div class="vm-coll-info">
+                        <div class="vm-coll-label">Total Bookings</div>
+                        <div class="vm-coll-value" id="collTotalBookings">0</div>
+                    </div>
+                </div>
+                
+                <div class="vm-coll-card amber">
+                    <div class="vm-coll-icon">
+                        <i class="ti ti-currency-rupee"></i>
+                    </div>
+                    <div class="vm-coll-info">
+                        <div class="vm-coll-label">Total Amount</div>
+                        <div class="vm-coll-value" id="collTotalAmount">₹0</div>
+                    </div>
+                </div>
+                
+                <div class="vm-coll-card green">
+                    <div class="vm-coll-icon">
+                        <i class="ti ti-circle-check"></i>
+                    </div>
+                    <div class="vm-coll-info">
+                        <div class="vm-coll-label">Received (This Month)</div>
+                        <div class="vm-coll-value" id="collReceivedAmount">₹0</div>
+                    </div>
+                </div>
+                
+                <div class="vm-coll-card red">
+                    <div class="vm-coll-icon">
+                        <i class="ti ti-alert-circle"></i>
+                    </div>
+                    <div class="vm-coll-info">
+                        <div class="vm-coll-label">Pending Amount</div>
+                        <div class="vm-coll-value" id="collPendingAmount">₹0</div>
+                    </div>
+                </div>
+            </div>
+           <div class="vm-collection-note" id="collectionNote" style="display:none;">
+    <i class="ti ti-info-circle"></i>
+    <div>
+        <strong>Note:</strong> All amounts shown are for bookings that started (pickup date) in the selected month only.
+    </div>
+</div>
+        </div>
     </div>
 </div>
 
@@ -1736,7 +2180,152 @@
                 openBookingViewModal();
             });
         });
+var collectionModal = document.getElementById('vehicleCollectionModal');
+var currentVehicleId = null;
+var currentVehicleName = '';
+var currentVehicleReg = '';
 
+// Populate year dropdown
+function populateYearDropdown() {
+    var yearSelect = document.getElementById('collectionYear');
+    if (!yearSelect) return;
+    
+    var currentYear = new Date().getFullYear();
+    yearSelect.innerHTML = '';
+    
+    for (var i = currentYear; i >= currentYear - 5; i--) {
+        var option = document.createElement('option');
+        option.value = i;
+        option.textContent = i;
+        if (i === currentYear) option.selected = true;
+        yearSelect.appendChild(option);
+    }
+}
+
+// Set current month
+function setCurrentMonth() {
+    var monthSelect = document.getElementById('collectionMonth');
+    if (monthSelect) {
+        monthSelect.value = new Date().getMonth() + 1;
+    }
+}
+
+// Format money
+function fmtCollMoney(value) {
+    var num = parseFloat(value || 0);
+    return '₹' + num.toLocaleString('en-IN', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    });
+}
+
+// Month names
+var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+// Load collection data
+function loadCollectionData(vehicleId, year, month) {
+    document.getElementById('collectionLoading').style.display = 'block';
+    document.getElementById('collectionStats').style.display = 'none';
+    document.getElementById('collectionNote').style.display = 'none';
+    
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '<?php echo base_url('admin/vehicle/get_collection_summary'); ?>', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    
+    xhr.onload = function() {
+        document.getElementById('collectionLoading').style.display = 'none';
+        
+        if (xhr.status === 200) {
+            try {
+                var response = JSON.parse(xhr.responseText);
+                
+                if (response.success) {
+                    var data = response.data;
+                    
+                    document.getElementById('collTotalBookings').textContent = data.total_bookings || 0;
+                    document.getElementById('collTotalAmount').textContent = fmtCollMoney(data.total_amount);
+                    document.getElementById('collReceivedAmount').textContent = fmtCollMoney(data.received_amount);
+                    document.getElementById('collPendingAmount').textContent = fmtCollMoney(data.pending_amount);
+                    
+                    document.getElementById('collectionStats').style.display = 'grid';
+                    document.getElementById('collectionNote').style.display = 'flex';
+                    
+                    var monthName = monthNames[(data.month - 1)] || '';
+                    document.getElementById('collectionModalVehicle').textContent = 
+                        currentVehicleName + ' (' + currentVehicleReg + ') - ' + monthName + ' ' + data.year;
+                } else {
+                    alert(response.message || 'Failed to load collection data');
+                }
+            } catch (e) {
+                alert('Error parsing response');
+                console.error(e);
+            }
+        } else {
+            alert('Server error: ' + xhr.status);
+        }
+    };
+    
+    xhr.onerror = function() {
+        document.getElementById('collectionLoading').style.display = 'none';
+        alert('Network error');
+    };
+    
+    xhr.send('vehicle_id=' + vehicleId + '&year=' + year + '&month=' + month);
+}
+
+// Open collection modal
+function openCollectionModal(vehicleId, vehicleName, vehicleReg) {
+    currentVehicleId = vehicleId;
+    currentVehicleName = vehicleName;
+    currentVehicleReg = vehicleReg;
+    
+    populateYearDropdown();
+    setCurrentMonth();
+    
+    var year = document.getElementById('collectionYear').value;
+    var month = document.getElementById('collectionMonth').value;
+    
+    loadCollectionData(vehicleId, year, month);
+    
+    collectionModal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+// Close collection modal
+function closeCollectionModal() {
+    collectionModal.classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+// Event listeners
+document.getElementById('closeCollectionModal').addEventListener('click', closeCollectionModal);
+
+collectionModal.addEventListener('click', function(e) {
+    if (e.target === collectionModal) closeCollectionModal();
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && collectionModal.classList.contains('open')) {
+        closeCollectionModal();
+    }
+});
+
+document.getElementById('applyCollectionFilter').addEventListener('click', function() {
+    var year = document.getElementById('collectionYear').value;
+    var month = document.getElementById('collectionMonth').value;
+    loadCollectionData(currentVehicleId, year, month);
+});
+
+// Attach to collection buttons
+document.querySelectorAll('.js-open-collection').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        var vehicleId = btn.getAttribute('data-vehicle-id');
+        var vehicleName = btn.getAttribute('data-vehicle-name');
+        var vehicleReg = btn.getAttribute('data-registration');
+        openCollectionModal(vehicleId, vehicleName, vehicleReg);
+    });
+});
         // Init pagination last
         initPagination();
     })();

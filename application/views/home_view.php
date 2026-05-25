@@ -28,10 +28,18 @@
         --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
     }
 
-    * {
+    *,
+    *::before,
+    *::after {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
+    }
+
+    html,
+    body {
+        overflow-x: hidden;
+        max-width: 100%;
     }
 
     .vc-page {
@@ -39,9 +47,10 @@
         background: var(--cream);
         min-height: 100vh;
         padding-bottom: 80px;
+        overflow-x: hidden;
     }
 
-    /* Hero */
+    /* ── Hero ── */
     .vc-hero {
         background: linear-gradient(135deg, #fffdf5 0%, #fff3c8 100%);
         border: 1px solid var(--border);
@@ -56,8 +65,10 @@
         content: '';
         position: absolute;
         inset: 0;
-        background: radial-gradient(ellipse 70% 120% at 110% 50%, rgba(35, 94, 167, .12) 0%, transparent 60%),
+        background:
+            radial-gradient(ellipse 70% 120% at 110% 50%, rgba(35, 94, 167, .12) 0%, transparent 60%),
             radial-gradient(ellipse 50% 80% at -10% 80%, rgba(241, 193, 79, .18) 0%, transparent 55%);
+        pointer-events: none;
     }
 
     .vc-hero-inner {
@@ -91,11 +102,12 @@
         background: var(--accent);
         border-radius: 2px;
         display: inline-block;
+        flex-shrink: 0;
     }
 
     .vc-hero h1 {
         font-family: var(--font-display);
-        font-size: clamp(30px, 5vw, 52px);
+        font-size: clamp(28px, 6vw, 52px);
         font-weight: 300;
         color: var(--ink);
         line-height: 1.1;
@@ -129,6 +141,8 @@
         text-decoration: none;
         transition: background .18s, transform .15s;
         white-space: nowrap;
+        flex-shrink: 0;
+        -webkit-tap-highlight-color: transparent;
     }
 
     .vc-hero-cta:hover {
@@ -139,16 +153,17 @@
     .vc-hero-cta svg {
         width: 16px;
         height: 16px;
+        flex-shrink: 0;
     }
 
-    /* Body */
+    /* ── Body ── */
     .vc-body {
         max-width: 1200px;
         margin: 0 auto;
         padding: 0 24px;
     }
 
-    /* Filters */
+    /* ── Filters ── */
     .vc-filters-wrap {
         background: var(--card-bg);
         border-radius: var(--radius-xl);
@@ -189,11 +204,13 @@
 
     #vehicleSearch {
         flex: 1;
+        min-width: 0;
         border: none;
         outline: none;
         background: transparent;
         font-family: var(--font-body);
-        font-size: 15px;
+        font-size: 16px;
+        /* 16px prevents iOS auto-zoom */
         color: var(--ink);
         padding: 13px 12px;
         width: 100%;
@@ -205,7 +222,7 @@
 
     .vc-filter-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        grid-template-columns: repeat(4, 1fr);
         gap: 12px;
     }
 
@@ -221,12 +238,14 @@
 
     .vc-filter-group select {
         width: 100%;
+        -webkit-appearance: none;
         appearance: none;
         background: var(--cream) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%238A867E' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") no-repeat right 12px center;
         border: 1.5px solid var(--border-strong);
         border-radius: var(--radius-sm);
         font-family: var(--font-body);
-        font-size: 14px;
+        font-size: 16px;
+        /* prevents iOS zoom */
         color: var(--ink);
         padding: 9px 32px 9px 12px;
         cursor: pointer;
@@ -239,7 +258,7 @@
         box-shadow: 0 0 0 3px rgba(35, 94, 167, .1);
     }
 
-    /* Results meta */
+    /* ── Results meta ── */
     .vc-results-meta {
         display: flex;
         align-items: center;
@@ -259,14 +278,14 @@
         font-weight: 600;
     }
 
-    /* Grid */
+    /* ── Grid ── */
     .vc-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
         gap: 20px;
     }
 
-    /* Card */
+    /* ── Card ── */
     .vc-card {
         background: var(--card-bg);
         border-radius: var(--radius-lg);
@@ -277,6 +296,8 @@
         display: flex;
         flex-direction: column;
         animation: fadeUp .4s ease both;
+        max-width: 100%;
+        min-width: 0;
     }
 
     .vc-card:hover {
@@ -284,12 +305,13 @@
         transform: translateY(-3px);
     }
 
-    /* Media */
+    /* ── Media ── */
     .vc-card-media {
         position: relative;
         height: 192px;
         background: var(--cream-dark);
         overflow: hidden;
+        flex-shrink: 0;
     }
 
     .vc-card-media img {
@@ -312,6 +334,7 @@
         align-items: center;
         justify-content: center;
         gap: 10px;
+        flex-shrink: 0;
     }
 
     .vc-empty-initial {
@@ -340,6 +363,7 @@
         left: 12px;
         background: rgba(250, 248, 243, .92);
         backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
         border: .5px solid rgba(26, 24, 20, .12);
         border-radius: 20px;
         font-size: 11px;
@@ -348,14 +372,19 @@
         letter-spacing: .06em;
         text-transform: uppercase;
         padding: 4px 10px;
+        max-width: calc(100% - 24px);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
-    /* Card body */
+    /* ── Card body ── */
     .vc-card-body {
         padding: 20px;
         display: flex;
         flex-direction: column;
         flex: 1;
+        min-width: 0;
     }
 
     .vc-card-name {
@@ -366,6 +395,9 @@
         letter-spacing: -.01em;
         margin-bottom: 2px;
         line-height: 1.25;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .vc-card-reg {
@@ -388,6 +420,7 @@
         background: var(--cream);
         border-radius: var(--radius-sm);
         padding: 10px 12px;
+        min-width: 0;
     }
 
     .vc-spec-label {
@@ -403,6 +436,9 @@
         font-size: 14px;
         font-weight: 600;
         color: var(--ink);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .vc-divider {
@@ -411,15 +447,21 @@
         margin: 0 0 16px;
     }
 
+    /* ── Card footer ── */
     .vc-card-footer {
         display: flex;
-        align-items: center;
+        align-items: flex-end;
         justify-content: space-between;
         gap: 12px;
         margin-top: auto;
     }
 
-    /* Advance tag */
+    .vc-card-footer-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    /* ── Advance tag ── */
     .vc-advance-tag {
         display: inline-flex;
         align-items: center;
@@ -432,15 +474,16 @@
         color: #7A5C00;
         padding: 4px 10px;
         margin-top: 8px;
-        /* ← add this */
+        white-space: nowrap;
     }
 
-    /* Starts-from price block */
+    /* ── Starts-from ── */
     .vc-starts-from {
         display: flex;
         align-items: baseline;
         gap: 4px;
         margin-top: 8px;
+        flex-wrap: wrap;
     }
 
     .vc-starts-from-label {
@@ -459,6 +502,7 @@
         color: var(--ink);
         letter-spacing: -.02em;
         line-height: 1;
+        white-space: nowrap;
     }
 
     .vc-starts-from-unit {
@@ -468,7 +512,7 @@
         white-space: nowrap;
     }
 
-    /* Book button */
+    /* ── Book button ── */
     .vc-book-btn {
         display: inline-flex;
         align-items: center;
@@ -483,6 +527,9 @@
         text-decoration: none;
         transition: background .18s, transform .15s;
         flex-shrink: 0;
+        white-space: nowrap;
+        align-self: flex-end;
+        -webkit-tap-highlight-color: transparent;
     }
 
     .vc-book-btn:hover {
@@ -493,11 +540,12 @@
     .vc-book-btn svg {
         width: 14px;
         height: 14px;
+        flex-shrink: 0;
     }
 
-    /* Empty state */
+    /* ── Empty / no vehicles states ── */
     .vc-empty-state {
-        grid-column: 1/-1;
+        grid-column: 1 / -1;
         text-align: center;
         padding: 80px 24px;
     }
@@ -552,7 +600,7 @@
         line-height: 1.6;
     }
 
-    /* Pagination */
+    /* ── Pagination ── */
     .vc-pagination-wrap {
         display: flex;
         align-items: center;
@@ -580,6 +628,7 @@
         transition: background .15s, border-color .15s, color .15s, transform .12s;
         user-select: none;
         line-height: 1;
+        -webkit-tap-highlight-color: transparent;
     }
 
     .vc-page-btn:hover:not(:disabled):not(.active) {
@@ -616,7 +665,7 @@
         height: 16px;
     }
 
-    /* Animations */
+    /* ── Animations ── */
     @keyframes fadeUp {
         from {
             opacity: 0;
@@ -629,70 +678,171 @@
         }
     }
 
-    /* Responsive */
-    @media(max-width:768px) {
+    /* ══════════════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════════════ */
+
+    /* Tablet ≤ 1024px */
+    @media (max-width: 1024px) {
+        .vc-filter-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    /* Mobile ≤ 768px */
+    @media (max-width: 768px) {
+
         .vc-hero {
-            padding: 40px 20px 44px;
+            border-radius: var(--radius-lg);
+            padding: 32px 20px 40px;
         }
 
         .vc-hero-inner {
             flex-direction: column;
             align-items: flex-start;
+            gap: 20px;
+        }
+
+        .vc-hero-sub {
+            font-size: 14px;
+            max-width: 100%;
+        }
+
+        /* Full-width CTA on mobile */
+        .vc-hero-cta {
+            width: 100%;
+            justify-content: center;
+            padding: 14px 20px;
+            font-size: 15px;
         }
 
         .vc-body {
-            padding: 0 16px;
+            padding: 0 14px;
         }
 
         .vc-filters-wrap {
-            padding: 18px 16px;
-            margin-top: 18px;
+            padding: 16px;
+            margin-top: 16px;
             border-radius: var(--radius-lg);
+        }
+
+        .vc-search-row {
+            margin-bottom: 16px;
         }
 
         .vc-filter-grid {
             grid-template-columns: 1fr 1fr;
+            gap: 10px;
         }
 
+        /* Single column cards */
         .vc-grid {
             grid-template-columns: 1fr;
+            gap: 16px;
         }
 
+        .vc-card {
+            border-radius: var(--radius-md);
+        }
+
+        .vc-results-meta {
+            padding: 20px 0 16px;
+        }
+
+        /* Bigger pagination tap targets */
         .vc-page-btn {
-            min-width: 34px;
-            height: 34px;
-            font-size: 13px;
+            min-width: 42px;
+            height: 42px;
         }
     }
 
-    @media(max-width:480px) {
+    /* Small mobile ≤ 480px */
+    @media (max-width: 480px) {
+
+        .vc-hero h1 {
+            font-size: 26px;
+        }
+
+        /* All filters full-width */
         .vc-filter-grid {
             grid-template-columns: 1fr;
         }
 
+        .vc-card-media,
+        .vc-card-media-empty {
+            height: 168px;
+        }
+
+        .vc-card-body {
+            padding: 16px;
+        }
+
+        .vc-card-name {
+            font-size: 18px;
+        }
+
+        /* Stack price + button vertically */
+        .vc-card-footer {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 14px;
+        }
+
+        /* Full-width Book button */
+        .vc-book-btn {
+            width: 100%;
+            justify-content: center;
+            padding: 13px 20px;
+            font-size: 15px;
+            align-self: auto;
+        }
+
+        .vc-starts-from-price {
+            font-size: 22px;
+        }
+    }
+
+    /* Extra small ≤ 360px */
+    @media (max-width: 360px) {
+        .vc-body {
+            padding: 0 10px;
+        }
+
+        .vc-hero {
+            padding: 24px 14px 32px;
+        }
+
         .vc-hero h1 {
-            font-size: 28px;
+            font-size: 22px;
         }
     }
 </style>
 
 <div class="vc-page">
 
-    <div class="vc-hero">
-        <div class="vc-hero-inner">
-            <div>
-                <div class="vc-eyebrow">Fleet Catalogue</div>
-                <h1>Find your<br><em>perfect ride.</em></h1>
-                <p class="vc-hero-sub">Browse our curated fleet. Filter by type, fuel, and seats to find exactly what you need.</p>
-            </div>
-            <a class="vc-hero-cta" href="<?php echo base_url('bookings/create'); ?>">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
-                Book a Car
-            </a>
+   <div class="vc-hero">
+    <div class="vc-hero-inner">
+        <div>
+            <div class="vc-eyebrow">Surya Deep Car Rent</div>
+
+            <h1>
+                Best Car Rental &<br>
+                <em>Cab Booking Service</em>
+            </h1>
+
+            <p class="vc-hero-sub">
+                Welcome to Surya Deep Car Rent. Book affordable cars, taxi services, airport pickup, local rides, and outstation travel with comfort and reliability.
+            </p>
         </div>
+
+        <a class="vc-hero-cta" href="<?php echo base_url('bookings/create'); ?>">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+            Book a Car
+        </a>
     </div>
+</div>
 
     <div class="vc-body">
 
@@ -706,11 +856,11 @@
                             <path d="M21 21l-4.35-4.35" />
                         </svg>
                     </span>
-                    <input type="text" id="vehicleSearch" placeholder="Search by name, registration, type or fuel…">
+                    <input type="text" id="vehicleSearch" placeholder="Search by name, reg, type or fuel…" autocomplete="off">
                 </div>
                 <div class="vc-filter-grid">
                     <div class="vc-filter-group">
-                        <label>Vehicle Type</label>
+                        <label for="filterType">Vehicle Type</label>
                         <select id="filterType">
                             <option value="">All Types</option>
                             <?php
@@ -724,7 +874,7 @@
                         </select>
                     </div>
                     <div class="vc-filter-group">
-                        <label>Fuel Type</label>
+                        <label for="filterFuel">Fuel Type</label>
                         <select id="filterFuel">
                             <option value="">All Fuel Types</option>
                             <?php
@@ -738,7 +888,7 @@
                         </select>
                     </div>
                     <div class="vc-filter-group">
-                        <label>Min Seats</label>
+                        <label for="filterSeats">Min Seats</label>
                         <select id="filterSeats">
                             <option value="">Any Seats</option>
                             <?php
@@ -752,7 +902,7 @@
                         </select>
                     </div>
                     <div class="vc-filter-group">
-                        <label>Max Advance (₹)</label>
+                        <label for="filterAdvance">Max Advance (₹)</label>
                         <select id="filterAdvance">
                             <option value="">Any Amount</option>
                             <option value="1000">Up to ₹1,000</option>
@@ -765,19 +915,20 @@
             </div>
 
             <div class="vc-results-meta">
-                <div class="vc-results-count" id="resultsCount">Showing <strong><?php echo count($vehicles); ?></strong> vehicles</div>
+                <div class="vc-results-count" id="resultsCount">
+                    Showing <strong><?php echo count($vehicles); ?></strong> vehicles
+                </div>
             </div>
 
             <div class="vc-grid" id="vehicleGrid">
                 <?php foreach ($vehicles as $vehicle): ?>
                     <?php
                     $vehicle_image = isset($vehicle['image']) ? trim($vehicle['image']) : '';
-                    /* Calculate lowest package price for "starts from" display */
-                    $pkg_prices = array_filter(array(
+                    $pkg_prices = array_filter([
                         (float)(isset($vehicle['price_6_hours'])  ? $vehicle['price_6_hours']  : 0),
                         (float)(isset($vehicle['price_12_hours']) ? $vehicle['price_12_hours'] : 0),
                         (float)(isset($vehicle['price_24_hours']) ? $vehicle['price_24_hours'] : 0),
-                    ), function ($p) {
+                    ], function ($p) {
                         return $p > 0;
                     });
                     $min_price = $pkg_prices ? min($pkg_prices) : 0;
@@ -793,7 +944,10 @@
 
                         <?php if ($vehicle_image !== ''): ?>
                             <div class="vc-card-media">
-                                <img src="<?php echo app_vehicle_image_url($vehicle_image); ?>" alt="<?php echo html_escape($vehicle['name']); ?>" loading="lazy">
+                                <img
+                                    src="<?php echo app_vehicle_image_url($vehicle_image); ?>"
+                                    alt="<?php echo html_escape($vehicle['name']); ?>"
+                                    loading="lazy">
                                 <span class="vc-type-badge"><?php echo html_escape($vehicle['vehicle_type']); ?></span>
                             </div>
                         <?php else: ?>
@@ -822,23 +976,18 @@
                             <div class="vc-divider"></div>
 
                             <div class="vc-card-footer">
-                                <div>
-
+                                <div class="vc-card-footer-info">
                                     <div class="vc-starts-from">
-                                        <span class="vc-starts-from-label">Starts from</span>
-                                        <span class="vc-starts-from-price">
-                                            &#8377;<?php echo number_format($min_price, 0); ?>
-                                        </span>
+                                        <span class="vc-starts-from-label">From</span>
+                                        <span class="vc-starts-from-price">&#8377;<?php echo number_format($min_price, 0); ?></span>
                                         <span class="vc-starts-from-unit">/ 6 hrs</span>
                                     </div>
-                                    <div class="vc-card-reg" style="margin-top:4px;">
-                                        KM basis: &#8377;<?php echo number_format((float) (isset($vehicle['rate_per_day']) ? $vehicle['rate_per_day'] : 0), 0); ?> / km
+                                    <div class="vc-card-reg" style="margin-top:4px;margin-bottom:0;">
+                                        KM: &#8377;<?php echo number_format((float)(isset($vehicle['rate_per_day']) ? $vehicle['rate_per_day'] : 0), 0); ?>/km
                                     </div>
-                                    <!-- Advance tag -->
                                     <div class="vc-advance-tag">
                                         &#8377;<?php echo number_format((float)$vehicle['advance_amount'], 0); ?> advance
                                     </div>
-
                                 </div>
 
                                 <a class="vc-book-btn" href="<?php echo base_url('bookings/create?vehicle_id=' . (int)$vehicle['id']); ?>">
@@ -864,7 +1013,6 @@
                 </div>
             </div>
 
-            <!-- Pagination -->
             <nav class="vc-pagination-wrap" id="vcPagination" aria-label="Vehicle pages"></nav>
 
         <?php else: ?>
@@ -880,7 +1028,6 @@
 <?php if (!empty($vehicles)): ?>
     <script>
         (function() {
-
             var search = document.getElementById('vehicleSearch');
             var selType = document.getElementById('filterType');
             var selFuel = document.getElementById('filterFuel');
@@ -912,15 +1059,13 @@
                             card.dataset.name.indexOf(sv) !== -1 ||
                             card.dataset.registration.indexOf(sv) !== -1 ||
                             card.dataset.type.indexOf(sv) !== -1 ||
-                            card.dataset.fuel.indexOf(sv) !== -1
-                        ) &&
+                            card.dataset.fuel.indexOf(sv) !== -1) &&
                         (tv === '' || card.dataset.type === tv) &&
                         (fv === '' || card.dataset.fuel === fv) &&
                         (sev === 0 || parseInt(card.dataset.seats, 10) >= sev) &&
                         (adv === 0 || parseFloat(card.dataset.advance) <= adv)
                     );
                 });
-
                 currentPage = 1;
                 render();
             }
@@ -938,25 +1083,23 @@
                     c.style.display = 'none';
                 });
                 visibleCards.forEach(function(c, i) {
-                    c.style.display = (i >= start && i < end) ? '' : 'none';
-                    if (i >= start && i < end) {
+                    var show = (i >= start && i < end);
+                    c.style.display = show ? '' : 'none';
+                    if (show) {
                         c.style.animation = 'none';
-                        c.offsetHeight; /* reflow */
+                        void c.offsetHeight;
                         c.style.animation = '';
                         c.style.animationDelay = ((i - start) * 0.05) + 's';
                     }
                 });
 
-                emptyEl.style.display = total === 0 ? '' : 'none';
+                emptyEl.style.display = (total === 0) ? '' : 'none';
 
                 if (countEl) {
-                    if (total === 0) {
-                        countEl.innerHTML = 'No vehicles found';
-                    } else {
-                        countEl.innerHTML =
-                            'Showing <strong>' + (start + 1) + '–' + Math.min(end, total) +
-                            '</strong> of <strong>' + total + '</strong> vehicle' + (total !== 1 ? 's' : '');
-                    }
+                    countEl.innerHTML = total === 0 ?
+                        'No vehicles found' :
+                        'Showing <strong>' + (start + 1) + '–' + Math.min(end, total) +
+                        '</strong> of <strong>' + total + '</strong> vehicle' + (total !== 1 ? 's' : '');
                 }
 
                 buildPagination(totalPages);
@@ -971,14 +1114,11 @@
                 pagNav.appendChild(makeBtn(null, currentPage === 1, false, 'prev',
                     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>'
                 ));
-
                 pages.forEach(function(p) {
                     pagNav.appendChild(p === '…' ?
                         makeBtn('…', false, false, 'ellipsis') :
-                        makeBtn(p, false, p === currentPage, 'number')
-                    );
+                        makeBtn(p, false, p === currentPage, 'number'));
                 });
-
                 pagNav.appendChild(makeBtn(null, currentPage === totalPages, false, 'next',
                     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>'
                 ));
@@ -986,21 +1126,19 @@
 
             function getPageNumbers(cur, total) {
                 if (total <= 5) {
-                    var arr = [];
-                    for (var i = 1; i <= total; i++) arr.push(i);
-                    return arr;
+                    var a = [];
+                    for (var i = 1; i <= total; i++) a.push(i);
+                    return a;
                 }
                 if (cur <= 3) return [1, 2, 3, '…', total];
                 if (cur >= total - 2) return [1, '…', total - 2, total - 1, total];
                 return [1, '…', cur - 1, cur, cur + 1, '…', total];
             }
 
-            function makeBtn(label, disabled, active, type, innerHtml) {
+            function makeBtn(label, disabled, active, type, html) {
                 var btn = document.createElement('button');
-                btn.className = 'vc-page-btn' +
-                    (active ? ' active' : '') +
-                    (type === 'ellipsis' ? ' ellipsis' : '');
-                btn.innerHTML = innerHtml || label;
+                btn.className = 'vc-page-btn' + (active ? ' active' : '') + (type === 'ellipsis' ? ' ellipsis' : '');
+                btn.innerHTML = html || label;
                 btn.disabled = !!disabled;
 
                 if (type === 'number' && !active) {
@@ -1024,8 +1162,8 @@
                 if (type === 'next') {
                     btn.setAttribute('aria-label', 'Next page');
                     btn.addEventListener('click', function() {
-                        var totalPages = Math.ceil(visibleCards.length / perPage());
-                        if (currentPage < totalPages) {
+                        var tp = Math.ceil(visibleCards.length / perPage());
+                        if (currentPage < tp) {
                             currentPage++;
                             render();
                             scrollToGrid();
@@ -1036,7 +1174,7 @@
             }
 
             function scrollToGrid() {
-                var top = grid.getBoundingClientRect().top + window.pageYOffset - 24;
+                var top = grid.getBoundingClientRect().top + window.pageYOffset - 80;
                 window.scrollTo({
                     top: top,
                     behavior: 'smooth'
@@ -1058,7 +1196,6 @@
             });
 
             render();
-
         })();
     </script>
 <?php endif; ?>

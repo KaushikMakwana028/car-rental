@@ -1182,35 +1182,44 @@ unset($booking);
                             $collection_whatsapp_url = ((float) $booking['paid_amount'] > 0 && trim((string) $booking['customer_phone']) !== '')
                                 ? admin_whatsapp_url($booking['customer_phone'], $collection_message)
                                 : '';
-                            $detail_payload = [
-                                'booking_code'       => $booking['booking_code'],
-                                'customer_name'      => $booking['customer_name'],
-                                'customer_phone'     => $booking['customer_phone'],
-                                'vehicle_name'       => $booking['vehicle_name'],
-                                'registration_no'    => $booking['registration_no'],
-                                'trip_dates_label'   => $booking['trip_dates_label'],
-                                'trip_days'          => $booking['trip_days'],
-
-                                'pickup_location'    => $booking['pickup_location'],
-                                'drop_location'      => $booking['drop_location'],
-                                'estimated_km'       => !empty($booking['estimated_km']) ? (int) $booking['estimated_km'] : 0,
-                                'amount'             => (float) $booking['amount'],
-                                'paid_amount'        => (float) $booking['paid_amount'],
-                                'balance_amount'     => (float) $booking['balance_amount'],
-                                'advance_due'        => (float) $booking['advance_due'],
-                                'payment_status'     => $booking['payment_status'],
-                                'pickup_time'  => !empty($booking['pickup_time'])  ? $booking['pickup_time']  : '',
-                                'return_time'  => !empty($booking['return_time'])  ? $booking['return_time']  : '',
-                                'booking_type' => !empty($booking['booking_type']) ? $booking['booking_type'] : 'km',
-                                'hours_slot'   => !empty($booking['hours_slot'])   ? (int)$booking['hours_slot'] : 0,
-                                'payment_badge'      => $booking['payment_badge'],
-                                'status'             => $booking['display_status'],
-                                'status_label'       => ucfirst($booking['display_status']),
-                                'collection_whatsapp_url' => $collection_whatsapp_url,
-                                'thank_you_message'  => $is_fully_paid
-                                    ? 'Full payment of Rs ' . number_format((float) $booking['paid_amount'], 2) . ' has been received. This booking is complete and ready for a warm thank-you message to the customer.'
-                                    : 'A total of Rs ' . number_format((float) $booking['paid_amount'], 2) . ' has been received for this booking so far.',
-                            ];
+                           $detail_payload = [
+    'booking_code'       => $booking['booking_code'],
+    'customer_name'      => $booking['customer_name'],
+    'customer_phone'     => $booking['customer_phone'],
+    'vehicle_name'       => $booking['vehicle_name'],
+    'registration_no'    => $booking['registration_no'],
+    'trip_dates_label'   => $booking['trip_dates_label'],
+    'trip_days'          => $booking['trip_days'],
+    'pickup_date'        => !empty($booking['pickup_date']) ? $booking['pickup_date'] : '',  // ADD THIS
+    'return_date'        => !empty($booking['return_date']) ? $booking['return_date'] : '',  // ADD THIS
+    'pickup_location'    => $booking['pickup_location'],
+    'drop_location'      => $booking['drop_location'],
+    'estimated_km'       => !empty($booking['estimated_km']) ? (int) $booking['estimated_km'] : 0,
+    'amount' => (float) $booking['amount'],
+    'fuel_expense' => !empty($booking['fuel_expense']) ? (float) $booking['fuel_expense'] : 0,
+    'toll_expense' => !empty($booking['toll_expense']) ? (float) $booking['toll_expense'] : 0,
+    'driver_expense' => !empty($booking['driver_expense']) ? (float) $booking['driver_expense'] : 0,
+    'parking_expense' => !empty($booking['parking_expense']) ? (float) $booking['parking_expense'] : 0,
+    'total_expenses' => !empty($booking['total_expenses']) ? (float) $booking['total_expenses'] : 0,
+    'net_amount' => !empty($booking['net_amount']) ? (float) $booking['net_amount'] : 0,
+    'other_expenses' => !empty($booking['other_expenses']) ? (float) $booking['other_expenses'] : 0,
+    'paid_amount' => (float) $booking['paid_amount'],
+    'balance_amount' => (float) $booking['balance_amount'],
+    
+    'advance_due'        => (float) $booking['advance_due'],
+    'payment_status'     => $booking['payment_status'],
+    'pickup_time'  => !empty($booking['pickup_time'])  ? $booking['pickup_time']  : '',
+    'return_time'  => !empty($booking['return_time'])  ? $booking['return_time']  : '',
+    'booking_type' => !empty($booking['booking_type']) ? $booking['booking_type'] : 'km',
+    'hours_slot'   => !empty($booking['hours_slot'])   ? (int)$booking['hours_slot'] : 0,
+    'payment_badge'      => $booking['payment_badge'],
+    'status'             => $booking['display_status'],
+    'status_label'       => ucfirst($booking['display_status']),
+    'collection_whatsapp_url' => $collection_whatsapp_url,
+    'thank_you_message'  => $is_fully_paid
+        ? 'Full payment of Rs ' . number_format((float) $booking['paid_amount'], 2) . ' has been received. This booking is complete and ready for a warm thank-you message to the customer.'
+        : 'A total of Rs ' . number_format((float) $booking['paid_amount'], 2) . ' has been received for this booking so far.',
+];
                             ?>
                             <tr class="js-bk-row"
                                 data-status="<?php echo html_escape($booking['display_status']); ?>"
@@ -1275,45 +1284,50 @@ unset($booking);
                                     <span class="bk-badge <?php echo html_escape($booking['display_status']); ?>"><?php echo ucfirst($booking['display_status']); ?></span>
                                 </td>
                                 <td>
-                                    <div class="bk-actions">
-                                        <!-- View -->
-                                        <button class="bk-action-btn bk-icon-btn js-bk-view" type="button" title="View Details">
-                                            <i class="ti ti-eye"></i>
-                                        </button>
+                                  <div class="bk-actions">
+    <!-- View -->
+    <button class="bk-action-btn bk-icon-btn js-bk-view" type="button" title="View Details">
+        <i class="ti ti-eye"></i>
+    </button>
 
-                                        <!-- Photos -->
-                                        <a class="bk-action-btn bk-icon-btn blue" href="<?php echo base_url('admin/bookings/photos/' . (int) $booking['id']); ?>" title="Car Photos">
-                                            <i class="ti ti-camera"></i>
-                                            <?php if (!empty($booking['booking_photo_count'])): ?>
-                                                <span class="bk-photo-pip"><?php echo (int)$booking['booking_photo_count']; ?></span>
-                                            <?php endif; ?>
-                                        </a>
+    <!-- Edit -->
+    <a class="bk-action-btn bk-icon-btn" href="<?php echo base_url('admin/booking/edit/' . (int) $booking['id']); ?>" title="Edit Booking">
+        <i class="ti ti-edit"></i>
+    </a>
 
-                                        <!-- Collect / Summary -->
-                                        <?php if ($has_balance): ?>
-                                            <button class="bk-action-btn bk-icon-btn blue js-bk-collect" type="button" title="Collect Payment">
-                                                <i class="ti ti-coin-rupee"></i>
-                                            </button>
-                                        <?php else: ?>
-                                            <button class="bk-action-btn bk-icon-btn js-bk-view" type="button" title="View Summary">
-                                                <i class="ti ti-file-description"></i>
-                                            </button>
-                                        <?php endif; ?>
+    <!-- Photos -->
+    <a class="bk-action-btn bk-icon-btn blue" href="<?php echo base_url('admin/bookings/photos/' . (int) $booking['id']); ?>" title="Car Photos">
+        <i class="ti ti-camera"></i>
+        <?php if (!empty($booking['booking_photo_count'])): ?>
+            <span class="bk-photo-pip"><?php echo (int)$booking['booking_photo_count']; ?></span>
+        <?php endif; ?>
+    </a>
 
-                                        <!-- WhatsApp -->
-                                        <?php if ($collection_whatsapp_url !== ''): ?>
-                                            <a class="bk-action-btn bk-icon-btn" href="<?php echo html_escape($collection_whatsapp_url); ?>" target="_blank" rel="noopener noreferrer" title="Send WhatsApp">
-                                                <i class="ti ti-brand-whatsapp"></i>
-                                            </a>
-                                        <?php endif; ?>
+    <!-- Collect / Summary -->
+    <?php if ($has_balance): ?>
+        <button class="bk-action-btn bk-icon-btn blue js-bk-collect" type="button" title="Collect Payment">
+            <i class="ti ti-coin-rupee"></i>
+        </button>
+    <?php else: ?>
+        <button class="bk-action-btn bk-icon-btn js-bk-view" type="button" title="View Summary">
+            <i class="ti ti-file-description"></i>
+        </button>
+    <?php endif; ?>
 
-                                        <!-- Delete -->
-                                        <form method="post" action="<?php echo base_url('admin/bookings/delete/' . (int)$booking['id']); ?>" class="js-swal-confirm-form" data-swal-title="Delete booking?" data-swal-text="This booking and its payment records will be permanently removed." data-swal-confirm="Delete">
-                                            <button class="bk-action-btn bk-icon-btn danger" type="submit" title="Delete Booking">
-                                                <i class="ti ti-trash"></i>
-                                            </button>
-                                        </form>
-                                    </div>
+    <!-- WhatsApp -->
+    <?php if ($collection_whatsapp_url !== ''): ?>
+        <a class="bk-action-btn bk-icon-btn" href="<?php echo html_escape($collection_whatsapp_url); ?>" target="_blank" rel="noopener noreferrer" title="Send WhatsApp">
+            <i class="ti ti-brand-whatsapp"></i>
+        </a>
+    <?php endif; ?>
+
+    <!-- Delete -->
+    <form method="post" action="<?php echo base_url('admin/bookings/delete/' . (int)$booking['id']); ?>" class="js-swal-confirm-form" data-swal-title="Delete booking?" data-swal-text="This booking and its payment records will be permanently removed." data-swal-confirm="Delete">
+        <button class="bk-action-btn bk-icon-btn danger" type="submit" title="Delete Booking">
+            <i class="ti ti-trash"></i>
+        </button>
+    </form>
+</div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -1375,18 +1389,139 @@ unset($booking);
                     <strong id="bkDKm">—</strong>
                 </div>
             </div>
-            <div class="bk-fare-box">
-                <div class="bk-fare-row"><span>Estimated Fare</span><strong id="bkDAmount">Rs 0</strong></div>
-                <div class="bk-fare-row"><span>Advance Target</span><strong id="bkDAdvance">Rs 0</strong></div>
-                <div class="bk-fare-row good"><span>Collected So Far</span><strong id="bkDPaid">Rs 0</strong></div>
-                <div class="bk-fare-row total due"><span>Balance Due</span><strong id="bkDBalance">Rs 0</strong></div>
-            </div>
+           <div class="bk-fare-box">
+    <div class="bk-fare-row"><span>Base Fare</span><strong id="bkDAmount">Rs 0</strong></div>
+    
+    <div id="bkDExpensesSection" style="display:none;">
+        <div class="bk-fare-row" id="bkDFuelRow" style="display:none;"><span>⛽ Fuel Expense</span><strong id="bkDFuel">Rs 0</strong></div>
+        <div class="bk-fare-row" id="bkDTollRow" style="display:none;"><span>🛣️ Toll Expense</span><strong id="bkDToll">Rs 0</strong></div>
+        <div class="bk-fare-row" id="bkDDriverRow" style="display:none;"><span>👤 Driver Expense</span><strong id="bkDDriver">Rs 0</strong></div>
+        <div class="bk-fare-row" id="bkDParkingRow" style="display:none;"><span>🅿️ Parking Expense</span><strong id="bkDParking">Rs 0</strong></div>
+        <div class="bk-fare-row" style="border-top:0.5px solid var(--bk-border);padding-top:6px;margin-top:4px;"><span>Total Expenses</span><strong id="bkDTotalExpenses">Rs 0</strong></div>
+    </div>
+    
+    <div class="bk-fare-row" id="bkDOtherExpensesRow" style="display:none;"><span>Other Expenses</span><strong id="bkDOtherExpenses">Rs 0</strong></div>
+    
+    <div class="bk-fare-row total" id="bkDTotalRow" style="border-top:1px solid var(--bk-border);padding-top:8px;margin-top:4px;">
+        <span>Net Amount (After Expenses)</span><strong id="bkDTotal">Rs 0</strong>
+    </div>
+    </div>
             <div class="bk-detail-note" id="bkDetailNote">Payment summary will appear here.</div>
-            <div class="bk-modal-actions">
-                <button class="bk-btn-line" type="button" data-close-modal="bkDetailModal">Close</button>
-                <a class="bk-btn-line" href="#" id="bkDetailWhatsappBtn" target="_blank" rel="noopener noreferrer" style="display:none;">WhatsApp</a>
-                <button class="bk-btn" type="button" id="bkDetailCollectBtn">Collect Payment</button>
-            </div>
+           <div class="bk-modal-actions">
+
+    <button class="bk-btn-light" type="button" data-close-modal="bkDetailModal">
+        Close
+    </button>
+
+    <a class="bk-btn-light"
+       href="#"
+       id="bkDetailWhatsappBtn"
+       target="_blank"
+       rel="noopener noreferrer"
+       style="display:none;">
+
+        <svg class="bk-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+        </svg>
+
+        WhatsApp
+    </a>
+
+    <button class="bk-btn-warning"
+            type="button"
+            id="bkDetailReminderBtn"
+            style="display:none;">
+
+        <svg class="bk-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+        </svg>
+
+        Payment Reminder
+    </button>
+
+    <button class="bk-btn-primary"
+            type="button"
+            id="bkDetailCollectBtn">
+
+        Collect Payment
+    </button>
+
+</div>
+<style>
+    .bk-modal-actions{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:10px;
+    margin-top:20px;
+    flex-wrap:wrap;
+}
+
+/* Common Button Style */
+.bk-btn-light,
+.bk-btn-warning,
+.bk-btn-primary{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+
+    height:42px;
+    padding:0 18px;
+
+    border-radius:10px;
+    border:none;
+
+    font-size:14px;
+    font-weight:600;
+
+    cursor:pointer;
+    text-decoration:none;
+
+    transition:all .2s ease;
+}
+
+/* Close + Whatsapp */
+.bk-btn-light{
+    background:#f8fafc;
+    color:#334155;
+    border:1px solid #e2e8f0;
+}
+
+.bk-btn-light:hover{
+    background:#eef2ff;
+    color:#2563eb;
+}
+
+/* Reminder */
+.bk-btn-warning{
+    background:#eff6ff;
+    color:#2563eb;
+}
+
+.bk-btn-warning:hover{
+    background:#2563eb;
+    color:#fff;
+}
+
+/* Main Button */
+.bk-btn-primary{
+    background:#2563eb;
+    color:#fff;
+}
+
+.bk-btn-primary:hover{
+    background:#1d4ed8;
+}
+
+/* Icon */
+.bk-action-icon{
+    width:16px;
+    height:16px;
+    flex-shrink:0;
+}
+</style>
         </div>
     </div>
 </div>
@@ -1417,6 +1552,10 @@ unset($booking);
                     <label>Amount to Collect</label>
                     <input type="number" step="0.01" min="0" name="amount" id="bkCAmountInput" required>
                 </div>
+                <div>
+    <label>Other Expenses (Optional)</label>
+    <input type="number" step="0.01" min="0" name="other_expenses" id="bkCOtherExpenses" placeholder="Toll, parking, fuel surcharge, etc.">
+</div>
                 <div class="bk-collect-grid">
                     <div>
                         <label>Payment Mode</label>
@@ -1455,6 +1594,7 @@ unset($booking);
         var collectModal = document.getElementById('bkCollectModal');
         var detailCollectBtn = document.getElementById('bkDetailCollectBtn');
         var detailWhatsappBtn = document.getElementById('bkDetailWhatsappBtn');
+        var detailReminderBtn = document.getElementById('bkDetailReminderBtn');
         var detailNote = document.getElementById('bkDetailNote');
         var collectNote = document.getElementById('bkCNote');
         var activeFilter = 'all';
@@ -1544,10 +1684,6 @@ unset($booking);
             return btn;
         }
 
-        /* Smart page number pattern:
-           Start:  1 2 3 … last
-           Middle: 1 … p-1 p p+1 … last
-           End:    1 … last-2 last-1 last  */
         function getPageNumbers(cur, total) {
             if (total <= 5) {
                 var arr = [];
@@ -1559,11 +1695,9 @@ unset($booking);
             return [1, '…', cur - 1, cur, cur + 1, '…', total];
         }
 
-        /* ── Filters + search + pagination together ── */
         function applyFilters() {
             var q = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
-            /* First hide all, then build visibleRows */
             visibleRows = [];
             rows.forEach(function(row) {
                 var st = row.getAttribute('data-status') || '';
@@ -1573,7 +1707,6 @@ unset($booking);
                 else row.style.display = 'none';
             });
 
-            /* Reset to page 1 on every filter/search change */
             currentPage = 1;
             renderPage(1);
         }
@@ -1646,52 +1779,277 @@ unset($booking);
             }
         }
 
-        function fillDetail(d, row) {
-            document.getElementById('bkDetailCode').textContent = d.booking_code || 'Booking';
-            document.getElementById('bkDetailSub').textContent = (d.payment_status || '') + ' • ' + (d.status_label || '');
-            document.getElementById('bkDetailStatus').textContent = d.status_label || 'Status';
-            document.getElementById('bkDCustomer').innerHTML = esc(d.customer_name) + (d.customer_phone ? '<br><span class="td-muted">' + esc(d.customer_phone) + '</span>' : '');
-            document.getElementById('bkDVehicle').innerHTML = esc(d.vehicle_name) + (d.registration_no ? '<br><span class="td-muted">' + esc(d.registration_no) + '</span>' : '');
-            document.getElementById('bkDDates').innerHTML = esc(d.trip_dates_label) + '<br><span class="td-muted">' + esc((d.trip_days || 1) + ' day(s)') + '</span>';
-            var btype = d.booking_type || 'km';
-            var hslot = parseInt(d.hours_slot || 0, 10);
-            var ptFmt = d.pickup_time ? formatTime12(d.pickup_time) : '';
-            var rtFmt = d.return_time ? formatTime12(d.return_time) : '';
-            if (btype === 'hours' && hslot > 0) {
-                document.getElementById('bkDKm').innerHTML = '⏱ ' + hslot + '-hour package<br><span class="td-muted">' + (ptFmt && rtFmt ? ptFmt + ' – ' + rtFmt : 'Times not set') + '</span>';
-            } else {
-                var kmValue = parseInt(d.estimated_km || 0, 10);
-                document.getElementById('bkDKm').innerHTML = kmValue > 0 ?
-                    ('🚗 ' + kmValue + ' km<br><span class="td-muted">KM-based booking</span>') :
-                    'KM Booking<br><span class="td-muted">Distance not available</span>';
-            }
-            document.getElementById('bkDAmount').textContent = fmt(d.amount || 0);
-            document.getElementById('bkDAdvance').textContent = fmt(d.advance_due || 0);
-            document.getElementById('bkDPaid').textContent = fmt(d.paid_amount || 0);
-            document.getElementById('bkDBalance').textContent = fmt(d.balance_amount || 0);
-            if (detailNote) detailNote.textContent = d.thank_you_message || 'Payment summary will appear here.';
-
-            currentCollect = {
-                bookingId: row.getAttribute('data-booking-id') || '',
-                bookingCode: row.getAttribute('data-booking-code') || '',
-                customerName: row.getAttribute('data-booking-customer') || '',
-                amount: row.getAttribute('data-amount') || '0',
-                paid: row.getAttribute('data-paid') || '0',
-                balance: row.getAttribute('data-balance') || '0',
-                whatsappUrl: d.collection_whatsapp_url || ''
-            };
-            detailCollectBtn.style.display = parseFloat(currentCollect.balance) > 0.01 ? 'inline-flex' : 'none';
-            if (detailWhatsappBtn) {
-                if (currentCollect.whatsappUrl) {
-                    detailWhatsappBtn.href = currentCollect.whatsappUrl;
-                    detailWhatsappBtn.style.display = 'inline-flex';
-                } else {
-                    detailWhatsappBtn.href = '#';
-                    detailWhatsappBtn.style.display = 'none';
-                }
-            }
+function generatePaymentReminderMessage(data) {
+    var customerName = data.customer_name || 'Customer';
+    var bookingCode = data.booking_code || '';
+    var vehicleName = data.vehicle_name || 'Vehicle';
+    var registrationNo = data.registration_no || '';
+    var pickupLocation = data.pickup_location || 'N/A';
+    var dropLocation = data.drop_location || 'N/A';
+    
+    // Format dates
+    var pickupDate = data.pickup_date || '';
+    var returnDate = data.return_date || '';
+    
+    var pickupDateFormatted = '';
+    if (pickupDate) {
+        var pd = new Date(pickupDate);
+        var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        pickupDateFormatted = pd.getDate() + ' ' + months[pd.getMonth()] + ' ' + pd.getFullYear();
+    }
+    
+    var returnDateFormatted = '';
+    if (returnDate) {
+        var rd = new Date(returnDate);
+        var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        returnDateFormatted = rd.getDate() + ' ' + months[rd.getMonth()] + ' ' + rd.getFullYear();
+    }
+    
+    // Format times
+    var pickupTime = data.pickup_time ? formatTime12(data.pickup_time) : 'N/A';
+    var returnTime = data.return_time ? formatTime12(data.return_time) : 'N/A';
+    
+    // Build booking type info
+    var bookingType = data.booking_type || 'km';
+    var durationInfo = '';
+    
+    if (bookingType === 'hours') {
+        var hoursSlot = parseInt(data.hours_slot || 0, 10);
+        durationInfo = hoursSlot + ' Hours';
+    } else {
+        var estimatedKm = parseInt(data.estimated_km || 0, 10);
+        durationInfo = estimatedKm > 0 ? estimatedKm + ' KM' : 'As per usage';
+    }
+    
+    // Calculate amounts
+    var baseAmount = parseFloat(data.amount || 0);
+    var fuelExpense = parseFloat(data.fuel_expense || 0);
+    var tollExpense = parseFloat(data.toll_expense || 0);
+    var driverExpense = parseFloat(data.driver_expense || 0);
+    var parkingExpense = parseFloat(data.parking_expense || 0);
+    var totalExpenses = fuelExpense + tollExpense + driverExpense + parkingExpense;
+    var otherExpenses = parseFloat(data.other_expenses || 0);
+    var netAmount = baseAmount - totalExpenses;
+    var totalAmount = netAmount + otherExpenses;
+    var balanceAmount = totalAmount - parseFloat(data.paid_amount || 0);
+    var paidAmount = parseFloat(data.paid_amount || 0);
+    
+    var message = '🚗 *PAYMENT REMINDER*\n\n';
+    message += 'Dear *' + customerName + '*,\n\n';
+    message += 'This is a friendly reminder for your upcoming booking.\n\n';
+    
+    message += '━━━━━━━━━━━━━━━━━\n';
+    message += '📋 *BOOKING DETAILS*\n';
+    message += '━━━━━━━━━━━━━━━━━\n\n';
+    
+    message += '🆔 Booking ID: *' + bookingCode + '*\n';
+    message += '🚙 Vehicle: *' + vehicleName + '*\n';
+    if (registrationNo) {
+        message += '🔢 Registration: *' + registrationNo + '*\n';
+    }
+    
+    message += '\n━━━━━━━━━━━━━━━━━\n';
+    message += '📅 *TRIP SCHEDULE*\n';
+    message += '━━━━━━━━━━━━━━━━━\n\n';
+    
+    message += '📍 *PICKUP*\n';
+    message += '   📅 Date: ' + (pickupDateFormatted || 'N/A') + '\n';
+    message += '   🕐 Time: ' + pickupTime + '\n';
+    message += '   📌 Location: ' + pickupLocation + '\n\n';
+    
+    message += '📍 *DROP-OFF*\n';
+    message += '   📅 Date: ' + (returnDateFormatted || 'N/A') + '\n';
+    message += '   🕐 Time: ' + returnTime + '\n';
+    message += '   📌 Location: ' + dropLocation + '\n\n';
+    
+    message += '⏱️ *Duration:* ' + durationInfo + '\n';
+    
+    message += '\n━━━━━━━━━━━━━━━━━\n';
+    message += '💰 *PAYMENT DETAILS*\n';
+    message += '━━━━━━━━━━━━━━━━━\n\n';
+    
+    message += '💵 Base Amount: ₹' + baseAmount.toFixed(2) + '\n';
+    
+    if (totalExpenses > 0) {
+        message += '\n*Expenses:*\n';
+        if (fuelExpense > 0) {
+            message += '  ⛽ Fuel: ₹' + fuelExpense.toFixed(2) + '\n';
         }
+        if (tollExpense > 0) {
+            message += '  🛣️ Toll: ₹' + tollExpense.toFixed(2) + '\n';
+        }
+        if (driverExpense > 0) {
+            message += '  👤 Driver: ₹' + driverExpense.toFixed(2) + '\n';
+        }
+        if (parkingExpense > 0) {
+            message += '  🅿️ Parking: ₹' + parkingExpense.toFixed(2) + '\n';
+        }
+        message += '  ────────────────\n';
+        message += '  Total Expenses: ₹' + totalExpenses.toFixed(2) + '\n\n';
+    }
+    
+    message += '💵 Total Amount: ₹' + totalAmount.toFixed(2) + '\n';
+    
+    if (paidAmount > 0) {
+        message += '✅ Amount Paid: ₹' + paidAmount.toFixed(2) + '\n';
+        message += '⚠️ *Balance Due: ₹' + balanceAmount.toFixed(2) + '*\n';
+    } else {
+        message += '⚠️ *Amount Due: ₹' + balanceAmount.toFixed(2) + '*\n';
+    }
+    
+    message += '\n━━━━━━━━━━━━━━━━━\n\n';
+    message += '⏰ *Please complete your payment before the pickup time to confirm your booking.*\n\n';
+    message += 'For payment details or assistance, feel free to contact us.\n\n';
+    message += 'Thank you for choosing our service! 🙏\n';
+    message += '━━━━━━━━━━━━━━━━━';
+    
+    return message;
+}      
+ function fillDetail(d, row) {
+    // Safety function to set text safely
+    function setText(elementId, value) {
+        var el = document.getElementById(elementId);
+        if (el) el.textContent = value;
+    }
+    
+    function setHTML(elementId, value) {
+        var el = document.getElementById(elementId);
+        if (el) el.innerHTML = value;
+    }
+    
+    function setDisplay(elementId, display) {
+        var el = document.getElementById(elementId);
+        if (el) el.style.display = display;
+    }
 
+    setText('bkDetailCode', d.booking_code || 'Booking');
+    setText('bkDetailSub', (d.payment_status || '') + ' • ' + (d.status_label || ''));
+    setText('bkDetailStatus', d.status_label || 'Status');
+    setHTML('bkDCustomer', esc(d.customer_name) + (d.customer_phone ? '<br><span class="td-muted">' + esc(d.customer_phone) + '</span>' : ''));
+    setHTML('bkDVehicle', esc(d.vehicle_name) + (d.registration_no ? '<br><span class="td-muted">' + esc(d.registration_no) + '</span>' : ''));
+    setHTML('bkDDates', esc(d.trip_dates_label) + '<br><span class="td-muted">' + esc((d.trip_days || 1) + ' day(s)') + '</span>');
+    
+    var btype = d.booking_type || 'km';
+    var hslot = parseInt(d.hours_slot || 0, 10);
+    var ptFmt = d.pickup_time ? formatTime12(d.pickup_time) : '';
+    var rtFmt = d.return_time ? formatTime12(d.return_time) : '';
+    
+    if (btype === 'hours' && hslot > 0) {
+        setHTML('bkDKm', '⏱ ' + hslot + '-hour package<br><span class="td-muted">' + (ptFmt && rtFmt ? ptFmt + ' – ' + rtFmt : 'Times not set') + '</span>');
+    } else {
+        var kmValue = parseInt(d.estimated_km || 0, 10);
+        setHTML('bkDKm', kmValue > 0 ?
+            ('🚗 ' + kmValue + ' km<br><span class="td-muted">KM-based booking</span>') :
+            'KM Booking<br><span class="td-muted">Distance not available</span>');
+    }
+    
+    // Calculate amounts with all expenses
+    var baseAmount = parseFloat(d.amount || 0);
+    var fuelExpense = parseFloat(d.fuel_expense || 0);
+    var tollExpense = parseFloat(d.toll_expense || 0);
+    var driverExpense = parseFloat(d.driver_expense || 0);
+    var parkingExpense = parseFloat(d.parking_expense || 0);
+    var totalExpenses = fuelExpense + tollExpense + driverExpense + parkingExpense;
+    var otherExpenses = parseFloat(d.other_expenses || 0);
+    var netAmount = baseAmount - totalExpenses;
+    var totalAmount = netAmount + otherExpenses;
+    var paidAmount = parseFloat(d.paid_amount || 0);
+    var balanceAmount = totalAmount - paidAmount;
+
+    setText('bkDAmount', fmt(baseAmount));
+
+    // Show expense breakdown if any expenses
+    if (totalExpenses > 0) {
+        setDisplay('bkDExpensesSection', '');
+        
+        if (fuelExpense > 0) {
+            setText('bkDFuel', fmt(fuelExpense));
+            setDisplay('bkDFuelRow', '');
+        } else {
+            setDisplay('bkDFuelRow', 'none');
+        }
+        
+        if (tollExpense > 0) {
+            setText('bkDToll', fmt(tollExpense));
+            setDisplay('bkDTollRow', '');
+        } else {
+            setDisplay('bkDTollRow', 'none');
+        }
+        
+        if (driverExpense > 0) {
+            setText('bkDDriver', fmt(driverExpense));
+            setDisplay('bkDDriverRow', '');
+        } else {
+            setDisplay('bkDDriverRow', 'none');
+        }
+        
+        if (parkingExpense > 0) {
+            setText('bkDParking', fmt(parkingExpense));
+            setDisplay('bkDParkingRow', '');
+        } else {
+            setDisplay('bkDParkingRow', 'none');
+        }
+        
+        setText('bkDTotalExpenses', fmt(totalExpenses));
+    } else {
+        setDisplay('bkDExpensesSection', 'none');
+    }
+
+    if (otherExpenses > 0) {
+        setText('bkDOtherExpenses', fmt(otherExpenses));
+        setDisplay('bkDOtherExpensesRow', '');
+    } else {
+        setDisplay('bkDOtherExpensesRow', 'none');
+    }
+
+    setText('bkDTotal', fmt(totalAmount));
+    
+    // These might not exist, so check
+    var paidEl = document.getElementById('bkDPaid');
+    if (paidEl) paidEl.textContent = fmt(paidAmount);
+    
+    var balanceEl = document.getElementById('bkDBalance');
+    if (balanceEl) balanceEl.textContent = fmt(balanceAmount);
+    
+    var noteEl = document.getElementById('bkDetailNote');
+    if (noteEl) {
+        var isFullyPaid = paidAmount >= totalAmount && totalAmount > 0;
+        noteEl.textContent = isFullyPaid
+            ? 'Full payment of Rs ' + paidAmount.toFixed(2) + ' has been received. This booking is complete and ready for a warm thank-you message to the customer.'
+            : 'A total of Rs ' + paidAmount.toFixed(2) + ' has been received for this booking so far.';
+    }
+
+    currentCollect = {
+        bookingId: row.getAttribute('data-booking-id') || '',
+        bookingCode: row.getAttribute('data-booking-code') || '',
+        customerName: row.getAttribute('data-booking-customer') || '',
+        customerPhone: d.customer_phone || '',
+        amount: totalAmount.toFixed(2),
+        paid: paidAmount.toFixed(2),
+        balance: balanceAmount.toFixed(2),
+        whatsappUrl: d.collection_whatsapp_url || '',
+        fullData: d
+    };
+    
+    var hasBalance = balanceAmount > 0.01;
+    setDisplay('bkDetailCollectBtn', hasBalance ? 'inline-flex' : 'none');
+    
+    if (detailReminderBtn && currentCollect.customerPhone && hasBalance) {
+        detailReminderBtn.style.display = 'inline-flex';
+    } else if (detailReminderBtn) {
+        detailReminderBtn.style.display = 'none';
+    }
+    
+    if (detailWhatsappBtn) {
+        if (currentCollect.whatsappUrl) {
+            detailWhatsappBtn.href = currentCollect.whatsappUrl;
+            detailWhatsappBtn.style.display = 'inline-flex';
+        } else {
+            detailWhatsappBtn.href = '#';
+            detailWhatsappBtn.style.display = 'none';
+        }
+    }
+}
         function fillCollect(data) {
             if (!data) return;
             document.getElementById('bkCBookingId').value = data.bookingId || '';
@@ -1749,6 +2107,26 @@ unset($booking);
                 closeModal(detailModal);
                 fillCollect(currentCollect);
                 openModal(collectModal);
+            });
+        }
+
+        // Payment Reminder Button Handler
+        if (detailReminderBtn) {
+            detailReminderBtn.addEventListener('click', function() {
+                if (!currentCollect || !currentCollect.customerPhone) {
+                    alert('Customer phone number is not available.');
+                    return;
+                }
+                
+                var reminderMessage = generatePaymentReminderMessage(currentCollect.fullData);
+                var phone = currentCollect.customerPhone.replace(/\D/g, '');
+                
+                if (phone.length === 10) {
+                    phone = '91' + phone;
+                }
+                
+                var whatsappUrl = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(reminderMessage);
+                window.open(whatsappUrl, '_blank');
             });
         }
 

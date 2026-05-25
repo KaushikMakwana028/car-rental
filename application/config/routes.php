@@ -63,6 +63,7 @@ $route['admin/profile/password'] = 'admin/profile/password';
 $route['admin/bookings'] = 'admin/booking/index';
 $route['admin/bookings/create'] = 'admin/booking/create';
 $route['admin/bookings/store'] = 'admin/booking/store';
+$route['admin/bookings/lookup_customer/(:any)'] = 'admin/booking/lookup_customer';
 $route['admin/bookings/photos/(:num)'] = 'admin/booking/photos/$1';
 $route['admin/bookings/photos/upload/(:num)'] = 'admin/booking/upload_photos/$1';
 $route['admin/bookings/delete/(:num)'] = 'admin/booking/delete/$1';

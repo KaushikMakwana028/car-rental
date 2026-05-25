@@ -70,10 +70,17 @@ $flash_error     = $this->session->flashdata('error');
         </div><!-- /.footer-inner -->
 
         <div class="footer-bottom">
-            <span>&copy; <?php echo $current_year; ?> Cab Booking Fast. All rights reserved.</span>
-            <span class="footer-bottom-dot">·</span>
-            <span><?php echo html_escape($contact_name); ?></span>
-        </div>
+    <span>&copy; <?php echo $current_year; ?> Cab Booking Fast. All rights reserved.</span>
+    <span class="footer-bottom-dot">·</span>
+    <span><?php echo html_escape($contact_name); ?></span>
+    <span class="footer-bottom-dot">·</span>
+    <span>
+        Developed by 
+        <a href="https://visiontechnolabs.com/" target="_blank" rel="noopener noreferrer">
+            Vision Technolabs
+        </a>
+    </span>
+</div>
 
     </div><!-- /.wrap -->
 </footer>
