@@ -59,6 +59,10 @@ foreach ($vehicles as $vehicle) {
     <?php if (!empty($vehicles)): ?>
         <div class="vehicle-grid">
             <?php foreach ($vehicles as $vehicle): ?>
+                <?php
+                $is_booked = isset($vehicle['status']) && $vehicle['status'] === 'booked' && !empty($vehicle['active_booking']);
+                $booked_label = $is_booked ? 'Booked till ' . date('d M Y', strtotime($vehicle['active_booking']['return_date'])) : '';
+                ?>
                 <article class="vehicle-card">
                     <?php $vehicle_image = isset($vehicle['image']) ? trim($vehicle['image']) : ''; ?>
                     <div class="vehicle-media<?php echo $vehicle_image !== '' ? '' : ' vehicle-media-empty'; ?>">
@@ -72,6 +76,11 @@ foreach ($vehicles as $vehicle) {
                     <div class="vehicle-body">
                         <h3><?php echo html_escape($vehicle['name']); ?></h3>
                         <div class="vehicle-meta"><?php echo html_escape($vehicle['registration_no']); ?></div>
+                        <?php if ($is_booked): ?>
+                            <div class="vc-advance-tag" style="display:inline-flex;margin-bottom:12px;background:#fee2e2;color:#991b1b;border-color:#fecaca;">
+                                <?php echo html_escape($booked_label); ?>
+                            </div>
+                        <?php endif; ?>
                         <div class="spec-list">
                             <div class="spec-row"><span>Type</span><strong><?php echo html_escape($vehicle['vehicle_type']); ?></strong></div>
                             <div class="spec-row"><span>Fuel</span><strong><?php echo html_escape($vehicle['fuel_type']); ?></strong></div>

@@ -225,12 +225,12 @@
 </style>
 
 <div class="page-wrapper">
-    <div class="page-header">
+    <!-- <div class="page-header">
         <div class="page-header-content">
             <h1>Payment Details</h1>
             <p>Add the QR image, bank account details, and instructions customers should use before uploading their receipt.</p>
         </div>
-    </div>
+    </div> -->
 
     <div class="payment-settings-grid">
         <section class="section-card">

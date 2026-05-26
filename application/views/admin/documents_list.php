@@ -75,6 +75,24 @@
         max-width: 520px;
     }
 
+    .dr-search {
+        width: min(340px, 100%);
+        min-height: 42px;
+        padding: 0 14px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text-primary);
+        font: 500 13px/1.2 var(--font);
+        outline: none;
+        transition: border-color .18s ease, box-shadow .18s ease;
+    }
+
+    .dr-search:focus {
+        border-color: var(--brand);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
+    }
+
     .dr-summary-pills {
         display: flex;
         gap: 8px;
@@ -563,6 +581,71 @@
         margin-bottom: 4px;
     }
 
+    .dr-pagination-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 18px;
+        flex-wrap: wrap;
+    }
+
+    .dr-pagination-info {
+        font-size: 13px;
+        color: var(--text-secondary);
+    }
+
+    .dr-pagination {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .dr-page-btn,
+    .dr-page-dot {
+        min-width: 38px;
+        height: 38px;
+        padding: 0 12px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .dr-page-btn {
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all .18s ease;
+    }
+
+    .dr-page-btn:hover {
+        border-color: var(--brand-mid);
+        color: var(--brand);
+        background: var(--brand-light);
+    }
+
+    .dr-page-btn.active {
+        border-color: var(--brand);
+        background: var(--brand);
+        color: #fff;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .dr-page-btn:disabled {
+        opacity: .45;
+        cursor: not-allowed;
+        background: var(--surface-alt);
+    }
+
+    .dr-page-dot {
+        color: var(--text-muted);
+    }
+
     /* ── Responsive ── */
     @media (max-width: 680px) {
         .dr-header {
@@ -652,21 +735,37 @@ function dr_initials($name)
 
 <div class="dr-wrap">
     <!-- Page header -->
-    <div class="dr-header">
+    <!-- <div class="dr-header">
         <div>
             <h3 class="dr-header-title">Documents Review</h3>
             <p class="dr-header-sub">Open one customer at a time, review every document, and approve or reject pending uploads directly from this page.</p>
         </div>
-
-
-    </div>
+        <?php if (!empty($document_groups)): ?>
+            <input type="search" id="drSearchInput" class="dr-search" placeholder="Search customer, email, phone, or document">
+        <?php endif; ?>
+    </div> -->
 
     <!-- Document groups -->
-    <div class="dr-groups">
+    <div class="dr-groups" id="drGroups">
         <?php if (!empty($document_groups)): ?>
             <?php foreach ($document_groups as $index => $group): ?>
                 <?php $customer = $group['customer']; ?>
-                <details class="dr-group">
+                <?php
+                $document_search_parts = array(
+                    isset($customer['full_name']) ? $customer['full_name'] : '',
+                    isset($customer['email']) ? $customer['email'] : '',
+                    isset($customer['phone']) ? $customer['phone'] : '',
+                );
+                foreach ($group['documents'] as $document) {
+                    $document_search_parts[] = isset($document['document_type']) ? $document['document_type'] : '';
+                    $document_search_parts[] = isset($document['status']) ? $document['status'] : '';
+                    $document_search_parts[] = isset($document['booking_label']) ? $document['booking_label'] : '';
+                    $document_search_parts[] = isset($document['admin_notes']) ? $document['admin_notes'] : '';
+                    $document_search_parts[] = isset($document['file_name']) ? $document['file_name'] : '';
+                }
+                $document_group_search = strtolower(trim(implode(' ', array_filter($document_search_parts))));
+                ?>
+                <details class="dr-group js-dr-group" data-search="<?php echo html_escape($document_group_search); ?>">
                     <summary>
                         <div class="dr-group-head">
                             <!-- Left: avatar + name -->
@@ -843,4 +942,123 @@ function dr_initials($name)
             </div>
         <?php endif; ?>
     </div>
+    <?php if (!empty($document_groups)): ?>
+        <div class="dr-pagination-wrap" id="drPaginationWrap">
+            <div class="dr-pagination-info" id="drPaginationInfo"></div>
+            <div class="dr-pagination" id="drPagination"></div>
+        </div>
+    <?php endif; ?>
 </div>
+
+<?php if (!empty($document_groups)): ?>
+<script>
+    (function () {
+        var groups = Array.prototype.slice.call(document.querySelectorAll('.js-dr-group'));
+        var paginationWrap = document.getElementById('drPaginationWrap');
+        var paginationInfo = document.getElementById('drPaginationInfo');
+        var pagination = document.getElementById('drPagination');
+        var searchInput = document.getElementById('drSearchInput');
+        var perPage = 6;
+        var currentPage = 1;
+        var filteredGroups = groups.slice();
+
+        if (!groups.length || !paginationWrap || !paginationInfo || !pagination) {
+            return;
+        }
+
+        function getPageItems(totalPages, page) {
+            if (totalPages <= 5) {
+                return Array.from({ length: totalPages }, function (_, index) {
+                    return index + 1;
+                });
+            }
+            if (page <= 2) {
+                return [1, 2, 3, 'dots', totalPages];
+            }
+            if (page >= totalPages - 1) {
+                return [1, 'dots', totalPages - 2, totalPages - 1, totalPages];
+            }
+            return [1, 'dots', page - 1, page, page + 1, 'dots', totalPages];
+        }
+
+        function createButton(label, page, disabled, active) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'dr-page-btn' + (active ? ' active' : '');
+            btn.textContent = label;
+            btn.disabled = !!disabled;
+            if (!disabled && !active) {
+                btn.addEventListener('click', function () {
+                    currentPage = page;
+                    render();
+                });
+            }
+            return btn;
+        }
+
+        function createDots() {
+            var dot = document.createElement('span');
+            dot.className = 'dr-page-dot';
+            dot.textContent = '...';
+            return dot;
+        }
+
+        function render() {
+            var term = searchInput ? searchInput.value.toLowerCase().trim() : '';
+            filteredGroups = groups.filter(function (group) {
+                var haystack = (group.getAttribute('data-search') || '').toLowerCase();
+                return term === '' || haystack.indexOf(term) !== -1;
+            });
+
+            var total = filteredGroups.length;
+            if (total === 0) {
+                groups.forEach(function (group) {
+                    group.style.display = 'none';
+                });
+                paginationInfo.textContent = 'No matching customers found';
+                pagination.innerHTML = '';
+                return;
+            }
+
+            var totalPages = Math.max(1, Math.ceil(total / perPage));
+            if (currentPage > totalPages) {
+                currentPage = totalPages;
+            }
+
+            var start = (currentPage - 1) * perPage;
+            var end = start + perPage;
+
+            groups.forEach(function (group) {
+                group.style.display = 'none';
+            });
+
+            filteredGroups.forEach(function (group, index) {
+                group.style.display = (index >= start && index < end) ? '' : 'none';
+            });
+
+            paginationInfo.textContent = 'Showing ' + (start + 1) + '-' + Math.min(end, total) + ' of ' + total + ' customers';
+            pagination.innerHTML = '';
+            pagination.appendChild(createButton('Prev', currentPage - 1, currentPage === 1, false));
+
+            getPageItems(totalPages, currentPage).forEach(function (item) {
+                if (item === 'dots') {
+                    pagination.appendChild(createDots());
+                    return;
+                }
+                pagination.appendChild(createButton(String(item), item, false, item === currentPage));
+            });
+
+            pagination.appendChild(createButton('Next', currentPage + 1, currentPage === totalPages, false));
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function () {
+                currentPage = 1;
+                render();
+            });
+        }
+
+        render();
+    })();
+</script>
+<?php endif; ?>

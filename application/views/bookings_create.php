@@ -3,6 +3,8 @@
 <?php $current_step = isset($current_step) ? (int) $current_step : 1; ?>
 <?php $booking_edit = !empty($booking_edit) ? $booking_edit : array(); ?>
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
 <style>
     .step-shell {
         padding: 20px 24px;
@@ -76,7 +78,6 @@
         min-width: 156px;
     }
 
-    /* Extra charge notice above submit button */
     .extra-notice-banner {
         background: #fffbf0;
         border: 2px solid #f5c842;
@@ -105,6 +106,357 @@
         color: #a07840;
         margin-top: 5px;
         line-height: 1.7;
+    }
+
+    .booking-conflict-note {
+        display: none;
+        margin-top: 8px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid #fecaca;
+        background: #fff1f2;
+        color: #b91c1c;
+        font-size: 12.5px;
+        font-weight: 600;
+        line-height: 1.5;
+    }
+
+    .booking-conflict-note.show {
+        display: block;
+    }
+
+    .booking-conflict-input {
+        border-color: #f87171 !important;
+        box-shadow: 0 0 0 3px rgba(248, 113, 113, .12);
+    }
+
+    .booking-picker-input {
+        background-color: #fff !important;
+        background-repeat: no-repeat;
+        background-position: right 16px center;
+        background-size: 18px 18px;
+        cursor: pointer;
+        padding-right: 48px !important;
+    }
+
+    .booking-picker-input.date {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%230f3b74' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2' ry='2'/%3E%3Cline x1='16' y1='2' x2='16' y2='6'/%3E%3Cline x1='8' y1='2' x2='8' y2='6'/%3E%3Cline x1='3' y1='10' x2='21' y2='10'/%3E%3C/svg%3E");
+    }
+
+    .booking-picker-input.time {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%230f3b74' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpolyline points='12 7 12 12 15 15'/%3E%3C/svg%3E");
+    }
+
+    .booking-picker-input[readonly] {
+        user-select: none;
+    }
+
+    /* ═══════════════════════════════════════════
+       FLATPICKR — CALENDAR (DATE PICKER)
+    ═══════════════════════════════════════════ */
+
+    .flatpickr-calendar {
+        border: 1px solid rgba(35, 94, 167, .14) !important;
+        box-shadow: 0 20px 44px rgba(15, 23, 42, .16) !important;
+        border-radius: 16px !important;
+        overflow: hidden !important;
+        font-family: inherit !important;
+        background: #fff !important;
+        z-index: 40;
+        width: 308px !important;
+        padding: 0 !important;
+    }
+
+    .flatpickr-calendar.open {
+        animation: bookingPickerFade .18s ease;
+    }
+
+    /* ── Header bar ── */
+    .flatpickr-months {
+        background: linear-gradient(135deg, #17355c 0%, #235ea7 100%) !important;
+        height: 56px !important;
+        display: flex !important;
+        align-items: center !important;
+        padding: 0 6px !important;
+        position: relative !important;
+    }
+
+    /* ── Prev / Next arrows ── */
+    .flatpickr-months .flatpickr-prev-month,
+    .flatpickr-months .flatpickr-next-month {
+        position: static !important;
+        height: 40px !important;
+        width: 40px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 !important;
+        top: auto !important;
+        border-radius: 8px !important;
+        flex-shrink: 0 !important;
+        fill: #fff !important;
+        color: #fff !important;
+        transition: background .15s !important;
+    }
+
+    .flatpickr-months .flatpickr-prev-month:hover,
+    .flatpickr-months .flatpickr-next-month:hover {
+        background: rgba(255, 255, 255, .18) !important;
+    }
+
+    .flatpickr-months .flatpickr-prev-month svg,
+    .flatpickr-months .flatpickr-next-month svg {
+        fill: #fff !important;
+    }
+
+    /* ── Month container ── */
+    .flatpickr-months .flatpickr-month {
+        flex: 1 !important;
+        height: 56px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: transparent !important;
+        float: none !important;
+        line-height: 1 !important;
+    }
+
+    /* ── Month + Year row ── */
+    .flatpickr-current-month {
+        position: static !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        width: auto !important;
+        height: auto !important;
+        padding: 0 !important;
+        left: auto !important;
+        font-size: 16px !important;
+        font-weight: 700 !important;
+        color: #fff !important;
+    }
+
+    /* ── Month dropdown — force white text ── */
+    .flatpickr-monthDropdown-months {
+        appearance: none !important;
+        -webkit-appearance: none !important;
+        background: transparent !important;
+        border: 0 !important;
+        outline: 0 !important;
+        font-size: 16px !important;
+        font-weight: 700 !important;
+        color: #fff !important;
+        -webkit-text-fill-color: #fff !important;
+        opacity: 1 !important;
+        cursor: pointer !important;
+        padding: 0 2px !important;
+    }
+
+    .flatpickr-monthDropdown-months option {
+        background: #17355c !important;
+        color: #fff !important;
+    }
+
+    /* ── Year input ── */
+    .flatpickr-current-month input.cur-year {
+        font-size: 16px !important;
+        font-weight: 700 !important;
+        color: #fff !important;
+        -webkit-text-fill-color: #fff !important;
+        background: transparent !important;
+        border: 0 !important;
+        outline: 0 !important;
+        padding: 0 2px !important;
+        margin: 0 !important;
+        max-width: 60px !important;
+    }
+
+    .flatpickr-current-month .cur-year[disabled] {
+        opacity: 1 !important;
+        color: #fff !important;
+        -webkit-text-fill-color: #fff !important;
+    }
+
+    .flatpickr-current-month .numInputWrapper:hover {
+        background: transparent !important;
+    }
+
+    /* ── Weekday header ── */
+    .flatpickr-weekdays {
+        background: #edf4fd !important;
+        padding: 6px 10px 4px !important;
+    }
+
+    span.flatpickr-weekday {
+        color: #456383 !important;
+        font-size: 11px !important;
+        font-weight: 700 !important;
+        letter-spacing: .08em !important;
+        text-transform: uppercase !important;
+        background: transparent !important;
+    }
+
+    /* ── Day grid ── */
+    .flatpickr-days {
+        padding: 8px 10px 12px !important;
+    }
+
+    .dayContainer {
+        min-width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .flatpickr-day {
+        border-radius: 8px !important;
+        max-width: 36px !important;
+        height: 36px !important;
+        line-height: 36px !important;
+        font-size: 13px !important;
+        color: #17355c !important;
+    }
+
+    .flatpickr-day.selected,
+    .flatpickr-day.startRange,
+    .flatpickr-day.endRange,
+    .flatpickr-day.selected:hover,
+    .flatpickr-day.startRange:hover,
+    .flatpickr-day.endRange:hover {
+        background: #235ea7 !important;
+        border-color: #235ea7 !important;
+        color: #fff !important;
+    }
+
+    .flatpickr-day.today {
+        border-color: #f1c14f !important;
+        color: #7a5c00 !important;
+        font-weight: 700 !important;
+    }
+
+    .flatpickr-day:hover:not(.selected) {
+        background: rgba(35, 94, 167, .09) !important;
+        border-color: transparent !important;
+    }
+
+    .flatpickr-day.prevMonthDay,
+    .flatpickr-day.nextMonthDay {
+        color: #b0c4d8 !important;
+    }
+
+    .flatpickr-day.flatpickr-disabled,
+    .flatpickr-day.flatpickr-disabled:hover {
+        opacity: .35 !important;
+        color: #b0c4d8 !important;
+    }
+
+    /* ═══════════════════════════════════════════
+       FLATPICKR — TIME PICKER
+    ═══════════════════════════════════════════ */
+
+    .flatpickr-calendar.noCalendar {
+        width: auto !important;
+        min-width: 240px !important;
+        border-radius: 16px !important;
+        padding: 20px !important;
+    }
+
+    .flatpickr-calendar.noCalendar .flatpickr-time {
+        border: 0 !important;
+        background: transparent !important;
+        height: auto !important;
+        max-height: none !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        padding: 0 !important;
+    }
+
+    .flatpickr-calendar.noCalendar .flatpickr-time .numInputWrapper {
+        flex: 1 !important;
+        height: 64px !important;
+        border-radius: 12px !important;
+        background: #edf4fd !important;
+        border: 1.5px solid #b5d4f4 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        overflow: visible !important;
+    }
+
+    .flatpickr-calendar.noCalendar .flatpickr-time .numInputWrapper:hover {
+        background: #ddeaf9 !important;
+    }
+
+    .flatpickr-calendar.noCalendar .flatpickr-time input.flatpickr-hour,
+    .flatpickr-calendar.noCalendar .flatpickr-time input.flatpickr-minute {
+        font-size: 28px !important;
+        font-weight: 800 !important;
+        color: #17355c !important;
+        text-align: center !important;
+        width: 100% !important;
+        background: transparent !important;
+        border: 0 !important;
+        outline: 0 !important;
+        height: 64px !important;
+        line-height: 64px !important;
+        padding: 0 !important;
+        cursor: default !important;
+    }
+
+    .flatpickr-calendar.noCalendar .flatpickr-time .flatpickr-time-separator {
+        font-size: 26px !important;
+        font-weight: 800 !important;
+        color: #17355c !important;
+        flex-shrink: 0 !important;
+        width: 16px !important;
+        text-align: center !important;
+        background: transparent !important;
+        border: 0 !important;
+        height: auto !important;
+        min-height: auto !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        line-height: 64px !important;
+    }
+
+    .flatpickr-calendar.noCalendar .flatpickr-time .flatpickr-am-pm {
+        height: 64px !important;
+        min-height: 64px !important;
+        width: 64px !important;
+        border-radius: 12px !important;
+        background: #235ea7 !important;
+        border: 0 !important;
+        color: #fff !important;
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        flex-shrink: 0 !important;
+        line-height: 1 !important;
+    }
+
+    .flatpickr-calendar.noCalendar .flatpickr-time .flatpickr-am-pm:hover {
+        background: #17355c !important;
+    }
+
+    /* ── Hide up/down arrow spinners ── */
+    .flatpickr-time .numInputWrapper span {
+        display: none !important;
+    }
+
+    @keyframes bookingPickerFade {
+        from {
+            opacity: 0;
+            transform: translateY(4px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 </style>
 
@@ -162,6 +514,10 @@
                     <select name="vehicle_id" id="vehicle_id" required>
                         <option value="">Select vehicle</option>
                         <?php foreach ($vehicles as $v): ?>
+                            <?php
+                            $is_booked_vehicle = isset($v['status']) && $v['status'] === 'booked' && !empty($v['active_booking']);
+                            $booked_option_note = $is_booked_vehicle ? ' | Booked till ' . date('d M Y', strtotime($v['active_booking']['return_date'])) : '';
+                            ?>
                             <option
                                 value="<?php echo (int)$v['id']; ?>"
                                 data-rate-km="<?php echo (float)(isset($v['rate_per_day']) ? $v['rate_per_day'] : 0); ?>"
@@ -170,12 +526,14 @@
                                 data-p12="<?php echo (float)(isset($v['price_12_hours'])      ? $v['price_12_hours']      : 0); ?>"
                                 data-p24="<?php echo (float)(isset($v['price_24_hours'])      ? $v['price_24_hours']      : 0); ?>"
                                 data-extra="<?php echo (float)(isset($v['extra_hour_charge']) ? $v['extra_hour_charge']   : 0); ?>"
+                                data-booked-until="<?php echo $is_booked_vehicle ? html_escape($v['active_booking']['return_date']) : ''; ?>"
                                 <?php echo ((int)$v['id'] === $selected_vehicle_id) ? 'selected' : ''; ?>>
                                 <?php echo html_escape($v['name'] . ' | ' . $v['registration_no']
                                     . ' | Adv ₹' . number_format((float)$v['advance_amount'], 0)); ?>
                             </option>
                         <?php endforeach; ?>
                     </select>
+                    <div class="helper" id="vehicle_booking_note">Cars marked as booked can still be reserved for future non-overlapping dates.</div>
                 </div>
 
                 <div>
@@ -198,43 +556,48 @@
                 <!-- ── 3. Pickup Date & Return Date ── -->
                 <div>
                     <label>Pickup Date</label>
-                    <input type="date" name="pickup_date" id="pickup_date"
+                    <input type="text" name="pickup_date" id="pickup_date" class="booking-picker-input date" readonly
                         value="<?php echo !empty($booking_edit['pickup_date']) ? html_escape($booking_edit['pickup_date']) : ''; ?>" required>
+                    <div class="helper">Click to select pickup date.</div>
+                    <div class="booking-conflict-note" id="bookingConflictNote"></div>
                 </div>
                 <div>
                     <label>Return Date</label>
-                    <input type="date" name="return_date" id="return_date"
+                    <input type="text" name="return_date" id="return_date" class="booking-picker-input date" readonly
                         value="<?php echo !empty($booking_edit['return_date']) ? html_escape($booking_edit['return_date']) : ''; ?>" required>
+                    <div class="helper">Click to select return date.</div>
                 </div>
 
                 <!-- ── 4. Pickup Time & Return Time ── -->
-              <div id="pickup_time_wrap">
-    <label>Pickup Time</label>
+                <div id="pickup_time_wrap">
+                    <label>Pickup Time</label>
 
-    <input 
-        type="time"
-        name="pickup_time"
-        id="pickup_time"
-        value="<?php echo !empty($booking_edit['pickup_time']) ? html_escape(date('H:i', strtotime($booking_edit['pickup_time']))) : ''; ?>"
-        required
-    >
+                    <input
+                        type="text"
+                        name="pickup_time"
+                        id="pickup_time"
+                        class="booking-picker-input time"
+                        value="<?php echo !empty($booking_edit['pickup_time']) ? html_escape(date('h:i K', strtotime($booking_edit['pickup_time']))) : ''; ?>"
+                        required
+                        readonly>
 
-    <div class="helper">Select pickup time.</div>
-</div>
+                    <div class="helper">Click to select pickup time.</div>
+                </div>
 
-<div id="return_time_wrap">
-    <label>Return Time</label>
+                <div id="return_time_wrap">
+                    <label>Return Time</label>
 
-    <input 
-        type="time"
-        name="return_time"
-        id="return_time"
-        value="<?php echo !empty($booking_edit['return_time']) ? html_escape(date('H:i', strtotime($booking_edit['return_time']))) : ''; ?>"
-        required
-    >
+                    <input
+                        type="text"
+                        name="return_time"
+                        id="return_time"
+                        class="booking-picker-input time"
+                        value="<?php echo !empty($booking_edit['return_time']) ? html_escape(date('h:i K', strtotime($booking_edit['return_time']))) : ''; ?>"
+                        required
+                        readonly>
 
-    <div class="helper">Select return time.</div>
-</div>
+                    <div class="helper">Click to select return time.</div>
+                </div>
 
                 <!-- ── 5. Calculated Duration Box ── -->
                 <div class="full" id="hours_duration_wrap">
@@ -335,6 +698,7 @@
     </aside>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
     (function() {
 
@@ -353,6 +717,7 @@
         var advanceHelper = document.getElementById('advance_helper');
         var amountLabel = document.getElementById('amount_label');
         var helperEl = document.getElementById('amount_helper');
+        var vehicleBookingNote = document.getElementById('vehicle_booking_note');
         var pickupDate = document.getElementById('pickup_date');
         var returnDate = document.getElementById('return_date');
         var pickupTimeInp = document.getElementById('pickup_time');
@@ -362,6 +727,15 @@
         var hoursDurNote = document.getElementById('hours_duration_note');
         var extraBanner = document.getElementById('extra_notice_banner');
         var noticExtraVal = document.getElementById('notice_extra_val');
+        var conflictNote = document.getElementById('bookingConflictNote');
+        var submitBtn = document.querySelector('form[action*="bookings/store"] button[type="submit"]');
+        var availabilityUrl = '<?php echo base_url('api/vehicles/check-availability'); ?>';
+        var availabilityRequestToken = 0;
+        var conflictActive = false;
+        var pickupDatePicker = null;
+        var returnDatePicker = null;
+        var pickupTimePicker = null;
+        var returnTimePicker = null;
 
         /* ── Correct Indian rupee formatter using built-in toLocaleString ── */
         function fmt(n) {
@@ -381,8 +755,96 @@
                 p6: parseFloat(opt.getAttribute('data-p6') || '0'),
                 p12: parseFloat(opt.getAttribute('data-p12') || '0'),
                 p24: parseFloat(opt.getAttribute('data-p24') || '0'),
-                extra: parseFloat(opt.getAttribute('data-extra') || '0')
+                extra: parseFloat(opt.getAttribute('data-extra') || '0'),
+                bookedUntil: opt.getAttribute('data-booked-until') || ''
             };
+        }
+
+        function updateVehicleBookingNote() {
+            if (!vehicleBookingNote) return;
+            var data = getVehicleData();
+            if (data && data.bookedUntil) {
+                vehicleBookingNote.textContent = 'This car is already booked till ' + data.bookedUntil + '. You can still book it for dates after that.';
+                return;
+            }
+            vehicleBookingNote.textContent = 'Cars marked as booked can still be reserved for future non-overlapping dates.';
+        }
+
+        function setConflictState(hasConflict, message) {
+            conflictActive = !!hasConflict;
+
+            toggleConflictInput(pickupDate, conflictActive);
+            toggleConflictInput(returnDate, conflictActive);
+
+            if (conflictNote) {
+                conflictNote.textContent = message || '';
+                conflictNote.classList.toggle('show', conflictActive && !!message);
+            }
+
+            if (submitBtn) {
+                submitBtn.disabled = conflictActive;
+                submitBtn.style.opacity = conflictActive ? '0.65' : '';
+                submitBtn.style.cursor = conflictActive ? 'not-allowed' : '';
+            }
+        }
+
+        function toggleConflictInput(field, hasConflict) {
+            if (!field) {
+                return;
+            }
+            field.classList.toggle('booking-conflict-input', hasConflict);
+            if (field._flatpickr && field._flatpickr.altInput) {
+                field._flatpickr.altInput.classList.toggle('booking-conflict-input', hasConflict);
+            }
+        }
+
+        function checkAvailability() {
+            var data = getVehicleData();
+            var vehicleId = vehicleSel ? vehicleSel.value : '';
+            var pickupValue = pickupDate ? pickupDate.value : '';
+            var returnValue = returnDate ? returnDate.value : '';
+            var bookingIdInput = document.querySelector('input[name="booking_id"]');
+            var bookingId = bookingIdInput ? bookingIdInput.value : '0';
+
+            if (!data || !vehicleId || !pickupValue) {
+                setConflictState(false, '');
+                return;
+            }
+
+            var token = ++availabilityRequestToken;
+            var url = availabilityUrl +
+                '?vehicle_id=' + encodeURIComponent(vehicleId) +
+                '&pickup_date=' + encodeURIComponent(pickupValue) +
+                '&return_date=' + encodeURIComponent(returnValue || pickupValue) +
+                '&booking_id=' + encodeURIComponent(bookingId || '0');
+
+            fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(result) {
+                    if (token !== availabilityRequestToken) {
+                        return;
+                    }
+
+                    if (result && result.available === false) {
+                        setConflictState(true, result.message || 'Selected dates are not available for this car.');
+                        return;
+                    }
+
+                    setConflictState(false, '');
+                })
+                .catch(function() {
+                    if (token !== availabilityRequestToken) {
+                        return;
+                    }
+                    setConflictState(false, '');
+                });
         }
 
         function isKmBooking() {
@@ -404,7 +866,9 @@
             if (returnTimeInp) returnTimeInp.required = !kmMode;
             if (slotSel) slotSel.required = !kmMode;
             if (kmInput) kmInput.required = kmMode;
+            updateVehicleBookingNote();
             updateAmount();
+            checkAvailability();
         }
 
         function calcHours() {
@@ -457,6 +921,76 @@
                 hour: hour,
                 minute: minute
             };
+        }
+
+        function initPickers() {
+            if (typeof flatpickr === 'undefined') {
+                return;
+            }
+
+            pickupDatePicker = flatpickr('#pickup_date', {
+                altInput: true,
+                altInputClass: 'booking-picker-input date',
+                altFormat: 'd-m-Y',
+                dateFormat: 'Y-m-d',
+                minDate: 'today',
+                disableMobile: true,
+                onChange: function(selectedDates, dateStr) {
+                    if (returnDatePicker && dateStr) {
+                        returnDatePicker.set('minDate', dateStr);
+                        if (returnDate && returnDate.value && returnDate.value < dateStr) {
+                            returnDatePicker.clear();
+                        }
+                    }
+                    updateHoursDuration();
+                    updateAmount();
+                    checkAvailability();
+                }
+            });
+
+            returnDatePicker = flatpickr('#return_date', {
+                altInput: true,
+                altInputClass: 'booking-picker-input date',
+                altFormat: 'd-m-Y',
+                dateFormat: 'Y-m-d',
+                minDate: pickupDate && pickupDate.value ? pickupDate.value : 'today',
+                disableMobile: true,
+                onChange: function() {
+                    updateHoursDuration();
+                    updateAmount();
+                    checkAvailability();
+                }
+            });
+
+            pickupTimePicker = flatpickr('#pickup_time', {
+                enableTime: true,
+                noCalendar: true,
+                dateFormat: 'h:i K',
+                time_24hr: false,
+                minuteIncrement: 15,
+                disableMobile: true,
+                position: 'auto left',
+                onChange: function() {
+                    updateHoursDuration();
+                    updateAmount();
+                    checkAvailability();
+                }
+            });
+
+            returnTimePicker = flatpickr('#return_time', {
+                enableTime: true,
+                noCalendar: true,
+                dateFormat: 'h:i K',
+                time_24hr: false,
+                minuteIncrement: 15,
+                disableMobile: true,
+                position: 'auto left',
+                onChange: function() {
+                    updateHoursDuration();
+                    updateAmount();
+                    checkAvailability();
+                }
+            });
         }
 
         function calcHourPackages(hours, slot) {
@@ -526,9 +1060,9 @@
             /* ── Advance field ── */
             advanceInp.value = needsAdvance() && d.advance ? 'Rs. ' + d.advance.toFixed(2) : 'Not selected';
             if (advanceHelper) {
-                advanceHelper.textContent = needsAdvance()
-                    ? 'This amount will be paid on the next page.'
-                    : 'Advance is optional. If unchecked, your booking will finish after document upload.';
+                advanceHelper.textContent = needsAdvance() ?
+                    'This amount will be paid on the next page.' :
+                    'Advance is optional. If unchecked, your booking will finish after document upload.';
             }
 
             /* ── Package price based on selected slot ── */
@@ -538,8 +1072,8 @@
             var packageCount = calcHourPackages(totalHours, h);
             var price = kmMode ? (Math.max(0, km) * d.rateKm) : (
                 (h === '6' ? d.p6 :
-                h === '12' ? d.p12 :
-                h === '24' ? d.p24 : 0) * Math.max(1, packageCount || 1)
+                    h === '12' ? d.p12 :
+                    h === '24' ? d.p24 : 0) * Math.max(1, packageCount || 1)
             );
 
             amountInp.value = price > 0 ? price.toFixed(2) : '';
@@ -560,7 +1094,11 @@
             }
         }
 
-        if (vehicleSel) vehicleSel.addEventListener('change', updateAmount);
+        if (vehicleSel) vehicleSel.addEventListener('change', function() {
+            updateVehicleBookingNote();
+            updateAmount();
+            checkAvailability();
+        });
         if (bookingTypeSel) bookingTypeSel.addEventListener('change', toggleBookingMode);
         if (requiresAdvanceChk) requiresAdvanceChk.addEventListener('change', updateAmount);
         if (slotSel) slotSel.addEventListener('change', updateAmount);
@@ -570,14 +1108,17 @@
             if (el) el.addEventListener('change', function() {
                 updateHoursDuration();
                 updateAmount();
+                checkAvailability();
             });
         });
 
         /* Run on load for edit mode pre-filled values */
+        initPickers();
         updateHoursDuration();
+        updateVehicleBookingNote();
         toggleBookingMode();
         updateAmount();
+        checkAvailability();
 
     })();
 </script>
-

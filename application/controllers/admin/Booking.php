@@ -15,7 +15,7 @@ class Booking extends Admin_Controller
     {
         $data['page_title'] = 'Create Booking';
         $data['current_user'] = $this->current_user;
-        $data['vehicles'] = $this->General_model->get_available_vehicles();
+        $data['vehicles'] = $this->General_model->get_public_vehicles();
         $this->render_view('admin/bookings_create', $data);
     }
 
@@ -64,6 +64,17 @@ class Booking extends Admin_Controller
 
         $pickup_date = $this->input->post('pickup_date', true);
         $return_date = $this->input->post('return_date', true);
+        $conflict = $this->General_model->find_vehicle_booking_conflict($vehicle_id, $pickup_date, $return_date);
+
+        if (!empty($conflict)) {
+            $this->session->set_flashdata(
+                'error',
+                'This car is already booked from ' . date('d M Y', strtotime($conflict['pickup_date'])) .
+                ' to ' . date('d M Y', strtotime($conflict['return_date'])) . '. Please choose another date or another car.'
+            );
+            redirect('admin/bookings/create');
+        }
+
         $calculated_amount = $this->General_model->calculate_booking_amount($vehicle, $booking_type, $estimated_km, $hours_slot, $pickup_date, $return_date, $pickup_time, $return_time);
 
         // Get custom amount from form (user can override the calculated amount)
@@ -285,6 +296,17 @@ class Booking extends Admin_Controller
 
         $pickup_date = $this->input->post('pickup_date', true);
         $return_date = $this->input->post('return_date', true);
+        $conflict = $this->General_model->find_vehicle_booking_conflict($vehicle_id, $pickup_date, $return_date, $booking_id);
+
+        if (!empty($conflict)) {
+            $this->session->set_flashdata(
+                'error',
+                'This car is already booked from ' . date('d M Y', strtotime($conflict['pickup_date'])) .
+                ' to ' . date('d M Y', strtotime($conflict['return_date'])) . '. Please choose another date or another car.'
+            );
+            redirect('admin/booking/edit/' . $booking_id);
+        }
+
         $calculated_amount = $this->General_model->calculate_booking_amount($vehicle, $booking_type, $estimated_km, $hours_slot, $pickup_date, $return_date, $pickup_time, $return_time);
 
         // Get custom amount from form (user can override the calculated amount)
@@ -336,20 +358,25 @@ class Booking extends Admin_Controller
 
     public function lookup_customer()
     {
-        // Accept both GET and POST
         $this->output->enable_profiler(FALSE);
         $this->output->set_content_type('application/json');
 
         $phone = trim($this->input->get_post('phone', true));
+        $normalized_phone = preg_replace('/\D+/', '', $phone);
 
-        if ($phone === '') {
+        if ($normalized_phone === '') {
             $this->output->set_output(json_encode(['found' => false]));
             return;
         }
 
         $customer = $this->db
-            ->where('phone', $phone)
-            ->get('customers')
+            ->from('users')
+            ->where('role', 0)
+            ->group_start()
+                ->where('phone', $phone)
+                ->or_where('phone', $normalized_phone)
+            ->group_end()
+            ->get()
             ->row_array();
 
         if (empty($customer)) {
@@ -357,56 +384,69 @@ class Booking extends Admin_Controller
             return;
         }
 
-        $aadhaar  = '';
-        $license  = '';
-        $verified = 0;
-        $has_document_images = false;
+        $aadhaar = !empty($customer['aadhaar_number']) ? $customer['aadhaar_number'] : '';
+        $license = !empty($customer['driving_license_number']) ? $customer['driving_license_number'] : '';
+        $verified = !empty($customer['documents_verified']) ? 1 : 0;
+        $has_document_uploads = false;
+        $document_badges = array();
 
-        if ($this->db->table_exists('customer_documents')) {
-            $doc = $this->db
+        if ($this->db->table_exists('documents')) {
+            $documents = $this->db
+                ->select('document_type, file_name, file_path, status, updated_at')
                 ->where('customer_id', $customer['id'])
+                ->order_by('updated_at', 'DESC')
                 ->order_by('id', 'DESC')
-                ->limit(1)
-                ->get('customer_documents')
-                ->row_array();
+                ->get('documents')
+                ->result_array();
 
-            if (!empty($doc)) {
-                $aadhaar  = $doc['aadhaar_number']         ?? ($doc['aadhaar']  ?? '');
-                $license  = $doc['driving_license_number'] ?? ($doc['license_number'] ?? ($doc['license'] ?? ''));
-                $verified = !empty($doc['is_verified'])    ? 1 : (!empty($doc['verified']) ? 1 : 0);
-
-                $image_fields = [
-                    'aadhaar_image',
-                    'license_image',
-                    'aadhaar_front',
-                    'aadhaar_back',
-                    'license_front',
-                    'license_back',
-                    'document_image',
-                    'file_path',
-                    'image_path'
-                ];
-                foreach ($image_fields as $field) {
-                    if (!empty($doc[$field])) {
-                        $has_document_images = true;
-                        break;
-                    }
+            $document_map = array();
+            foreach ($documents as $document) {
+                $document_type = !empty($document['document_type']) ? trim($document['document_type']) : 'Document';
+                if (isset($document_map[$document_type])) {
+                    continue;
                 }
-            }
-        }
 
-        if ($aadhaar === '') $aadhaar = $customer['aadhaar_number'] ?? ($customer['aadhaar'] ?? '');
-        if ($license === '') $license = $customer['driving_license_number'] ?? ($customer['license_number'] ?? '');
+                $file_label = '';
+                if (!empty($document['file_name'])) {
+                    $file_label = $document['file_name'];
+                } elseif (!empty($document['file_path'])) {
+                    $file_label = basename($document['file_path']);
+                }
+
+                if ($file_label !== '') {
+                    $has_document_uploads = true;
+                }
+
+                $extension = strtolower(pathinfo($file_label, PATHINFO_EXTENSION));
+                $document_map[$document_type] = array(
+                    'type' => $document_type,
+                    'file_name' => $file_label,
+                    'status' => !empty($document['status']) ? strtolower($document['status']) : 'pending',
+                    'is_file_upload' => $file_label !== '',
+                    'file_kind' => $extension !== '' ? $extension : '',
+                );
+            }
+
+            if (isset($document_map['Aadhaar Card']) && $aadhaar === '' && !$document_map['Aadhaar Card']['is_file_upload']) {
+                $aadhaar = 'Uploaded by customer';
+            }
+            if (isset($document_map['Driving License']) && $license === '' && !$document_map['Driving License']['is_file_upload']) {
+                $license = 'Uploaded by customer';
+            }
+
+            $document_badges = array_values($document_map);
+        }
 
         $this->output->set_output(json_encode([
             'found'                  => true,
-            'customer_name'          => $customer['name']  ?? '',
+            'customer_name'          => $customer['full_name'] ?? '',
             'customer_email'         => $customer['email'] ?? '',
             'aadhaar_number'         => $aadhaar,
             'driving_license_number' => $license,
             'documents_verified'     => $verified,
-            'has_document_images'    => $has_document_images,
-            'customer_id'            => $customer['id'],
+            'has_document_uploads'   => $has_document_uploads,
+            'document_badges'        => $document_badges,
+            'customer_id'            => (int) $customer['id'],
         ]));
     }
 }

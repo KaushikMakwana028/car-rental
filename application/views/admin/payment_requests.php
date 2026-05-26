@@ -564,12 +564,12 @@ if (!function_exists('admin_whatsapp_url')) {
 <div class="pr-wrap">
 
     <!-- ── Page Header ── -->
-    <div class="pr-header">
+    <!-- <div class="pr-header">
         <div class="pr-header-left">
             <h1>Payment Requests</h1>
             <p>Review uploaded receipts and approve or reject each customer request.</p>
         </div>
-    </div>
+    </div> -->
 
     <!-- ── Stats Strip ── -->
     <div class="pr-stats">

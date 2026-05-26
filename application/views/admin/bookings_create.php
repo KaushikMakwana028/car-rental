@@ -364,11 +364,49 @@
         var $bannerFound = $('#adm_banner_found');
         var $bannerNew = $('#adm_banner_new');
         var $bannerError = $('#adm_banner_error');
+        var $bannerDocuments = $('#adm_banner_doc_images');
 
         function hideBanners() {
             $bannerFound.hide();
             $bannerNew.hide();
             $bannerError.hide();
+            $bannerDocuments.hide().empty();
+        }
+
+        function escapeHtml(value) {
+            return $('<span>').text(value || '').html();
+        }
+
+        function renderDocumentsBanner(customerId, documents) {
+            var reviewUrl = '<?php echo base_url("admin/documents"); ?>';
+            if (customerId) {
+                reviewUrl += '?customer_id=' + customerId;
+            }
+
+            var html = 'Customer documents were uploaded from the customer portal. ';
+            html += 'Review them in the <a href="' + reviewUrl + '" style="color:#1d4ed8;font-weight:600;">Documents section</a>.';
+
+            if (documents && documents.length) {
+                html += '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">';
+                documents.forEach(function(doc) {
+                    if (!doc || !doc.type) {
+                        return;
+                    }
+
+                    var status = doc.status ? String(doc.status).toLowerCase() : 'pending';
+                    var badgeColor = status === 'approved' ? '#166534' : (status === 'rejected' ? '#991b1b' : '#92400e');
+                    var badgeBackground = status === 'approved' ? '#dcfce7' : (status === 'rejected' ? '#fee2e2' : '#fef3c7');
+                    var meta = doc.file_name ? escapeHtml(doc.file_name) : 'number only';
+                    var kind = doc.file_kind ? ' (' + escapeHtml(String(doc.file_kind).toUpperCase()) + ')' : '';
+
+                    html += '<span style="display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;background:' + badgeBackground + ';color:' + badgeColor + ';font-size:12px;font-weight:600;">'
+                        + escapeHtml(doc.type) + ': ' + meta + kind +
+                        '</span>';
+                });
+                html += '</div>';
+            }
+
+            $bannerDocuments.html(html).css('display', 'block');
         }
 
         function flashField(id, value) {
@@ -443,6 +481,67 @@
             $bannerNew.hide();
             $bannerError.hide();
             $('#adm_banner_doc_images').hide();
+        }
+
+        function doLookup(phone) {
+            if (phone === lastPhone) return;
+            lastPhone = phone;
+
+            hideBanners();
+            $spinner.show();
+
+            $.ajax({
+                url: LOOKUP_URL,
+                type: 'GET',
+                data: {
+                    phone: phone
+                },
+                dataType: 'json',
+                timeout: 8000,
+                success: function(res) {
+                    $spinner.hide();
+                    if (!res) {
+                        $bannerError.show();
+                        return;
+                    }
+
+                    if (res.found) {
+                        flashField('adm_customer_name', res.customer_name);
+                        flashField('adm_customer_email', res.customer_email);
+                        flashField('adm_aadhaar_number', res.aadhaar_number);
+                        flashField('adm_driving_license_number', res.driving_license_number);
+
+                        var docCb = document.getElementById('adm_documents_verified');
+                        if (docCb) {
+                            docCb.checked = (res.documents_verified == 1);
+                        }
+
+                        $bannerFound
+                            .html('Customer <strong>' + escapeHtml(res.customer_name) + '</strong> found. Details were auto-filled.')
+                            .show();
+
+                        if (res.has_document_uploads) {
+                            renderDocumentsBanner(res.customer_id, res.document_badges || []);
+                        }
+                    } else {
+                        $bannerNew.show();
+                    }
+                },
+                error: function(xhr) {
+                    $spinner.hide();
+                    if (xhr.statusText !== 'abort') {
+                        console.error('Lookup failed:', xhr.status, xhr.responseText ? xhr.responseText.substring(0, 300) : '');
+                        $bannerError.show();
+                    }
+                }
+            });
+        }
+
+        function hideBanners() {
+            $bannerFound.hide();
+            $bannerNew.hide();
+            $bannerError.hide();
+            $bannerDocuments.hide().empty();
         }
 
         $phoneInput.on('input', function() {

@@ -41,7 +41,55 @@ class Api extends CI_Controller
     {
         return $this->respond(array(
             'status' => true,
-            'data' => $this->General_model->get_available_vehicles(),
+            'data' => $this->General_model->get_public_vehicles(),
+        ));
+    }
+
+    public function check_vehicle_availability()
+    {
+        $vehicle_id = (int) $this->input->get('vehicle_id');
+        $pickup_date = trim((string) $this->input->get('pickup_date', true));
+        $return_date = trim((string) $this->input->get('return_date', true));
+        $booking_id = (int) $this->input->get('booking_id');
+
+        if ($vehicle_id <= 0) {
+            return $this->respond(array(
+                'status' => false,
+                'available' => true,
+                'message' => '',
+            ), 200);
+        }
+
+        if ($pickup_date === '') {
+            return $this->respond(array(
+                'status' => true,
+                'available' => true,
+                'message' => '',
+            ));
+        }
+
+        if ($return_date === '') {
+            $return_date = $pickup_date;
+        }
+
+        $conflict = $this->General_model->find_vehicle_booking_conflict($vehicle_id, $pickup_date, $return_date, $booking_id);
+
+        if (empty($conflict)) {
+            return $this->respond(array(
+                'status' => true,
+                'available' => true,
+                'message' => '',
+            ));
+        }
+
+        return $this->respond(array(
+            'status' => true,
+            'available' => false,
+            'message' => 'This car is already booked from ' . date('d M Y', strtotime($conflict['pickup_date'])) . ' to ' . date('d M Y', strtotime($conflict['return_date'])) . '. Please choose another date.',
+            'conflict' => array(
+                'pickup_date' => $conflict['pickup_date'],
+                'return_date' => $conflict['return_date'],
+            ),
         ));
     }
 
@@ -79,6 +127,15 @@ class Api extends CI_Controller
 
         $pickup_date = $this->input->post('pickup_date', true);
         $return_date = $this->input->post('return_date', true);
+        $conflict = $this->General_model->find_vehicle_booking_conflict($vehicle_id, $pickup_date, $return_date);
+
+        if (!empty($conflict)) {
+            return $this->respond(array(
+                'status' => false,
+                'message' => 'This car is already booked from ' . date('d M Y', strtotime($conflict['pickup_date'])) . ' to ' . date('d M Y', strtotime($conflict['return_date'])) . '.',
+            ), 422);
+        }
+
         $calculated_amount = $this->General_model->calculate_booking_amount($vehicle, $booking_type, $estimated_km, $hours_slot, $pickup_date, $return_date, $pickup_time, $return_time);
 
 

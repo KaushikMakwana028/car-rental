@@ -15,7 +15,7 @@ class Booking extends MY_Controller
         $data['current_user'] = $this->current_user;
         $data['is_customer_logged_in'] = $this->is_logged_in() && $this->current_role() === 0;
         $data['current_step'] = 1;
-        $data['vehicles'] = $this->General_model->get_available_vehicles();
+        $data['vehicles'] = $this->General_model->get_public_vehicles();
         $requested_vehicle_id = (int) $this->input->get('vehicle_id');
         $requested_booking_id = (int) $this->input->get('booking_id');
         $requested_customer_id = (int) $this->input->get('customer_id');
@@ -81,10 +81,25 @@ class Booking extends MY_Controller
 
         $pickup_date = $this->input->post('pickup_date', true);
         $return_date = $this->input->post('return_date', true);
-        $calculated_amount = $this->General_model->calculate_booking_amount($vehicle, $booking_type, $estimated_km, $hours_slot, $pickup_date, $return_date, $pickup_time, $return_time);
-
         $is_booking_edit = $booking_id > 0 && $customer_id > 0
             && $this->customer_can_access_booking($booking_id, $customer_id);
+        $conflict = $this->General_model->find_vehicle_booking_conflict(
+            $vehicle_id,
+            $pickup_date,
+            $return_date,
+            $is_booking_edit ? $booking_id : 0
+        );
+
+        if (!empty($conflict)) {
+            $this->session->set_flashdata(
+                'error',
+                'This car is already booked from ' . date('d M Y', strtotime($conflict['pickup_date'])) .
+                ' to ' . date('d M Y', strtotime($conflict['return_date'])) . '. Please choose another date or another car.'
+            );
+            redirect('bookings/create');
+        }
+
+        $calculated_amount = $this->General_model->calculate_booking_amount($vehicle, $booking_type, $estimated_km, $hours_slot, $pickup_date, $return_date, $pickup_time, $return_time);
 
         if ($is_booking_edit) {
             $this->General_model->update_user_profile($customer_id, array(

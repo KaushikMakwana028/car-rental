@@ -282,6 +282,15 @@ class General_model extends CI_Model
         }));
     }
 
+    public function get_public_vehicles()
+    {
+        $vehicles = $this->get_vehicles_with_live_status();
+
+        return array_values(array_filter($vehicles, function ($vehicle) {
+            return !isset($vehicle['status']) || $vehicle['status'] !== 'service';
+        }));
+    }
+
     public function get_vehicles_with_live_status()
     {
         $vehicles = $this->get_all('vehicles', array(), 'id DESC');
@@ -300,6 +309,41 @@ class General_model extends CI_Model
         $booking_id = $this->insert('bookings', $data);
 
         return $booking_id;
+    }
+
+    public function find_vehicle_booking_conflict($vehicle_id, $pickup_date, $return_date, $exclude_booking_id = 0)
+    {
+        $vehicle_id = (int) $vehicle_id;
+        $exclude_booking_id = (int) $exclude_booking_id;
+        $pickup_date = trim((string) $pickup_date);
+        $return_date = trim((string) $return_date);
+
+        if ($vehicle_id <= 0 || $pickup_date === '' || $return_date === '') {
+            return array();
+        }
+
+        $this->db->from('bookings');
+        $this->db->where('vehicle_id', $vehicle_id);
+        $this->db->where_in('status', array('pending', 'confirmed', 'completed'));
+        $this->db->where('pickup_date <=', $return_date);
+        $this->db->where('return_date >=', $pickup_date);
+
+        if ($exclude_booking_id > 0) {
+            $this->db->where('id !=', $exclude_booking_id);
+        }
+
+        $conflict = $this->db
+            ->order_by('pickup_date', 'ASC')
+            ->order_by('id', 'ASC')
+            ->limit(1)
+            ->get()
+            ->row_array();
+
+        if (empty($conflict)) {
+            return array();
+        }
+
+        return $conflict;
     }
 
     public function calculate_booking_amount($vehicle, $booking_type = 'hours', $estimated_km = 0, $hours_slot = 0, $pickup_date = '', $return_date = '', $pickup_time = '', $return_time = '')
@@ -1423,7 +1467,7 @@ class General_model extends CI_Model
             }
 
             $status = !empty($booking['effective_status']) ? $booking['effective_status'] : $booking['status'];
-            if (!in_array($status, array('pending', 'confirmed'), true)) {
+            if (!in_array($status, array('pending', 'confirmed', 'completed'), true)) {
                 continue;
             }
 

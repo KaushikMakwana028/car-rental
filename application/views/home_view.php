@@ -409,6 +409,41 @@
         margin-bottom: 16px;
     }
 
+    .vc-status-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: -6px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+    }
+
+    .vc-booked-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%);
+        border: 1px solid #fecdd3;
+        color: #9f1239;
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: -.01em;
+        box-shadow: 0 4px 12px rgba(190, 24, 93, .08);
+    }
+
+    .vc-booked-chip::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #e11d48;
+        box-shadow: 0 0 0 4px rgba(225, 29, 72, .12);
+        flex-shrink: 0;
+    }
+
     .vc-spec-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -932,6 +967,10 @@
                         return $p > 0;
                     });
                     $min_price = $pkg_prices ? min($pkg_prices) : 0;
+                    $km_price = (float)(isset($vehicle['rate_per_day']) ? $vehicle['rate_per_day'] : 0);
+                    $filter_price = $min_price > 0 ? $min_price : $km_price;
+                    $is_booked = isset($vehicle['status']) && $vehicle['status'] === 'booked' && !empty($vehicle['active_booking']);
+                    $booked_label = $is_booked ? 'Booked till ' . date('d M', strtotime($vehicle['active_booking']['return_date'])) : '';
                     ?>
                     <article
                         class="vc-card js-vehicle-card"
@@ -940,7 +979,8 @@
                         data-type="<?php echo html_escape(strtolower($vehicle['vehicle_type'])); ?>"
                         data-fuel="<?php echo html_escape(strtolower($vehicle['fuel_type'])); ?>"
                         data-seats="<?php echo (int)$vehicle['seats']; ?>"
-                        data-advance="<?php echo (float)$vehicle['advance_amount']; ?>">
+                        data-price="<?php echo (float)$filter_price; ?>"
+                        data-km-price="<?php echo (float)$km_price; ?>">
 
                         <?php if ($vehicle_image !== ''): ?>
                             <div class="vc-card-media">
@@ -961,6 +1001,11 @@
                         <div class="vc-card-body">
                             <div class="vc-card-name"><?php echo html_escape($vehicle['name']); ?></div>
                             <div class="vc-card-reg"><?php echo html_escape($vehicle['registration_no']); ?></div>
+                            <?php if ($is_booked): ?>
+                                <div class="vc-status-row">
+                                    <span class="vc-booked-chip"><?php echo html_escape($booked_label); ?></span>
+                                </div>
+                            <?php endif; ?>
 
                             <div class="vc-spec-grid">
                                 <div class="vc-spec-item">
@@ -983,7 +1028,7 @@
                                         <span class="vc-starts-from-unit">/ 6 hrs</span>
                                     </div>
                                     <div class="vc-card-reg" style="margin-top:4px;margin-bottom:0;">
-                                        KM: &#8377;<?php echo number_format((float)(isset($vehicle['rate_per_day']) ? $vehicle['rate_per_day'] : 0), 0); ?>/km
+                                        KM: &#8377;<?php echo number_format($km_price, 0); ?>/km
                                     </div>
                                     <div class="vc-advance-tag">
                                         &#8377;<?php echo number_format((float)$vehicle['advance_amount'], 0); ?> advance
@@ -1033,10 +1078,15 @@
             var selFuel = document.getElementById('filterFuel');
             var selSeats = document.getElementById('filterSeats');
             var selAdv = document.getElementById('filterAdvance');
+            var advLabel = document.querySelector('label[for="filterAdvance"]');
             var grid = document.getElementById('vehicleGrid');
             var emptyEl = document.getElementById('vehicleEmptyState');
             var countEl = document.getElementById('resultsCount');
             var pagNav = document.getElementById('vcPagination');
+
+            if (advLabel) {
+                advLabel.textContent = 'Max Price (Rs)';
+            }
 
             var allCards = Array.prototype.slice.call(document.querySelectorAll('.js-vehicle-card'));
             var currentPage = 1;
@@ -1046,24 +1096,120 @@
                 return window.innerWidth <= 768 ? 6 : 9;
             }
 
+            function toTitleCase(value) {
+                return String(value || '').replace(/\w\S*/g, function(word) {
+                    return word.charAt(0).toUpperCase() + word.slice(1);
+                });
+            }
+
+            function formatIndianNumber(value) {
+                var number = Math.round(parseFloat(value || '0'));
+                if (!isFinite(number)) {
+                    return '0';
+                }
+
+                var str = String(Math.abs(number));
+                if (str.length <= 3) {
+                    return (number < 0 ? '-' : '') + str;
+                }
+
+                var lastThree = str.slice(-3);
+                var rest = str.slice(0, -3);
+                rest = rest.replace(/\B(?=(\d{2})+(?!\d))/g, ',');
+
+                return (number < 0 ? '-' : '') + rest + ',' + lastThree;
+            }
+
+            function getCardAttr(card, name) {
+                return String(card.getAttribute('data-' + name) || '').trim();
+            }
+
+            function setFilterOptions(select, values, placeholder, formatter) {
+                var currentValue = select.value || '';
+                select.innerHTML = '';
+
+                var defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = placeholder;
+                select.appendChild(defaultOption);
+
+                values.forEach(function(value) {
+                    var option = document.createElement('option');
+                    option.value = String(value);
+                    option.textContent = formatter ? formatter(value) : value;
+                    if (option.value === currentValue) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                });
+            }
+
+            function buildDynamicFilterOptions() {
+                var types = [];
+                var fuels = [];
+                var seats = [];
+                var prices = [];
+
+                allCards.forEach(function(card) {
+                    var type = getCardAttr(card, 'type').toLowerCase();
+                    var fuel = getCardAttr(card, 'fuel').toLowerCase();
+                    var seat = parseInt(getCardAttr(card, 'seats') || '0', 10);
+                    var price = parseFloat(getCardAttr(card, 'price') || '0');
+
+                    if (type && types.indexOf(type) === -1) types.push(type);
+                    if (fuel && fuels.indexOf(fuel) === -1) fuels.push(fuel);
+                    if (seat > 0 && seats.indexOf(seat) === -1) seats.push(seat);
+                    if (price > 0 && prices.indexOf(price) === -1) prices.push(price);
+                });
+
+                types.sort();
+                fuels.sort();
+                seats.sort(function(a, b) {
+                    return a - b;
+                });
+                prices.sort(function(a, b) {
+                    return a - b;
+                });
+
+                setFilterOptions(selType, types, 'All Types', function(value) {
+                    return toTitleCase(value);
+                });
+                setFilterOptions(selFuel, fuels, 'All Fuel Types', function(value) {
+                    return toTitleCase(value);
+                });
+                setFilterOptions(selSeats, seats, 'Any Seats', function(value) {
+                    return value + '+ Seats';
+                });
+                setFilterOptions(selAdv, prices, 'Any Amount', function(value) {
+                    return 'Up to Rs ' + formatIndianNumber(value);
+                });
+            }
+
             function applyFilters() {
                 var sv = (search.value || '').toLowerCase().trim();
                 var tv = (selType.value || '').toLowerCase();
                 var fv = (selFuel.value || '').toLowerCase();
                 var sev = parseInt(selSeats.value || '0', 10);
-                var adv = parseFloat(selAdv.value || '0');
+                var maxPrice = parseFloat(selAdv.value || '0');
 
                 visibleCards = allCards.filter(function(card) {
+                    var cardName = getCardAttr(card, 'name').toLowerCase();
+                    var cardRegistration = getCardAttr(card, 'registration').toLowerCase();
+                    var cardType = getCardAttr(card, 'type').toLowerCase();
+                    var cardFuel = getCardAttr(card, 'fuel').toLowerCase();
+                    var cardSeats = parseInt(getCardAttr(card, 'seats') || '0', 10);
+                    var cardPrice = parseFloat(getCardAttr(card, 'price') || '0');
+
                     return (
                         (sv === '' ||
-                            card.dataset.name.indexOf(sv) !== -1 ||
-                            card.dataset.registration.indexOf(sv) !== -1 ||
-                            card.dataset.type.indexOf(sv) !== -1 ||
-                            card.dataset.fuel.indexOf(sv) !== -1) &&
-                        (tv === '' || card.dataset.type === tv) &&
-                        (fv === '' || card.dataset.fuel === fv) &&
-                        (sev === 0 || parseInt(card.dataset.seats, 10) >= sev) &&
-                        (adv === 0 || parseFloat(card.dataset.advance) <= adv)
+                            cardName.indexOf(sv) !== -1 ||
+                            cardRegistration.indexOf(sv) !== -1 ||
+                            cardType.indexOf(sv) !== -1 ||
+                            cardFuel.indexOf(sv) !== -1) &&
+                        (tv === '' || cardType === tv) &&
+                        (fv === '' || cardFuel === fv) &&
+                        (sev === 0 || cardSeats >= sev) &&
+                        (maxPrice === 0 || (cardPrice > 0 && cardPrice <= maxPrice))
                     );
                 });
                 currentPage = 1;
@@ -1180,6 +1326,8 @@
                     behavior: 'smooth'
                 });
             }
+
+            buildDynamicFilterOptions();
 
             [search, selType, selFuel, selSeats, selAdv].forEach(function(el) {
                 el.addEventListener('input', applyFilters);

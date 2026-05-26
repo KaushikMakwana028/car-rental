@@ -150,6 +150,24 @@
         line-height: 1.4;
     }
 
+    .cm-search {
+        width: min(340px, 100%);
+        min-height: 42px;
+        padding: 0 14px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text-1);
+        font: 500 13px/1.2 var(--font);
+        outline: none;
+        transition: border-color .18s ease, box-shadow .18s ease;
+    }
+
+    .cm-search:focus {
+        border-color: var(--brand);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
+    }
+
     /* ── Add button ── */
     .cm-add-btn {
         display: inline-flex;
@@ -380,6 +398,72 @@
         text-align: center;
         color: var(--text-3);
         font-size: 14px;
+    }
+
+    .cm-pagination-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 18px 22px 22px;
+        border-top: 1px solid var(--border-soft);
+        flex-wrap: wrap;
+    }
+
+    .cm-pagination-info {
+        font-size: 13px;
+        color: var(--text-2);
+    }
+
+    .cm-pagination {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .cm-page-btn,
+    .cm-page-dot {
+        min-width: 38px;
+        height: 38px;
+        padding: 0 12px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .cm-page-btn {
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text-2);
+        cursor: pointer;
+        transition: all .18s ease;
+    }
+
+    .cm-page-btn:hover {
+        border-color: var(--brand-mid);
+        color: var(--brand);
+        background: var(--brand-light);
+    }
+
+    .cm-page-btn.active {
+        border-color: var(--brand);
+        background: var(--brand);
+        color: #fff;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .cm-page-btn:disabled {
+        opacity: .45;
+        cursor: not-allowed;
+        background: var(--surface-alt);
+    }
+
+    .cm-page-dot {
+        color: var(--text-3);
     }
 
     /* ══════════════════════════════
@@ -717,12 +801,17 @@ function cm_initials($name)
                 <h3>Customer Directory</h3>
                 <p>Quick records with a detail popup for each customer.</p>
             </div>
-            <a class="cm-add-btn" href="<?php echo base_url('register'); ?>">
-                <svg viewBox="0 0 16 16" fill="none">
-                    <path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                </svg>
-                Add Customer
-            </a>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                <?php if (!empty($customers)): ?>
+                    <input type="search" id="cmSearchInput" class="cm-search" placeholder="Search name, email, phone, or status">
+                <?php endif; ?>
+                <a class="cm-add-btn" href="<?php echo base_url('register'); ?>">
+                    <svg viewBox="0 0 16 16" fill="none">
+                        <path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                    Add Customer
+                </a>
+            </div>
         </div>
 
         <div class="cm-table-wrap">
@@ -741,7 +830,16 @@ function cm_initials($name)
                 <tbody>
                     <?php if (!empty($customers)): ?>
                         <?php foreach ($customers as $customer): ?>
-                            <tr>
+                            <?php
+                            $customer_search = strtolower(trim(implode(' ', array_filter(array(
+                                isset($customer['full_name']) ? $customer['full_name'] : '',
+                                isset($customer['email']) ? $customer['email'] : '',
+                                isset($customer['phone']) ? $customer['phone'] : '',
+                                isset($customer['doc_status']) ? $customer['doc_status'] : '',
+                                isset($customer['last_booking']) ? $customer['last_booking'] : '',
+                            )))));
+                            ?>
+                            <tr class="js-cm-customer-row" data-search="<?php echo html_escape($customer_search); ?>">
                                 <td>
                                     <div class="cm-customer-cell">
                                         <div class="cm-avatar"><?php echo html_escape(cm_initials($customer['full_name'])); ?>
@@ -834,6 +932,12 @@ function cm_initials($name)
                 </tbody>
             </table>
         </div>
+        <?php if (!empty($customers)): ?>
+            <div class="cm-pagination-wrap" id="cmPaginationWrap">
+                <div class="cm-pagination-info" id="cmPaginationInfo"></div>
+                <div class="cm-pagination" id="cmPagination"></div>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
 
@@ -911,6 +1015,113 @@ function cm_initials($name)
 
 <script>
     (function () {
+        var customerRows = Array.prototype.slice.call(document.querySelectorAll('.js-cm-customer-row'));
+        var customersPaginationWrap = document.getElementById('cmPaginationWrap');
+        var customersPaginationInfo = document.getElementById('cmPaginationInfo');
+        var customersPagination = document.getElementById('cmPagination');
+        var customersSearchInput = document.getElementById('cmSearchInput');
+        var customersPerPage = 8;
+        var customersCurrentPage = 1;
+        var filteredCustomerRows = customerRows.slice();
+
+        function getPageItems(totalPages, page) {
+            if (totalPages <= 5) {
+                return Array.from({ length: totalPages }, function (_, index) {
+                    return index + 1;
+                });
+            }
+            if (page <= 2) {
+                return [1, 2, 3, 'dots', totalPages];
+            }
+            if (page >= totalPages - 1) {
+                return [1, 'dots', totalPages - 2, totalPages - 1, totalPages];
+            }
+            return [1, 'dots', page - 1, page, page + 1, 'dots', totalPages];
+        }
+
+        function createPagerButton(label, page, disabled, active) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'cm-page-btn' + (active ? ' active' : '');
+            btn.textContent = label;
+            btn.disabled = !!disabled;
+            if (!disabled && !active) {
+                btn.addEventListener('click', function () {
+                    customersCurrentPage = page;
+                    renderCustomersPagination();
+                });
+            }
+            return btn;
+        }
+
+        function createPagerDots() {
+            var dot = document.createElement('span');
+            dot.className = 'cm-page-dot';
+            dot.textContent = '...';
+            return dot;
+        }
+
+        function renderCustomersPagination() {
+            if (!customerRows.length || !customersPaginationWrap || !customersPaginationInfo || !customersPagination) {
+                return;
+            }
+
+            var term = customersSearchInput ? customersSearchInput.value.toLowerCase().trim() : '';
+            filteredCustomerRows = customerRows.filter(function (row) {
+                var haystack = (row.getAttribute('data-search') || '').toLowerCase();
+                return term === '' || haystack.indexOf(term) !== -1;
+            });
+
+            var total = filteredCustomerRows.length;
+            if (total === 0) {
+                customerRows.forEach(function (row) {
+                    row.style.display = 'none';
+                });
+                customersPaginationInfo.textContent = 'No matching customers found';
+                customersPagination.innerHTML = '';
+                return;
+            }
+
+            var totalPages = Math.max(1, Math.ceil(total / customersPerPage));
+            if (customersCurrentPage > totalPages) {
+                customersCurrentPage = totalPages;
+            }
+
+            var start = (customersCurrentPage - 1) * customersPerPage;
+            var end = start + customersPerPage;
+
+            customerRows.forEach(function (row) {
+                row.style.display = 'none';
+            });
+
+            filteredCustomerRows.forEach(function (row, index) {
+                row.style.display = (index >= start && index < end) ? '' : 'none';
+            });
+
+            customersPaginationInfo.textContent = 'Showing ' + (start + 1) + '-' + Math.min(end, total) + ' of ' + total + ' customers';
+            customersPagination.innerHTML = '';
+            customersPagination.appendChild(createPagerButton('Prev', customersCurrentPage - 1, customersCurrentPage === 1, false));
+
+            getPageItems(totalPages, customersCurrentPage).forEach(function (item) {
+                if (item === 'dots') {
+                    customersPagination.appendChild(createPagerDots());
+                    return;
+                }
+                customersPagination.appendChild(createPagerButton(String(item), item, false, item === customersCurrentPage));
+            });
+
+            customersPagination.appendChild(createPagerButton('Next', customersCurrentPage + 1, customersCurrentPage === totalPages, false));
+        }
+
+        if (customersSearchInput) {
+            customersSearchInput.addEventListener('input', function () {
+                customersCurrentPage = 1;
+                renderCustomersPagination();
+            });
+        }
+
+        renderCustomersPagination();
+
         var overlay = document.getElementById('customerModal');
         var closeBtn = document.getElementById('closeCustomerModal');
 
