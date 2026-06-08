@@ -50,6 +50,8 @@ class Api extends CI_Controller
         $vehicle_id = (int) $this->input->get('vehicle_id');
         $pickup_date = trim((string) $this->input->get('pickup_date', true));
         $return_date = trim((string) $this->input->get('return_date', true));
+        $pickup_time = $this->General_model->normalize_time_value($this->input->get('pickup_time', true));
+        $return_time = $this->General_model->normalize_time_value($this->input->get('return_time', true));
         $booking_id = (int) $this->input->get('booking_id');
 
         if ($vehicle_id <= 0) {
@@ -72,7 +74,7 @@ class Api extends CI_Controller
             $return_date = $pickup_date;
         }
 
-        $conflict = $this->General_model->find_vehicle_booking_conflict($vehicle_id, $pickup_date, $return_date, $booking_id);
+        $conflict = $this->General_model->find_vehicle_booking_conflict($vehicle_id, $pickup_date, $return_date, $booking_id, $pickup_time, $return_time);
 
         if (empty($conflict)) {
             return $this->respond(array(
@@ -82,13 +84,25 @@ class Api extends CI_Controller
             ));
         }
 
+        $conflict_start = $this->General_model->format_booking_datetime_label(
+            $conflict['pickup_date'],
+            isset($conflict['pickup_time']) ? $conflict['pickup_time'] : null
+        );
+        $conflict_end = $this->General_model->format_booking_datetime_label(
+            $conflict['return_date'],
+            isset($conflict['return_time']) ? $conflict['return_time'] : null,
+            true
+        );
+
         return $this->respond(array(
             'status' => true,
             'available' => false,
-            'message' => 'This car is already booked from ' . date('d M Y', strtotime($conflict['pickup_date'])) . ' to ' . date('d M Y', strtotime($conflict['return_date'])) . '. Please choose another date.',
+            'message' => 'This car is already booked from ' . $conflict_start . ' to ' . $conflict_end . '. Please choose another date and time.',
             'conflict' => array(
                 'pickup_date' => $conflict['pickup_date'],
                 'return_date' => $conflict['return_date'],
+                'pickup_time' => isset($conflict['pickup_time']) ? $conflict['pickup_time'] : null,
+                'return_time' => isset($conflict['return_time']) ? $conflict['return_time'] : null,
             ),
         ));
     }
@@ -127,12 +141,21 @@ class Api extends CI_Controller
 
         $pickup_date = $this->input->post('pickup_date', true);
         $return_date = $this->input->post('return_date', true);
-        $conflict = $this->General_model->find_vehicle_booking_conflict($vehicle_id, $pickup_date, $return_date);
+        $conflict = $this->General_model->find_vehicle_booking_conflict($vehicle_id, $pickup_date, $return_date, 0, $pickup_time, $return_time);
 
         if (!empty($conflict)) {
+            $conflict_start = $this->General_model->format_booking_datetime_label(
+                $conflict['pickup_date'],
+                isset($conflict['pickup_time']) ? $conflict['pickup_time'] : null
+            );
+            $conflict_end = $this->General_model->format_booking_datetime_label(
+                $conflict['return_date'],
+                isset($conflict['return_time']) ? $conflict['return_time'] : null,
+                true
+            );
             return $this->respond(array(
                 'status' => false,
-                'message' => 'This car is already booked from ' . date('d M Y', strtotime($conflict['pickup_date'])) . ' to ' . date('d M Y', strtotime($conflict['return_date'])) . '.',
+                'message' => 'This car is already booked from ' . $conflict_start . ' to ' . $conflict_end . '.',
             ), 422);
         }
 

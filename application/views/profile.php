@@ -21,7 +21,7 @@
                 </div>
                 <div>
                     <label>Phone</label>
-                    <input type="text" name="phone" value="<?php echo html_escape($profile_user['phone']); ?>" required>
+                    <input type="text" name="phone" value="<?php echo html_escape($profile_user['phone']); ?>" required maxlength="15" inputmode="numeric" data-indian-phone="1">
                 </div>
                 <div class="full">
                     <label>Profile Image</label>

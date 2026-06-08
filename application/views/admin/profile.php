@@ -842,7 +842,7 @@
                         </div>
                         <div class="pf-group">
                             <label>Phone Number</label>
-                            <input type="text" name="phone" value="<?php echo html_escape($profile_user['phone']); ?>" required>
+                            <input type="text" name="phone" value="<?php echo html_escape($profile_user['phone']); ?>" required maxlength="15" inputmode="numeric" data-indian-phone="1">
                         </div>
                     </div>
                     <div class="pf-group">

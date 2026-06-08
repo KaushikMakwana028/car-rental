@@ -61,7 +61,13 @@ foreach ($vehicles as $vehicle) {
             <?php foreach ($vehicles as $vehicle): ?>
                 <?php
                 $is_booked = isset($vehicle['status']) && $vehicle['status'] === 'booked' && !empty($vehicle['active_booking']);
-                $booked_label = $is_booked ? 'Booked till ' . date('d M Y', strtotime($vehicle['active_booking']['return_date'])) : '';
+                $booked_label = $is_booked
+                    ? 'Booked till ' . $this->General_model->format_booking_datetime_label(
+                        $vehicle['active_booking']['return_date'],
+                        isset($vehicle['active_booking']['return_time']) ? $vehicle['active_booking']['return_time'] : null,
+                        true
+                    )
+                    : '';
                 ?>
                 <article class="vehicle-card">
                     <?php $vehicle_image = isset($vehicle['image']) ? trim($vehicle['image']) : ''; ?>

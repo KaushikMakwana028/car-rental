@@ -33,6 +33,25 @@ class Profile extends Customer_Controller
             return;
         }
 
+        $phone = $this->General_model->normalize_indian_phone($this->input->post('phone', true));
+        if (!$this->General_model->is_valid_indian_phone($phone)) {
+            $this->session->set_flashdata('error', 'Enter a valid 10-digit mobile number. You may start with +91.');
+            redirect('profile');
+            return;
+        }
+
+        $existing_phone = $this->db
+            ->where('phone', $phone)
+            ->where('id !=', $user_id)
+            ->get('users')
+            ->row_array();
+
+        if (!empty($existing_phone)) {
+            $this->session->set_flashdata('error', 'That mobile number is already used by another account.');
+            redirect('profile');
+            return;
+        }
+
         $profile_image = !empty($profile_user['profile_image']) ? $profile_user['profile_image'] : null;
         if (!empty($_FILES['profile_image']['name'])) {
             $uploaded_path = $this->upload_profile_image();
@@ -47,7 +66,7 @@ class Profile extends Customer_Controller
         $this->General_model->update_user_profile($user_id, array(
             'full_name' => trim($this->input->post('full_name', true)),
             'email' => $email,
-            'phone' => trim($this->input->post('phone', true)),
+            'phone' => $phone,
             'profile_image' => $profile_image,
         ));
 

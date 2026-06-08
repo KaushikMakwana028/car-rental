@@ -505,7 +505,8 @@
                 <div>
                     <label>Mobile Number</label>
                     <input type="text" name="customer_phone" placeholder="Enter your mobile number"
-                        value="<?php echo !empty($booking_edit['customer_phone']) ? html_escape($booking_edit['customer_phone']) : ''; ?>" required>
+                        value="<?php echo !empty($booking_edit['customer_phone']) ? html_escape($booking_edit['customer_phone']) : ''; ?>"
+                        required maxlength="15" inputmode="numeric" data-indian-phone="1">
                 </div>
 
                 <!-- ── 2. Vehicle ── -->
@@ -803,6 +804,8 @@
             var vehicleId = vehicleSel ? vehicleSel.value : '';
             var pickupValue = pickupDate ? pickupDate.value : '';
             var returnValue = returnDate ? returnDate.value : '';
+            var pickupTimeValue = pickupTimeInp ? pickupTimeInp.value : '';
+            var returnTimeValue = returnTimeInp ? returnTimeInp.value : '';
             var bookingIdInput = document.querySelector('input[name="booking_id"]');
             var bookingId = bookingIdInput ? bookingIdInput.value : '0';
 
@@ -816,6 +819,8 @@
                 '?vehicle_id=' + encodeURIComponent(vehicleId) +
                 '&pickup_date=' + encodeURIComponent(pickupValue) +
                 '&return_date=' + encodeURIComponent(returnValue || pickupValue) +
+                '&pickup_time=' + encodeURIComponent(pickupTimeValue) +
+                '&return_time=' + encodeURIComponent(returnTimeValue) +
                 '&booking_id=' + encodeURIComponent(bookingId || '0');
 
             fetch(url, {

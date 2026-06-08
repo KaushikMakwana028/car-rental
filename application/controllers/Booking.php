@@ -53,7 +53,7 @@ class Booking extends MY_Controller
         $hours_slot     = (int) $this->input->post('hours_slot');
         $requires_advance = $this->input->post('requires_advance') ? 1 : 0;
         $customer_name  = trim($this->input->post('customer_name', true));
-        $customer_phone = trim($this->input->post('customer_phone', true));
+        $customer_phone = $this->General_model->normalize_indian_phone($this->input->post('customer_phone', true));
         $pickup_time    = $this->General_model->normalize_time_value($this->input->post('pickup_time', true));
         $return_time    = $this->General_model->normalize_time_value($this->input->post('return_time', true));
 
@@ -61,6 +61,11 @@ class Booking extends MY_Controller
 
         if ($customer_name === '' || $customer_phone === '') {
             $this->session->set_flashdata('error', 'Customer name and mobile number are required.');
+            redirect('bookings/create');
+        }
+
+        if (!$this->General_model->is_valid_indian_phone($customer_phone)) {
+            $this->session->set_flashdata('error', 'Enter a valid 10-digit mobile number. You may start with +91.');
             redirect('bookings/create');
         }
 
@@ -87,14 +92,25 @@ class Booking extends MY_Controller
             $vehicle_id,
             $pickup_date,
             $return_date,
-            $is_booking_edit ? $booking_id : 0
+            $is_booking_edit ? $booking_id : 0,
+            $pickup_time,
+            $return_time
         );
 
         if (!empty($conflict)) {
+            $conflict_start = $this->General_model->format_booking_datetime_label(
+                $conflict['pickup_date'],
+                isset($conflict['pickup_time']) ? $conflict['pickup_time'] : null
+            );
+            $conflict_end = $this->General_model->format_booking_datetime_label(
+                $conflict['return_date'],
+                isset($conflict['return_time']) ? $conflict['return_time'] : null,
+                true
+            );
             $this->session->set_flashdata(
                 'error',
-                'This car is already booked from ' . date('d M Y', strtotime($conflict['pickup_date'])) .
-                ' to ' . date('d M Y', strtotime($conflict['return_date'])) . '. Please choose another date or another car.'
+                'This car is already booked from ' . $conflict_start .
+                ' to ' . $conflict_end . '. Please choose another date/time or another car.'
             );
             redirect('bookings/create');
         }

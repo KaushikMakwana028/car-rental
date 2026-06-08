@@ -405,7 +405,7 @@ $terms_text = $is_admin_setup ? 'After the first admin account is created, this 
                     <div>
                         <label for="phone">Phone</label>
                         <div class="input-wrap">
-                            <input type="tel" id="phone" name="phone" placeholder="Enter phone number" autocomplete="tel" required>
+                            <input type="tel" id="phone" name="phone" placeholder="Enter phone number" autocomplete="tel" required maxlength="15" inputmode="numeric" data-indian-phone="1">
                             <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.21h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.78a16 16 0 0 0 6.29 6.29l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"></path>
                             </svg>
@@ -431,6 +431,62 @@ $terms_text = $is_admin_setup ? 'After the first admin account is created, this 
             <div class="terms"><?php echo $terms_text; ?></div>
         </section>
     </div>
+    <script>
+        (function() {
+            function normalizeIndianPhone(rawValue) {
+                var value = String(rawValue || '').trim();
+                if (!value) {
+                    return '';
+                }
+
+                var hasPlus = value.charAt(0) === '+';
+                var digits = value.replace(/\D/g, '');
+                if (!digits) {
+                    return '';
+                }
+
+                if (digits.length === 12 && digits.slice(0, 2) === '91' && /^[6-9]\d{9}$/.test(digits.slice(2))) {
+                    return digits.slice(2);
+                }
+
+                if (digits.length === 11 && digits.charAt(0) === '0' && /^[6-9]\d{9}$/.test(digits.slice(1))) {
+                    return digits.slice(1);
+                }
+
+                if (digits.length === 10 && /^[6-9]\d{9}$/.test(digits)) {
+                    return digits;
+                }
+
+                return hasPlus ? '+' + digits : digits;
+            }
+
+            document.querySelectorAll('input[data-indian-phone="1"]').forEach(function(input) {
+                input.addEventListener('input', function() {
+                    var raw = String(input.value || '');
+                    var keepPlus = raw.charAt(0) === '+';
+                    var digits = raw.replace(/\D/g, '');
+                    input.value = keepPlus ? '+' + digits : digits;
+                    input.setCustomValidity('');
+                });
+
+                input.addEventListener('blur', function() {
+                    input.value = normalizeIndianPhone(input.value);
+                });
+
+                if (input.form) {
+                    input.form.addEventListener('submit', function() {
+                        input.value = normalizeIndianPhone(input.value);
+                        if (!/^[6-9]\d{9}$/.test(input.value)) {
+                            input.setCustomValidity('Enter a valid 10-digit mobile number. You may start with +91.');
+                            input.reportValidity();
+                        } else {
+                            input.setCustomValidity('');
+                        }
+                    });
+                }
+            });
+        })();
+    </script>
 </body>
 
 </html>

@@ -80,11 +80,18 @@ class General_model extends CI_Model
 
     public function authenticate_user($login_id, $password, $role)
     {
+        $login_id = trim((string) $login_id);
+        $normalized_phone = $this->normalize_indian_phone($login_id);
+
+        $this->db->group_start();
+        $this->db->where('email', $login_id);
+        $this->db->or_where('phone', $login_id);
+        if ($this->is_valid_indian_phone($normalized_phone) && $normalized_phone !== $login_id) {
+            $this->db->or_where('phone', $normalized_phone);
+        }
+        $this->db->group_end();
+
         $user = $this->db
-            ->group_start()
-            ->where('email', $login_id)
-            ->or_where('phone', $login_id)
-            ->group_end()
             ->where(array('role' => (int) $role, 'status' => 1))
             ->get('users')
             ->row_array();
@@ -99,9 +106,19 @@ class General_model extends CI_Model
 
     public function create_user($data)
     {
+        $data['phone'] = $this->normalize_indian_phone(isset($data['phone']) ? $data['phone'] : '');
+        if (!$this->is_valid_indian_phone($data['phone'])) {
+            return array('status' => false, 'message' => 'Enter a valid 10-digit mobile number. You may start with +91.');
+        }
+
         $existing = $this->get_row('users', array('email' => $data['email']));
         if (!empty($existing)) {
             return array('status' => false, 'message' => 'Email already exists.');
+        }
+
+        $existing_phone = $this->get_row('users', array('phone' => $data['phone']));
+        if (!empty($existing_phone)) {
+            return array('status' => false, 'message' => 'Mobile number already exists.');
         }
 
         $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
@@ -117,7 +134,7 @@ class General_model extends CI_Model
     public function resolve_customer_account($full_name, $phone, $email = '')
     {
         $full_name = trim($full_name);
-        $phone = trim($phone);
+        $phone = $this->normalize_indian_phone($phone);
         $email = trim($email);
 
         if ($phone !== '') {
@@ -182,6 +199,10 @@ class General_model extends CI_Model
 
     public function update_user_profile($user_id, $data)
     {
+        if (array_key_exists('phone', $data)) {
+            $data['phone'] = $this->normalize_indian_phone($data['phone']);
+        }
+
         $data['updated_at'] = date('Y-m-d H:i:s');
         return $this->update('users', array('id' => (int) $user_id), $data);
     }
@@ -311,12 +332,14 @@ class General_model extends CI_Model
         return $booking_id;
     }
 
-    public function find_vehicle_booking_conflict($vehicle_id, $pickup_date, $return_date, $exclude_booking_id = 0)
+    public function find_vehicle_booking_conflict($vehicle_id, $pickup_date, $return_date, $exclude_booking_id = 0, $pickup_time = null, $return_time = null)
     {
         $vehicle_id = (int) $vehicle_id;
         $exclude_booking_id = (int) $exclude_booking_id;
         $pickup_date = trim((string) $pickup_date);
         $return_date = trim((string) $return_date);
+        $pickup_time = $this->normalize_time_value($pickup_time);
+        $return_time = $this->normalize_time_value($return_time);
 
         if ($vehicle_id <= 0 || $pickup_date === '' || $return_date === '') {
             return array();
@@ -332,18 +355,33 @@ class General_model extends CI_Model
             $this->db->where('id !=', $exclude_booking_id);
         }
 
-        $conflict = $this->db
+        $candidates = $this->db
             ->order_by('pickup_date', 'ASC')
+            ->order_by('pickup_time', 'ASC')
             ->order_by('id', 'ASC')
-            ->limit(1)
             ->get()
-            ->row_array();
+            ->result_array();
 
-        if (empty($conflict)) {
+        if (empty($candidates)) {
             return array();
         }
 
-        return $conflict;
+        foreach ($candidates as $candidate) {
+            if ($this->booking_ranges_overlap(
+                $pickup_date,
+                $return_date,
+                $pickup_time,
+                $return_time,
+                isset($candidate['pickup_date']) ? $candidate['pickup_date'] : '',
+                isset($candidate['return_date']) ? $candidate['return_date'] : '',
+                isset($candidate['pickup_time']) ? $candidate['pickup_time'] : null,
+                isset($candidate['return_time']) ? $candidate['return_time'] : null
+            )) {
+                return $candidate;
+            }
+        }
+
+        return array();
     }
 
     public function calculate_booking_amount($vehicle, $booking_type = 'hours', $estimated_km = 0, $hours_slot = 0, $pickup_date = '', $return_date = '', $pickup_time = '', $return_time = '')
@@ -425,6 +463,51 @@ class General_model extends CI_Model
         }
 
         return date('H:i:s', $stamp);
+    }
+
+    public function normalize_indian_phone($phone = '')
+    {
+        $phone = trim((string) $phone);
+        if ($phone === '') {
+            return '';
+        }
+
+        $digits = preg_replace('/\D+/', '', $phone);
+        if ($digits === '') {
+            return '';
+        }
+
+        if (strlen($digits) === 12 && substr($digits, 0, 2) === '91') {
+            $candidate = substr($digits, 2);
+            if (preg_match('/^[6-9]\d{9}$/', $candidate)) {
+                return $candidate;
+            }
+        }
+
+        if (strlen($digits) === 11 && substr($digits, 0, 1) === '0') {
+            $candidate = substr($digits, 1);
+            if (preg_match('/^[6-9]\d{9}$/', $candidate)) {
+                return $candidate;
+            }
+        }
+
+        return $digits;
+    }
+
+    public function is_valid_indian_phone($phone = '')
+    {
+        $phone = $this->normalize_indian_phone($phone);
+        return (bool) preg_match('/^[6-9]\d{9}$/', $phone);
+    }
+
+    public function format_booking_datetime_label($date = '', $time = null, $fallback_end_of_day = false)
+    {
+        $stamp = $this->compose_booking_timestamp($date, $time, $fallback_end_of_day);
+        if ($stamp === false) {
+            return '';
+        }
+
+        return date('d M Y h:i A', $stamp);
     }
 
     public function purge_draft_booking($booking_id, $customer_id)
@@ -1456,7 +1539,10 @@ class General_model extends CI_Model
 
     private function get_live_vehicle_booking_map($reference_date = '')
     {
-        $reference_date = $reference_date !== '' ? $reference_date : date('Y-m-d');
+        $reference_date = trim((string) $reference_date);
+        $reference_stamp = $reference_date !== ''
+            ? strtotime($reference_date . ' ' . date('H:i:s'))
+            : time();
         $bookings = $this->get_bookings();
         $map = array();
 
@@ -1471,11 +1557,7 @@ class General_model extends CI_Model
                 continue;
             }
 
-            if (!app_booking_is_active_on_date(
-                isset($booking['pickup_date']) ? $booking['pickup_date'] : '',
-                isset($booking['return_date']) ? $booking['return_date'] : '',
-                $reference_date
-            )) {
+            if (!$this->booking_is_active_at_timestamp($booking, $reference_stamp)) {
                 continue;
             }
 
@@ -1545,6 +1627,57 @@ class General_model extends CI_Model
         }
 
         return $pickup_stamp !== false ? date('d M Y', $pickup_stamp) : date('d M Y', $return_stamp);
+    }
+
+    private function booking_ranges_overlap($first_pickup_date, $first_return_date, $first_pickup_time = null, $first_return_time = null, $second_pickup_date = '', $second_return_date = '', $second_pickup_time = null, $second_return_time = null)
+    {
+        $first_start = $this->compose_booking_timestamp($first_pickup_date, $first_pickup_time, false);
+        $first_end = $this->compose_booking_timestamp($first_return_date, $first_return_time, true);
+        $second_start = $this->compose_booking_timestamp($second_pickup_date, $second_pickup_time, false);
+        $second_end = $this->compose_booking_timestamp($second_return_date, $second_return_time, true);
+
+        if ($first_start === false || $first_end === false || $second_start === false || $second_end === false) {
+            return false;
+        }
+
+        return $first_start < $second_end && $first_end > $second_start;
+    }
+
+    private function booking_is_active_at_timestamp($booking, $reference_stamp)
+    {
+        $reference_stamp = (int) $reference_stamp;
+        if ($reference_stamp <= 0) {
+            return false;
+        }
+
+        $pickup_date = isset($booking['pickup_date']) ? $booking['pickup_date'] : '';
+        $return_date = isset($booking['return_date']) ? $booking['return_date'] : '';
+        $pickup_time = isset($booking['pickup_time']) ? $booking['pickup_time'] : null;
+        $return_time = isset($booking['return_time']) ? $booking['return_time'] : null;
+
+        $start_stamp = $this->compose_booking_timestamp($pickup_date, $pickup_time, false);
+        $end_stamp = $this->compose_booking_timestamp($return_date, $return_time, true);
+
+        if ($start_stamp === false || $end_stamp === false) {
+            return false;
+        }
+
+        return $start_stamp <= $reference_stamp && $end_stamp > $reference_stamp;
+    }
+
+    private function compose_booking_timestamp($date = '', $time = null, $fallback_end_of_day = false)
+    {
+        $date = trim((string) $date);
+        if ($date === '') {
+            return false;
+        }
+
+        $normalized_time = $this->normalize_time_value($time);
+        if ($normalized_time === null) {
+            $normalized_time = $fallback_end_of_day ? '23:59:59' : '00:00:00';
+        }
+
+        return strtotime($date . ' ' . $normalized_time);
     }
 
     private function resolve_payment_status($paid_amount, $advance_amount, $amount)

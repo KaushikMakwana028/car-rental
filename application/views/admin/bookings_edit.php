@@ -18,7 +18,7 @@
             </div>
             <div>
                 <label>Customer Phone</label>
-                <input type="text" name="customer_phone" value="<?php echo html_escape($booking['customer_phone']); ?>" placeholder="Enter customer phone" required>
+                <input type="text" name="customer_phone" value="<?php echo html_escape($booking['customer_phone']); ?>" placeholder="Enter customer phone" required maxlength="15" inputmode="numeric" data-indian-phone="1">
             </div>
             <div class="full">
                 <label>Customer Email</label>

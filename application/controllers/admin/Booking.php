@@ -28,7 +28,7 @@ class Booking extends Admin_Controller
         $hours_slot = (int) $this->input->post('hours_slot');
         $requires_advance = $this->input->post('requires_advance') ? 1 : 0;
         $customer_name = trim($this->input->post('customer_name', true));
-        $customer_phone = trim($this->input->post('customer_phone', true));
+        $customer_phone = $this->General_model->normalize_indian_phone($this->input->post('customer_phone', true));
         $customer_email = trim($this->input->post('customer_email', true));
         $aadhaar_number = trim($this->input->post('aadhaar_number', true));
         $driving_license_number = trim($this->input->post('driving_license_number', true));
@@ -39,6 +39,11 @@ class Booking extends Admin_Controller
 
         if ($customer_name === '' || $customer_phone === '') {
             $this->session->set_flashdata('error', 'Customer name and phone are required.');
+            redirect('admin/bookings/create');
+        }
+
+        if (!$this->General_model->is_valid_indian_phone($customer_phone)) {
+            $this->session->set_flashdata('error', 'Enter a valid 10-digit mobile number. You may start with +91.');
             redirect('admin/bookings/create');
         }
 
@@ -64,13 +69,22 @@ class Booking extends Admin_Controller
 
         $pickup_date = $this->input->post('pickup_date', true);
         $return_date = $this->input->post('return_date', true);
-        $conflict = $this->General_model->find_vehicle_booking_conflict($vehicle_id, $pickup_date, $return_date);
+        $conflict = $this->General_model->find_vehicle_booking_conflict($vehicle_id, $pickup_date, $return_date, 0, $pickup_time, $return_time);
 
         if (!empty($conflict)) {
+            $conflict_start = $this->General_model->format_booking_datetime_label(
+                $conflict['pickup_date'],
+                isset($conflict['pickup_time']) ? $conflict['pickup_time'] : null
+            );
+            $conflict_end = $this->General_model->format_booking_datetime_label(
+                $conflict['return_date'],
+                isset($conflict['return_time']) ? $conflict['return_time'] : null,
+                true
+            );
             $this->session->set_flashdata(
                 'error',
-                'This car is already booked from ' . date('d M Y', strtotime($conflict['pickup_date'])) .
-                ' to ' . date('d M Y', strtotime($conflict['return_date'])) . '. Please choose another date or another car.'
+                'This car is already booked from ' . $conflict_start .
+                ' to ' . $conflict_end . '. Please choose another date/time or another car.'
             );
             redirect('admin/bookings/create');
         }
@@ -258,7 +272,7 @@ class Booking extends Admin_Controller
         $hours_slot = (int) $this->input->post('hours_slot');
         $requires_advance = $this->input->post('requires_advance') ? 1 : 0;
         $customer_name = trim($this->input->post('customer_name', true));
-        $customer_phone = trim($this->input->post('customer_phone', true));
+        $customer_phone = $this->General_model->normalize_indian_phone($this->input->post('customer_phone', true));
         $customer_email = trim($this->input->post('customer_email', true));
         $aadhaar_number = trim($this->input->post('aadhaar_number', true));
         $driving_license_number = trim($this->input->post('driving_license_number', true));
@@ -269,6 +283,11 @@ class Booking extends Admin_Controller
 
         if ($customer_name === '' || $customer_phone === '') {
             $this->session->set_flashdata('error', 'Customer name and phone are required.');
+            redirect('admin/booking/edit/' . $booking_id);
+        }
+
+        if (!$this->General_model->is_valid_indian_phone($customer_phone)) {
+            $this->session->set_flashdata('error', 'Enter a valid 10-digit mobile number. You may start with +91.');
             redirect('admin/booking/edit/' . $booking_id);
         }
 
@@ -296,13 +315,22 @@ class Booking extends Admin_Controller
 
         $pickup_date = $this->input->post('pickup_date', true);
         $return_date = $this->input->post('return_date', true);
-        $conflict = $this->General_model->find_vehicle_booking_conflict($vehicle_id, $pickup_date, $return_date, $booking_id);
+        $conflict = $this->General_model->find_vehicle_booking_conflict($vehicle_id, $pickup_date, $return_date, $booking_id, $pickup_time, $return_time);
 
         if (!empty($conflict)) {
+            $conflict_start = $this->General_model->format_booking_datetime_label(
+                $conflict['pickup_date'],
+                isset($conflict['pickup_time']) ? $conflict['pickup_time'] : null
+            );
+            $conflict_end = $this->General_model->format_booking_datetime_label(
+                $conflict['return_date'],
+                isset($conflict['return_time']) ? $conflict['return_time'] : null,
+                true
+            );
             $this->session->set_flashdata(
                 'error',
-                'This car is already booked from ' . date('d M Y', strtotime($conflict['pickup_date'])) .
-                ' to ' . date('d M Y', strtotime($conflict['return_date'])) . '. Please choose another date or another car.'
+                'This car is already booked from ' . $conflict_start .
+                ' to ' . $conflict_end . '. Please choose another date/time or another car.'
             );
             redirect('admin/booking/edit/' . $booking_id);
         }
@@ -362,9 +390,9 @@ class Booking extends Admin_Controller
         $this->output->set_content_type('application/json');
 
         $phone = trim($this->input->get_post('phone', true));
-        $normalized_phone = preg_replace('/\D+/', '', $phone);
+        $normalized_phone = $this->General_model->normalize_indian_phone($phone);
 
-        if ($normalized_phone === '') {
+        if (!$this->General_model->is_valid_indian_phone($normalized_phone)) {
             $this->output->set_output(json_encode(['found' => false]));
             return;
         }
@@ -372,10 +400,7 @@ class Booking extends Admin_Controller
         $customer = $this->db
             ->from('users')
             ->where('role', 0)
-            ->group_start()
-                ->where('phone', $phone)
-                ->or_where('phone', $normalized_phone)
-            ->group_end()
+            ->where('phone', $normalized_phone)
             ->get()
             ->row_array();
 

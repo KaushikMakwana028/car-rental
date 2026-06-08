@@ -149,7 +149,7 @@
                 <div class="phone-input-wrapper">
                     <input type="text" name="customer_phone" id="adm_customer_phone"
                         placeholder="Enter customer phone" required
-                        autocomplete="off" maxlength="15" inputmode="numeric">
+                        autocomplete="off" maxlength="15" inputmode="numeric" data-indian-phone="1">
                     <div class="phone-spinner" id="adm_phone_spinner"></div>
                 </div>
                 <div class="helper" style="margin-top:5px;">
@@ -377,6 +377,25 @@
             return $('<span>').text(value || '').html();
         }
 
+        function normalizeLookupPhone(value) {
+            var raw = String(value || '').trim();
+            var digits = raw.replace(/\D/g, '');
+
+            if (digits.length === 12 && digits.slice(0, 2) === '91' && /^[6-9]\d{9}$/.test(digits.slice(2))) {
+                return digits.slice(2);
+            }
+
+            if (digits.length === 11 && digits.charAt(0) === '0' && /^[6-9]\d{9}$/.test(digits.slice(1))) {
+                return digits.slice(1);
+            }
+
+            if (digits.length === 10 && /^[6-9]\d{9}$/.test(digits)) {
+                return digits;
+            }
+
+            return digits;
+        }
+
         function renderDocumentsBanner(customerId, documents) {
             var reviewUrl = '<?php echo base_url("admin/documents"); ?>';
             if (customerId) {
@@ -546,19 +565,20 @@
 
         $phoneInput.on('input', function() {
             var rawPhone = $.trim($(this).val()).replace(/\s+/g, '');
+            var normalizedPhone = normalizeLookupPhone(rawPhone);
             hideBanners();
             clearTimeout(lookupTimer);
 
             // Only lookup when we have enough digits (≥ 7)
-            if (rawPhone.replace(/\D/g, '').length < 7) {
+            if (!/^[6-9]\d{9}$/.test(normalizedPhone)) {
                 $spinner.hide();
-                lastPhone = ''; // reset so same number triggers again after clearing
+                lastPhone = '';
                 return;
             }
 
             // Debounce 600ms
             lookupTimer = setTimeout(function() {
-                doLookup(rawPhone);
+                doLookup(normalizedPhone);
             }, 600);
         });
 

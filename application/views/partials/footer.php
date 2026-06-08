@@ -239,6 +239,76 @@ $flash_error     = $this->session->flashdata('error');
     }
 </style>
 
+<script>
+    (function() {
+        function normalizeIndianPhone(rawValue) {
+            var value = String(rawValue || '').trim();
+            if (!value) {
+                return '';
+            }
+
+            var keepPlus = value.charAt(0) === '+';
+            var digits = value.replace(/\D/g, '');
+            if (!digits) {
+                return '';
+            }
+
+            if (digits.length === 12 && digits.slice(0, 2) === '91' && /^[6-9]\d{9}$/.test(digits.slice(2))) {
+                return digits.slice(2);
+            }
+
+            if (digits.length === 11 && digits.charAt(0) === '0' && /^[6-9]\d{9}$/.test(digits.slice(1))) {
+                return digits.slice(1);
+            }
+
+            if (digits.length === 10 && /^[6-9]\d{9}$/.test(digits)) {
+                return digits;
+            }
+
+            return keepPlus ? '+' + digits : digits;
+        }
+
+        function attachIndianPhoneInputs() {
+            document.querySelectorAll('input[data-indian-phone="1"]').forEach(function(input) {
+                if (input.dataset.indianPhoneBound === '1') {
+                    return;
+                }
+
+                input.dataset.indianPhoneBound = '1';
+
+                input.addEventListener('input', function() {
+                    var raw = String(input.value || '');
+                    var keepPlus = raw.charAt(0) === '+';
+                    var digits = raw.replace(/\D/g, '');
+                    input.value = keepPlus ? '+' + digits : digits;
+                    input.setCustomValidity('');
+                });
+
+                input.addEventListener('blur', function() {
+                    input.value = normalizeIndianPhone(input.value);
+                });
+
+                if (input.form && input.form.dataset.indianPhoneBound !== '1') {
+                    input.form.dataset.indianPhoneBound = '1';
+                    input.form.addEventListener('submit', function() {
+                        var phoneInputs = input.form.querySelectorAll('input[data-indian-phone="1"]');
+                        phoneInputs.forEach(function(phoneInput) {
+                            phoneInput.value = normalizeIndianPhone(phoneInput.value);
+                            if (!/^[6-9]\d{9}$/.test(phoneInput.value)) {
+                                phoneInput.setCustomValidity('Enter a valid 10-digit mobile number. You may start with +91.');
+                            } else {
+                                phoneInput.setCustomValidity('');
+                            }
+                        });
+                    });
+                }
+            });
+        }
+
+        attachIndianPhoneInputs();
+    })();
+</script>
+
 <!-- ═══════════════════════════════════════════════════════════ SCRIPTS -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
