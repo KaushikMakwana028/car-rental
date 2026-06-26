@@ -159,6 +159,7 @@ class Booking extends MY_Controller
         }
 
         $this->set_public_booking_session($customer_id, $booking_id);
+
         redirect('documents?booking_id=' . $booking_id . '&customer_id=' . $customer_id);
     }
 

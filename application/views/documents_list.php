@@ -82,6 +82,51 @@ $booking_back_url .= (strpos($booking_back_url, '?') === false ? '?' : '&') . 'b
     .booking-actions .btn-secondary {
         min-width: 156px;
     }
+
+    /* Premium File Input Styling */
+    input[type="file"] {
+        border: 1.5px dashed var(--border-md);
+        padding: 8px 12px;
+        border-radius: var(--r-md);
+        background: #fdfcf7;
+        cursor: pointer;
+        min-height: unset;
+        font-size: 13px;
+        color: var(--ink-2);
+        width: 100%;
+        display: block;
+        box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
+    }
+
+    input[type="file"]::file-selector-button {
+        background: var(--accent);
+        border: none;
+        color: #fff;
+        padding: 6px 14px;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 12px;
+        cursor: pointer;
+        margin-right: 12px;
+        transition: background 0.15s ease;
+    }
+
+    input[type="file"]::file-selector-button:hover {
+        background: var(--accent-dark);
+    }
+
+    @media (max-width: 600px) {
+        .booking-actions {
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+        }
+        .booking-actions .btn,
+        .booking-actions .btn-secondary {
+            width: 100%;
+            min-width: unset;
+        }
+    }
 </style>
 
 <section class="section-card step-shell">
@@ -90,7 +135,6 @@ $booking_back_url .= (strpos($booking_back_url, '?') === false ? '?' : '&') . 'b
         $steps = array(
             1 => 'Booking',
             2 => 'Document',
-            3 => 'Payment',
         );
         foreach ($steps as $step_no => $step_label):
             $is_active = $current_step === $step_no;
@@ -104,7 +148,7 @@ $booking_back_url .= (strpos($booking_back_url, '?') === false ? '?' : '&') . 'b
                     <?php echo html_escape($step_label); ?>
                 </div>
             </div>
-            <?php if ($step_no < 3): ?>
+            <?php if ($step_no < count($steps)): ?>
                 <div class="step-line <?php echo $current_step > $step_no ? 'done' : ''; ?>"></div>
             <?php endif; ?>
         <?php endforeach; ?>
@@ -180,13 +224,9 @@ $booking_back_url .= (strpos($booking_back_url, '?') === false ? '?' : '&') . 'b
                 $all_uploaded = !empty($document_map['Aadhaar Card']['file_path']) && !empty($document_map['Driving License']['file_path']);
                 ?>
                 <?php if ($all_uploaded): ?>
-                    <?php if (!empty($booking['requires_advance'])): ?>
-                        <a class="btn" href="<?php echo base_url('payments/pay/' . (int)$booking['id'] . '?customer_id=' . (int)$booking['customer_id']); ?>">Continue to Payment</a>
-                    <?php else: ?>
-                        <a class="btn" href="<?php echo base_url('documents/complete/' . (int)$booking['id'] . '?customer_id=' . (int)$booking['customer_id']); ?>">Complete Booking</a>
-                    <?php endif; ?>
+                    <a class="btn" href="<?php echo base_url('documents/complete/' . (int)$booking['id'] . '?customer_id=' . (int)$booking['customer_id']); ?>">Complete Booking</a>
                 <?php else: ?>
-                    <button class="btn" type="submit"><?php echo !empty($booking['requires_advance']) ? 'Upload Documents and Continue' : 'Upload Documents and Complete'; ?></button>
+                    <button class="btn" type="submit">Upload Documents and Complete</button>
                 <?php endif; ?>
                 <a class="btn-secondary js-swal-confirm" href="<?php echo $cancel_url; ?>" data-swal-title="Cancel booking?" data-swal-text="This incomplete booking draft will be removed." data-swal-confirm="Yes, cancel">Cancel</a>
             </div>
@@ -198,7 +238,7 @@ $booking_back_url .= (strpos($booking_back_url, '?') === false ? '?' : '&') . 'b
         <div class="card-head">
             <div>
                 <h3>Current booking summary.</h3>
-                <p><?php echo !empty($booking['requires_advance']) ? 'Upload both documents, then move to advance payment.' : 'Upload both documents to complete the booking request.'; ?></p>
+                <p>Upload both documents to complete the booking request.</p>
             </div>
         </div>
         <div class="info-grid" style="grid-template-columns:1fr;">
@@ -213,10 +253,6 @@ $booking_back_url .= (strpos($booking_back_url, '?') === false ? '?' : '&') . 'b
             <div class="feature-card">
                 <strong>Route</strong>
                 <span><?php echo html_escape($booking['trip_route']); ?></span>
-            </div>
-            <div class="feature-card">
-                <strong>Advance</strong>
-                <span><?php echo !empty($booking['requires_advance']) ? ('&#8377;' . number_format((float) $booking['advance_due'], 2)) : 'Optional / Not selected'; ?></span>
             </div>
         </div>
     </aside>

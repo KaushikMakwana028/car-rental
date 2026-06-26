@@ -182,6 +182,12 @@
                 <input type="text" name="driving_license_number" id="adm_driving_license_number"
                     placeholder="Enter license number">
             </div>
+            <div>
+                <label>Driver Mobile Number</label>
+                <input type="text" name="driver_number" id="adm_driver_number"
+                    placeholder="Enter driver phone number" maxlength="15" inputmode="numeric">
+                <div class="helper">Optional — driver's contact number for this trip.</div>
+            </div>
             <div class="full">
                 <label style="display:flex;align-items:center;gap:10px;text-transform:none;letter-spacing:0;font-size:14px;">
                     <input type="checkbox" name="documents_verified" id="adm_documents_verified" value="1" style="width:auto;min-height:auto;">
@@ -303,6 +309,10 @@
                     <div><label>Toll Expense</label><input type="number" step="0.01" min="0" name="toll_expense" id="adm_toll_expense" placeholder="0.00"></div>
                     <div><label>Driver Expense</label><input type="number" step="0.01" min="0" name="driver_expense" id="adm_driver_expense" placeholder="0.00"></div>
                     <div><label>Parking Expense</label><input type="number" step="0.01" min="0" name="parking_expense" id="adm_parking_expense" placeholder="0.00"></div>
+                    <div><label>Accident Expense</label><input type="number" step="0.01" min="0" name="accident_expense" id="adm_accident_expense" placeholder="0.00"></div>
+                    <div class="full"><label>Other Expenses</label><input type="number" step="0.01" min="0" name="other_expenses" id="adm_other_expenses" placeholder="0.00">
+                        <div class="helper">Any additional miscellaneous expense not listed above.</div>
+                    </div>
                 </div>
                 <div class="helper" style="margin-top: 10px;">These expenses will be deducted from the booking amount.</div>
             </div>
@@ -418,8 +428,8 @@
                     var meta = doc.file_name ? escapeHtml(doc.file_name) : 'number only';
                     var kind = doc.file_kind ? ' (' + escapeHtml(String(doc.file_kind).toUpperCase()) + ')' : '';
 
-                    html += '<span style="display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;background:' + badgeBackground + ';color:' + badgeColor + ';font-size:12px;font-weight:600;">'
-                        + escapeHtml(doc.type) + ': ' + meta + kind +
+                    html += '<span style="display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;background:' + badgeBackground + ';color:' + badgeColor + ';font-size:12px;font-weight:600;">' +
+                        escapeHtml(doc.type) + ': ' + meta + kind +
                         '</span>';
                 });
                 html += '</div>';
@@ -620,7 +630,7 @@
         // ═══════════════════════════════════════════════════════════
         //  EXPENSE LISTENERS
         // ═══════════════════════════════════════════════════════════
-        ['adm_fuel_expense', 'adm_toll_expense', 'adm_driver_expense', 'adm_parking_expense'].forEach(function(id) {
+        ['adm_fuel_expense', 'adm_toll_expense', 'adm_driver_expense', 'adm_parking_expense', 'adm_accident_expense', 'adm_other_expenses'].forEach(function(id) {
             var el = document.getElementById(id);
             if (el) el.addEventListener('input', admUpdateExpenses);
         });
@@ -731,7 +741,9 @@
             var toll = parseFloat(document.getElementById('adm_toll_expense').value || '0');
             var driver = parseFloat(document.getElementById('adm_driver_expense').value || '0');
             var parking = parseFloat(document.getElementById('adm_parking_expense').value || '0');
-            var total = fuel + toll + driver + parking;
+            var accident = parseFloat(document.getElementById('adm_accident_expense') ? document.getElementById('adm_accident_expense').value || '0' : '0');
+            var other = parseFloat(document.getElementById('adm_other_expenses') ? document.getElementById('adm_other_expenses').value || '0' : '0');
+            var total = fuel + toll + driver + parking + accident + other;
             var base = parseFloat(document.getElementById('admin_expected_amount').value || '0');
             var net = Math.max(0, base - total);
             document.getElementById('adm_expense_summary').style.display = total > 0 ? '' : 'none';

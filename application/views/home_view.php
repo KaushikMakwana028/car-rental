@@ -937,7 +937,7 @@
                         </select>
                     </div>
                     <div class="vc-filter-group">
-                        <label for="filterAdvance">Max Advance (₹)</label>
+                        <label for="filterAdvance">Max Price (₹)</label>
                         <select id="filterAdvance">
                             <option value="">Any Amount</option>
                             <option value="1000">Up to ₹1,000</option>
@@ -1030,9 +1030,7 @@
                                     <div class="vc-card-reg" style="margin-top:4px;margin-bottom:0;">
                                         KM: &#8377;<?php echo number_format($km_price, 0); ?>/km
                                     </div>
-                                    <div class="vc-advance-tag">
-                                        &#8377;<?php echo number_format((float)$vehicle['advance_amount'], 0); ?> advance
-                                    </div>
+
                                 </div>
 
                                 <a class="vc-book-btn" href="<?php echo base_url('bookings/create?vehicle_id=' . (int)$vehicle['id']); ?>">

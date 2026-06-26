@@ -150,13 +150,8 @@ class Document extends MY_Controller
             redirect('dashboard');
         }
 
-        if (empty($booking['requires_advance'])) {
-            $this->complete_booking_without_advance($booking);
-            return;
-        }
-
-        $this->session->set_flashdata('success', 'Documents uploaded successfully. Please complete payment now.');
-        redirect('payments/pay/' . $booking_id . '?customer_id=' . $customer_id);
+        $this->complete_booking_without_advance($booking);
+        return;
     }
 
     public function complete($booking_id = 0)
@@ -175,10 +170,6 @@ class Document extends MY_Controller
         if (!$this->can_continue_to_payment($customer_id)) {
             $this->session->set_flashdata('error', 'Upload both required documents before completing the booking.');
             redirect('documents?booking_id=' . (int) $booking_id . '&customer_id=' . $customer_id);
-        }
-
-        if (!empty($booking['requires_advance'])) {
-            redirect('payments/pay/' . (int) $booking_id . '?customer_id=' . $customer_id);
         }
 
         $this->complete_booking_without_advance($booking);

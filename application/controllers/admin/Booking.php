@@ -84,7 +84,7 @@ class Booking extends Admin_Controller
             $this->session->set_flashdata(
                 'error',
                 'This car is already booked from ' . $conflict_start .
-                ' to ' . $conflict_end . '. Please choose another date/time or another car.'
+                    ' to ' . $conflict_end . '. Please choose another date/time or another car.'
             );
             redirect('admin/bookings/create');
         }
@@ -100,9 +100,12 @@ class Booking extends Admin_Controller
         $toll_expense = (float) $this->input->post('toll_expense') ?: 0.00;
         $driver_expense = (float) $this->input->post('driver_expense') ?: 0.00;
         $parking_expense = (float) $this->input->post('parking_expense') ?: 0.00;
+        $accident_expense = (float) $this->input->post('accident_expense') ?: 0.00;
+        $other_expenses  = (float) $this->input->post('other_expenses')  ?: 0.00;
+        $driver_number   = trim($this->input->post('driver_number', true));
 
         // Calculate total expenses
-        $total_expenses = $fuel_expense + $toll_expense + $driver_expense + $parking_expense;
+        $total_expenses = $fuel_expense + $toll_expense + $driver_expense + $parking_expense + $accident_expense + $other_expenses;
 
         // Calculate net amount (amount - expenses)
         $net_amount = max(0, $final_amount - $total_expenses);
@@ -127,9 +130,11 @@ class Booking extends Admin_Controller
             'toll_expense' => $toll_expense,
             'driver_expense' => $driver_expense,
             'parking_expense' => $parking_expense,
+            'accident_expense' => $accident_expense,
             'total_expenses' => $total_expenses,
             'net_amount' => $net_amount,
-            'other_expenses' => (float) $this->input->post('other_expenses') ?: 0.00,
+            'other_expenses' => $other_expenses,
+            'driver_number'  => $driver_number !== '' ? $driver_number : null,
             'status' => $this->input->post('status', true) ?: 'pending',
         );
         $booking_id = (int) $this->General_model->create_booking($payload);
@@ -330,7 +335,7 @@ class Booking extends Admin_Controller
             $this->session->set_flashdata(
                 'error',
                 'This car is already booked from ' . $conflict_start .
-                ' to ' . $conflict_end . '. Please choose another date/time or another car.'
+                    ' to ' . $conflict_end . '. Please choose another date/time or another car.'
             );
             redirect('admin/booking/edit/' . $booking_id);
         }
@@ -346,9 +351,10 @@ class Booking extends Admin_Controller
         $toll_expense = (float) $this->input->post('toll_expense') ?: 0.00;
         $driver_expense = (float) $this->input->post('driver_expense') ?: 0.00;
         $parking_expense = (float) $this->input->post('parking_expense') ?: 0.00;
+        $accident_expense = (float) $this->input->post('accident_expense') ?: 0.00;
 
         // Calculate total expenses
-        $total_expenses = $fuel_expense + $toll_expense + $driver_expense + $parking_expense;
+        $total_expenses = $fuel_expense + $toll_expense + $driver_expense + $parking_expense + $accident_expense;
 
         // Calculate net amount (amount - expenses)
         $net_amount = max(0, $final_amount - $total_expenses);
@@ -373,6 +379,7 @@ class Booking extends Admin_Controller
             'toll_expense' => $toll_expense,
             'driver_expense' => $driver_expense,
             'parking_expense' => $parking_expense,
+            'accident_expense' => $accident_expense,
             'total_expenses' => $total_expenses,
             'net_amount' => $net_amount,
             'other_expenses' => (float) $this->input->post('other_expenses') ?: 0.00,

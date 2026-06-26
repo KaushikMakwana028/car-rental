@@ -1361,6 +1361,14 @@ class General_model extends CI_Model
         if (!$this->db->field_exists('requires_advance', 'bookings')) {
             $this->db->query("ALTER TABLE `bookings` ADD COLUMN `requires_advance` TINYINT(1) NOT NULL DEFAULT 1 AFTER `hours_slot`");
         }
+
+        if (!$this->db->field_exists('driver_number', 'bookings')) {
+            $this->db->query("ALTER TABLE `bookings` ADD COLUMN `driver_number` VARCHAR(20) NULL DEFAULT NULL AFTER `drop_location`");
+        }
+
+        if (!$this->db->field_exists('other_expenses', 'bookings')) {
+            $this->db->query("ALTER TABLE `bookings` ADD COLUMN `other_expenses` DECIMAL(10,2) NOT NULL DEFAULT 0 AFTER `parking_expense`");
+        }
     }
 
     private function ensure_booking_status_values()
@@ -1817,6 +1825,64 @@ class General_model extends CI_Model
             'received_amount' => $received_amount,
             'pending_amount' => $pending_amount,
             'total_bookings' => $total_bookings
+        );
+    }
+
+    public function get_vehicle_expenses($vehicle_id, $year = null, $month = null)
+    {
+        $vehicle_id = (int) $vehicle_id;
+        if ($vehicle_id <= 0 || !$this->db->table_exists('vehicle_expenses')) {
+            return array();
+        }
+
+        $this->db->where('vehicle_id', $vehicle_id);
+        if ($year !== null) {
+            $this->db->where('YEAR(expense_date)', (int) $year);
+        }
+        if ($month !== null) {
+            $this->db->where('MONTH(expense_date)', (int) $month);
+        }
+
+        return $this->db->order_by('expense_date', 'DESC')->order_by('id', 'DESC')->get('vehicle_expenses')->result_array();
+    }
+
+    public function add_vehicle_expense($vehicle_id, $expense_name, $amount, $expense_date = '', $notes = '')
+    {
+        if (!$this->db->table_exists('vehicle_expenses')) {
+            return 0;
+        }
+
+        $now = date('Y-m-d H:i:s');
+        return (int) $this->insert('vehicle_expenses', array(
+            'vehicle_id'   => (int) $vehicle_id,
+            'expense_name' => trim($expense_name),
+            'amount'       => (float) $amount,
+            'expense_date' => $expense_date !== '' ? $expense_date : date('Y-m-d'),
+            'notes'        => trim($notes),
+            'created_at'   => $now,
+            'updated_at'   => $now,
+        ));
+    }
+
+    public function delete_vehicle_expense($expense_id, $vehicle_id)
+    {
+        if (!$this->db->table_exists('vehicle_expenses')) {
+            return false;
+        }
+        return $this->delete('vehicle_expenses', array('id' => (int) $expense_id, 'vehicle_id' => (int) $vehicle_id));
+    }
+
+    public function get_vehicle_expense_summary($vehicle_id, $year = null, $month = null)
+    {
+        $expenses = $this->get_vehicle_expenses($vehicle_id, $year, $month);
+        $total = 0;
+        foreach ($expenses as $expense) {
+            $total += (float) $expense['amount'];
+        }
+        return array(
+            'expenses'    => $expenses,
+            'total'       => $total,
+            'count'       => count($expenses),
         );
     }
 }

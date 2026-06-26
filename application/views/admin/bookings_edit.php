@@ -71,19 +71,17 @@
                 </select>
             </div>
 
-           <div id="adm_km_wrap" style="display:none;">
-    <label>Estimated KM</label>
+            <div id="adm_km_wrap" style="display:none;">
+                <label>Estimated KM</label>
 
-    <input 
-        type="number"
-        min="1"
-        name="estimated_km"
-        id="adm_estimated_km"
-        value="<?php echo max(1, (int)($booking['estimated_km'] ?? 1)); ?>"
-        placeholder="Enter expected distance"
-        
-    >
-</div>
+                <input
+                    type="number"
+                    min="1"
+                    name="estimated_km"
+                    id="adm_estimated_km"
+                    value="<?php echo max(1, (int)($booking['estimated_km'] ?? 1)); ?>"
+                    placeholder="Enter expected distance">
+            </div>
             <!-- Hour pricing preview -->
             <div class="full" id="adm_hour_preview" style="display:none;">
                 <label>Hour Package Rates</label>
@@ -114,14 +112,14 @@
 
             <div><label>Pickup Date</label><input type="date" name="pickup_date" id="pickup_date" value="<?php echo html_escape($booking['pickup_date']); ?>" required></div>
             <div><label>Return Date</label><input type="date" name="return_date" id="return_date" value="<?php echo html_escape($booking['return_date']); ?>" required></div>
-            
+
             <!-- Pickup Time with Timepicker -->
             <div id="adm_pickup_time_wrap">
                 <label>Pickup Time</label>
                 <input type="text" name="pickup_time" id="adm_pickup_time" value="<?php echo html_escape($booking['pickup_time'] ?? ''); ?>" placeholder="Select time" required readonly>
                 <div class="helper">Click to select time from picker.</div>
             </div>
-            
+
             <!-- Return Time with Timepicker -->
             <div id="adm_return_time_wrap">
                 <label>Return Time</label>
@@ -142,7 +140,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div><label>Pickup Location</label><input type="text" name="pickup_location" value="<?php echo html_escape($booking['pickup_location']); ?>" required></div>
             <div><label>Drop Location</label><input type="text" name="drop_location" value="<?php echo html_escape($booking['drop_location']); ?>" required></div>
 
@@ -157,85 +155,90 @@
                 </select>
             </div>
 
-          <div id="adm_amount_wrap">
-    <label>Expected Amount (Base Fare)</label>
-    <input type="number" step="0.01" name="amount" id="admin_expected_amount" value="<?php echo (float)$booking['amount']; ?>" required>
-    <div class="helper">Auto-calculated. You can modify if needed for custom pricing.</div>
-</div>
+            <div id="adm_amount_wrap">
+                <label>Expected Amount (Base Fare)</label>
+                <input type="number" step="0.01" name="amount" id="admin_expected_amount" value="<?php echo (float)$booking['amount']; ?>" required>
+                <div class="helper">Auto-calculated. You can modify if needed for custom pricing.</div>
+            </div>
 
-<!-- Expenses Section -->
-<div class="full" style="border-top: 1.5px solid var(--border); padding-top: 16px; margin-top: 8px;">
-    <label style="font-weight: 700; display: block; margin-bottom: 12px;">Expenses Breakdown</label>
-    
-    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
-        <div>
-            <label>Fuel Expense</label>
-            <input type="number" step="0.01" min="0" name="fuel_expense" id="adm_fuel_expense" value="<?php echo isset($booking['fuel_expense']) ? (float)$booking['fuel_expense'] : ''; ?>" placeholder="0.00">
-        </div>
-        <div>
-            <label>Toll Expense</label>
-            <input type="number" step="0.01" min="0" name="toll_expense" id="adm_toll_expense" value="<?php echo isset($booking['toll_expense']) ? (float)$booking['toll_expense'] : ''; ?>" placeholder="0.00">
-        </div>
-        <div>
-            <label>Driver Expense</label>
-            <input type="number" step="0.01" min="0" name="driver_expense" id="adm_driver_expense" value="<?php echo isset($booking['driver_expense']) ? (float)$booking['driver_expense'] : ''; ?>" placeholder="0.00">
-        </div>
-        <div>
-            <label>Parking Expense</label>
-            <input type="number" step="0.01" min="0" name="parking_expense" id="adm_parking_expense" value="<?php echo isset($booking['parking_expense']) ? (float)$booking['parking_expense'] : ''; ?>" placeholder="0.00">
-        </div>
-    </div>
-    
-    <div class="helper" style="margin-top: 10px;">These expenses will be deducted from the booking amount.</div>
-</div>
+            <!-- Expenses Section -->
+            <div class="full" style="border-top: 1.5px solid var(--border); padding-top: 16px; margin-top: 8px;">
+                <label style="font-weight: 700; display: block; margin-bottom: 12px;">Expenses Breakdown</label>
 
-<!-- Total Expenses Display -->
-<div id="adm_expense_summary" style="
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                    <div>
+                        <label>Fuel Expense</label>
+                        <input type="number" step="0.01" min="0" name="fuel_expense" id="adm_fuel_expense" value="<?php echo isset($booking['fuel_expense']) ? (float)$booking['fuel_expense'] : ''; ?>" placeholder="0.00">
+                    </div>
+                    <div>
+                        <label>Toll Expense</label>
+                        <input type="number" step="0.01" min="0" name="toll_expense" id="adm_toll_expense" value="<?php echo isset($booking['toll_expense']) ? (float)$booking['toll_expense'] : ''; ?>" placeholder="0.00">
+                    </div>
+                    <div>
+                        <label>Driver Expense</label>
+                        <input type="number" step="0.01" min="0" name="driver_expense" id="adm_driver_expense" value="<?php echo isset($booking['driver_expense']) ? (float)$booking['driver_expense'] : ''; ?>" placeholder="0.00">
+                    </div>
+                    <div>
+                        <label>Parking Expense</label>
+                        <input type="number" step="0.01" min="0" name="parking_expense" id="adm_parking_expense" value="<?php echo isset($booking['parking_expense']) ? (float)$booking['parking_expense'] : ''; ?>" placeholder="0.00">
+                    </div>
+                    <div>
+                        <label>Accident Expense</label>
+                        <input type="number" step="0.01" min="0" name="accident_expense" id="adm_accident_expense" value="<?php echo isset($booking['accident_expense']) ? (float)$booking['accident_expense'] : ''; ?>" placeholder="0.00">
+                    </div>
+                </div>
+            </div>
+
+            <div class="helper" style="margin-top: 10px;">These expenses will be deducted from the booking amount.</div>
+        </div>
+
+        <!-- Total Expenses Display -->
+        <div id="adm_expense_summary" style="
     background: #fff8e1;
     border: 1.5px solid #f1c14f;
     border-radius: 10px;
     padding: 12px 16px;
     margin-top: 12px;
 ">
-    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: #7a5c00;">
-        💰 Expense Summary
-    </div>
-    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 10px;">
-        <div>
-            <div style="font-size: 10px; color: #73849A; margin-bottom: 4px;">Total Expenses</div>
-            <div style="font-size: 16px; font-weight: 700; color: #17355C;" id="adm_total_expenses_display">₹0</div>
-        </div>
-        <div>
-            <div style="font-size: 10px; color: #73849A; margin-bottom: 4px;">Net Amount (After Expenses)</div>
-            <div style="font-size: 16px; font-weight: 700; color: #0F6E56;" id="adm_net_amount_display">₹0</div>
-        </div>
-    </div>
-</div>
-            <div>
-                <label>Required Advance</label>
-                <label style="display:flex;align-items:center;gap:10px;text-transform:none;letter-spacing:0;font-size:14px;margin-bottom:8px;">
-                    <input type="checkbox" name="requires_advance" id="adm_requires_advance" value="1" <?php echo $booking['requires_advance'] ? 'checked' : ''; ?> style="width:auto;min-height:auto;">
-                    Mark this booking with advance payment
-                </label>
-                <input type="text" id="admin_advance_amount" readonly>
-                <div class="helper" id="adm_advance_helper">Advance amount for the selected vehicle.</div>
+            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: #7a5c00;">
+                💰 Expense Summary
             </div>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 10px;">
+                <div>
+                    <div style="font-size: 10px; color: #73849A; margin-bottom: 4px;">Total Expenses</div>
+                    <div style="font-size: 16px; font-weight: 700; color: #17355C;" id="adm_total_expenses_display">₹0</div>
+                </div>
+                <div>
+                    <div style="font-size: 10px; color: #73849A; margin-bottom: 4px;">Net Amount (After Expenses)</div>
+                    <div style="font-size: 16px; font-weight: 700; color: #0F6E56;" id="adm_net_amount_display">₹0</div>
+                </div>
+            </div>
+        </div>
+        <div>
+            <label>Required Advance</label>
+            <label style="display:flex;align-items:center;gap:10px;text-transform:none;letter-spacing:0;font-size:14px;margin-bottom:8px;">
+                <input type="checkbox" name="requires_advance" id="adm_requires_advance" value="1" <?php echo $booking['requires_advance'] ? 'checked' : ''; ?> style="width:auto;min-height:auto;">
+                Mark this booking with advance payment
+            </label>
+            <input type="text" id="admin_advance_amount" readonly>
+            <div class="helper" id="adm_advance_helper">Advance amount for the selected vehicle.</div>
+        </div>
 
-            <div class="full">
-                <label>Status</label>
-                <select name="status">
-                    <option value="pending" <?php echo $booking['status'] === 'pending' ? 'selected' : ''; ?>>Pending</option>
-                    <option value="confirmed" <?php echo $booking['status'] === 'confirmed' ? 'selected' : ''; ?>>Confirmed</option>
-                    <option value="completed" <?php echo $booking['status'] === 'completed' ? 'selected' : ''; ?>>Completed</option>
-                </select>
-                <div class="helper">Choose the current lifecycle stage for this reservation.</div>
-            </div>
+        <div class="full">
+            <label>Status</label>
+            <select name="status">
+                <option value="pending" <?php echo $booking['status'] === 'pending' ? 'selected' : ''; ?>>Pending</option>
+                <option value="confirmed" <?php echo $booking['status'] === 'confirmed' ? 'selected' : ''; ?>>Confirmed</option>
+                <option value="completed" <?php echo $booking['status'] === 'completed' ? 'selected' : ''; ?>>Completed</option>
+            </select>
+            <div class="helper">Choose the current lifecycle stage for this reservation.</div>
         </div>
-        <p style="margin-top:18px;">
-            <button class="btn" type="submit">Update Booking</button>
-            <a href="<?php echo base_url('admin/bookings'); ?>" class="btn" style="background:#6B7280;margin-left:10px;">Cancel</a>
-        </p>
-    </form>
+</div>
+<p style="margin-top:18px;">
+    <button class="btn" type="submit">Update Booking</button>
+    <a href="<?php echo base_url('admin/bookings'); ?>" class="btn" style="background:#6B7280;margin-left:10px;">Cancel</a>
+</p>
+</form>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -252,7 +255,7 @@
 
         // Store the initial custom amount from database
         var savedCustomAmount = parseFloat($('#admin_expected_amount').val() || '0');
-        var isInitialLoad = true;  // Flag to prevent overwriting on first load
+        var isInitialLoad = true; // Flag to prevent overwriting on first load
 
         // Initialize Flatpickr for time inputs
         var pickupTimePicker = flatpickr("#adm_pickup_time", {
@@ -263,7 +266,7 @@
             minuteIncrement: 15,
             onChange: function(selectedDates, dateStr, instance) {
                 admUpdateHoursDuration();
-                isInitialLoad = false;  // User changed time, allow recalculation
+                isInitialLoad = false; // User changed time, allow recalculation
                 admUpdateAmount();
             }
         });
@@ -276,7 +279,7 @@
             minuteIncrement: 15,
             onChange: function(selectedDates, dateStr, instance) {
                 admUpdateHoursDuration();
-                isInitialLoad = false;  // User changed time, allow recalculation
+                isInitialLoad = false; // User changed time, allow recalculation
                 admUpdateAmount();
             }
         });
@@ -301,41 +304,44 @@
                 maximumFractionDigits: 0
             });
         }
-function admUpdateExpenses() {
-    var fuelExpense = parseFloat(document.getElementById('adm_fuel_expense').value || '0');
-    var tollExpense = parseFloat(document.getElementById('adm_toll_expense').value || '0');
-    var driverExpense = parseFloat(document.getElementById('adm_driver_expense').value || '0');
-    var parkingExpense = parseFloat(document.getElementById('adm_parking_expense').value || '0');
-    
-    // Calculate total expenses
-    var totalExpenses = fuelExpense + tollExpense + driverExpense + parkingExpense;
-    
-    // Get base amount
-    var baseAmount = parseFloat(document.getElementById('admin_expected_amount').value || '0');
-    
-    // Calculate net amount (base - expenses)
-    var netAmount = Math.max(0, baseAmount - totalExpenses);
-    
-    // Update display
-    var summaryBox = document.getElementById('adm_expense_summary');
-    if (totalExpenses > 0) {
-        summaryBox.style.display = '';
-    } else {
-        summaryBox.style.display = 'none';
-    }
-    
-    document.getElementById('adm_total_expenses_display').textContent = 
-        '₹' + totalExpenses.toLocaleString('en-IN', {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0
-        });
-    
-    document.getElementById('adm_net_amount_display').textContent = 
-        '₹' + netAmount.toLocaleString('en-IN', {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0
-        });
-}
+
+        function admUpdateExpenses() {
+            var fuelExpense = parseFloat(document.getElementById('adm_fuel_expense').value || '0');
+            var tollExpense = parseFloat(document.getElementById('adm_toll_expense').value || '0');
+            var driverExpense = parseFloat(document.getElementById('adm_driver_expense').value || '0');
+            var parkingExpense = parseFloat(document.getElementById('adm_parking_expense').value || '0');
+            var accidentExpense = parseFloat(document.getElementById('adm_accident_expense') ? document.getElementById('adm_accident_expense').value || '0' : '0');
+
+            // Calculate total expenses
+            var totalExpenses = fuelExpense + tollExpense + driverExpense + parkingExpense + accidentExpense;
+
+            // Get base amount
+            var baseAmount = parseFloat(document.getElementById('admin_expected_amount').value || '0');
+
+            // Calculate net amount (base - expenses)
+            var netAmount = Math.max(0, baseAmount - totalExpenses);
+
+            // Update display
+            var summaryBox = document.getElementById('adm_expense_summary');
+            if (totalExpenses > 0) {
+                summaryBox.style.display = '';
+            } else {
+                summaryBox.style.display = 'none';
+            }
+
+            document.getElementById('adm_total_expenses_display').textContent =
+                '₹' + totalExpenses.toLocaleString('en-IN', {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                });
+
+            document.getElementById('adm_net_amount_display').textContent =
+                '₹' + netAmount.toLocaleString('en-IN', {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                });
+        }
+
         function admIsKmBooking() {
             return document.getElementById('adm_booking_type').value === 'km';
         }
@@ -351,7 +357,7 @@ function admUpdateExpenses() {
             document.getElementById('adm_return_time').required = !kmMode;
             document.getElementById('adm_hours_slot').required = !kmMode;
             document.getElementById('adm_estimated_km').required = kmMode;
-            
+
             // Only recalculate if user changed booking type (not on initial load)
             if (!isInitialLoad) {
                 admUpdateAmount();
@@ -423,7 +429,7 @@ function admUpdateExpenses() {
             var isExact = (hours === 6 || hours === 12 || hours === 24);
             box.style.borderColor = isExact ? '#86efac' : '#B5D4F4';
             box.style.background = isExact ? '#f0fdf4' : '#EEF3FA';
-            
+
             // Only recalculate if not initial load
             if (!isInitialLoad) {
                 admUpdateAmount();
@@ -462,7 +468,7 @@ function admUpdateExpenses() {
             var totalHours = admCalcHours();
             var packageCount = admCalcHourPackages(totalHours, h);
             var price = kmMode ? (Math.max(0, km) * d.rateKm) : ((h === '6' ? d.p6 : h === '12' ? d.p12 : h === '24' ? d.p24 : 0) * Math.max(1, packageCount || 1));
-            
+
             // ✅ KEY FIX: Only update amount field if NOT initial load OR if it's empty
             if (!isInitialLoad || savedCustomAmount === 0) {
                 document.getElementById('admin_expected_amount').value = price > 0 ? price.toFixed(2) : '';
@@ -482,13 +488,13 @@ function admUpdateExpenses() {
         });
 
         document.getElementById('adm_requires_advance').addEventListener('change', admUpdateAmount);
-        
+
         // When user changes hours slot, allow recalculation
         document.getElementById('adm_hours_slot').addEventListener('change', function() {
             isInitialLoad = false;
             admUpdateAmount();
         });
-        
+
         // When user changes estimated KM, allow recalculation
         document.getElementById('adm_estimated_km').addEventListener('input', function() {
             isInitialLoad = false;
@@ -508,7 +514,7 @@ function admUpdateExpenses() {
         admUpdateHoursDuration();
         admToggleBookingMode();
         // admUpdateAmount();  // ❌ REMOVED - This was overwriting your custom amount!
-        
+
         // After initial setup, mark as ready for updates
         setTimeout(function() {
             isInitialLoad = false;

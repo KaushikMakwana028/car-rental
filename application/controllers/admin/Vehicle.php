@@ -1,5 +1,5 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
 class Vehicle extends Admin_Controller
 {
@@ -193,44 +193,128 @@ class Vehicle extends Admin_Controller
         return false;
     }
     public function get_collection_summary()
-{
-    if (!$this->input->is_ajax_request()) {
-        show_404();
+    {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+        }
+
+        $vehicle_id = (int) $this->input->post('vehicle_id');
+        $year = $this->input->post('year') ? (int) $this->input->post('year') : (int) date('Y');
+        $month = $this->input->post('month') ? (int) $this->input->post('month') : (int) date('m');
+
+        if ($vehicle_id <= 0) {
+            echo json_encode(array('success' => false, 'message' => 'Invalid vehicle ID'));
+            return;
+        }
+
+        $vehicle = $this->General_model->get_row('vehicles', array('id' => $vehicle_id));
+
+        if (empty($vehicle)) {
+            echo json_encode(array('success' => false, 'message' => 'Vehicle not found'));
+            return;
+        }
+
+        $summary = $this->General_model->get_vehicle_collection_summary($vehicle_id, $year, $month);
+
+        $expense_summary = $this->General_model->get_vehicle_expense_summary($vehicle_id, $year, $month);
+
+        echo json_encode(array(
+            'success' => true,
+            'data' => array(
+                'vehicle_name'     => $vehicle['name'],
+                'registration_no'  => $vehicle['registration_no'],
+                'total_amount'     => $summary['total_amount'],
+                'received_amount'  => $summary['received_amount'],
+                'pending_amount'   => $summary['pending_amount'],
+                'total_bookings'   => $summary['total_bookings'],
+                'year'             => $year,
+                'month'            => $month,
+                'total_expenses'   => $expense_summary['total'],
+                'expense_count'    => $expense_summary['count'],
+                'expenses'         => $expense_summary['expenses'],
+                'net_collection'   => max(0, $summary['received_amount'] - $expense_summary['total']),
+            )
+        ));
     }
-    
-    $vehicle_id = (int) $this->input->post('vehicle_id');
-    $year = $this->input->post('year') ? (int) $this->input->post('year') : (int) date('Y');
-    $month = $this->input->post('month') ? (int) $this->input->post('month') : (int) date('m');
-    
-    if ($vehicle_id <= 0) {
-        echo json_encode(array('success' => false, 'message' => 'Invalid vehicle ID'));
-        return;
+    public function collection()
+    {
+        // echo " where we can stay as the ";
     }
-    
-    $vehicle = $this->General_model->get_row('vehicles', array('id' => $vehicle_id));
-    
-    if (empty($vehicle)) {
-        echo json_encode(array('success' => false, 'message' => 'Vehicle not found'));
-        return;
+
+    public function add_expense()
+    {
+        $this->output->set_content_type('application/json');
+
+        if (!$this->input->is_ajax_request()) {
+            echo json_encode(array('success' => false, 'message' => 'Invalid request.'));
+            return;
+        }
+
+        $vehicle_id   = (int) $this->input->post('vehicle_id');
+        $expense_name = trim($this->input->post('expense_name', true));
+        $amount       = (float) $this->input->post('amount');
+        $expense_date = trim($this->input->post('expense_date', true));
+        $notes        = trim($this->input->post('notes', true));
+
+        if ($vehicle_id <= 0 || $expense_name === '' || $amount <= 0) {
+            echo json_encode(array('success' => false, 'message' => 'Vehicle, expense name and amount are required.'));
+            return;
+        }
+
+        $vehicle = $this->General_model->get_row('vehicles', array('id' => $vehicle_id));
+        if (empty($vehicle)) {
+            echo json_encode(array('success' => false, 'message' => 'Vehicle not found.'));
+            return;
+        }
+
+        if ($expense_date === '') {
+            $expense_date = date('Y-m-d');
+        }
+
+        $id = $this->General_model->add_vehicle_expense($vehicle_id, $expense_name, $amount, $expense_date, $notes);
+        echo json_encode(array('success' => $id > 0, 'message' => $id > 0 ? 'Expense added.' : 'Failed to add expense.', 'id' => $id));
     }
-    
-    $summary = $this->General_model->get_vehicle_collection_summary($vehicle_id, $year, $month);
-    
-    echo json_encode(array(
-        'success' => true,
-        'data' => array(
-            'vehicle_name' => $vehicle['name'],
-            'registration_no' => $vehicle['registration_no'],
-            'total_amount' => $summary['total_amount'],
-            'received_amount' => $summary['received_amount'],
-            'pending_amount' => $summary['pending_amount'],
-            'total_bookings' => $summary['total_bookings'],
-            'year' => $year,
-            'month' => $month
-        )
-    ));
-}
-public function collection(){
-    // echo " where we can stay as the ";
-}
+
+    public function delete_expense()
+    {
+        $this->output->set_content_type('application/json');
+
+        if (!$this->input->is_ajax_request()) {
+            echo json_encode(array('success' => false, 'message' => 'Invalid request.'));
+            return;
+        }
+
+        $expense_id = (int) $this->input->post('expense_id');
+        $vehicle_id = (int) $this->input->post('vehicle_id');
+
+        if ($expense_id <= 0 || $vehicle_id <= 0) {
+            echo json_encode(array('success' => false, 'message' => 'Invalid request.'));
+            return;
+        }
+
+        $deleted = $this->General_model->delete_vehicle_expense($expense_id, $vehicle_id);
+        echo json_encode(array('success' => (bool) $deleted, 'message' => $deleted ? 'Expense deleted.' : 'Failed to delete.'));
+    }
+
+    public function get_expenses()
+    {
+        $this->output->set_content_type('application/json');
+
+        if (!$this->input->is_ajax_request()) {
+            echo json_encode(array('success' => false, 'message' => 'Invalid request.'));
+            return;
+        }
+
+        $vehicle_id = (int) $this->input->post('vehicle_id');
+        $year       = $this->input->post('year')  ? (int) $this->input->post('year')  : null;
+        $month      = $this->input->post('month') ? (int) $this->input->post('month') : null;
+
+        if ($vehicle_id <= 0) {
+            echo json_encode(array('success' => false, 'message' => 'Invalid vehicle.'));
+            return;
+        }
+
+        $summary = $this->General_model->get_vehicle_expense_summary($vehicle_id, $year, $month);
+        echo json_encode(array('success' => true, 'data' => $summary));
+    }
 }

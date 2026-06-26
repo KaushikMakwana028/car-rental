@@ -1031,342 +1031,505 @@
             font-size: 28px;
         }
     }
+
     .vm-icon-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    padding: 0;
-    border: 1.5px solid var(--border);
-    border-radius: 6px;
-    background: var(--surface);
-    color: var(--text-2);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    position: relative;
-}
-
-.vm-icon-btn i {
-    font-size: 16px;
-    line-height: 1;
-}
-
-.vm-icon-btn:hover {
-    background: var(--surface-alt);
-    border-color: var(--primary);
-    color: var(--primary);
-    transform: translateY(-1px);
-}
-
-.vm-icon-btn.view {
-    border-color: #3b82f6;
-    color: #3b82f6;
-    background: #eff6ff;
-}
-
-.vm-icon-btn.view:hover {
-    background: #3b82f6;
-    color: #fff;
-}
-
-.vm-icon-btn.collection {
-    border-color: #10b981;
-    color: #10b981;
-    background: #ecfdf5;
-}
-
-.vm-icon-btn.collection:hover {
-    background: #10b981;
-    color: #fff;
-}
-
-.vm-icon-btn.edit {
-    border-color: #f59e0b;
-    color: #f59e0b;
-    background: #fffbeb;
-}
-
-.vm-icon-btn.edit:hover {
-    background: #f59e0b;
-    color: #fff;
-}
-
-.vm-icon-btn.delete {
-    border-color: #ef4444;
-    color: #ef4444;
-    background: #fef2f2;
-}
-
-.vm-icon-btn.delete:hover {
-    background: #ef4444;
-    color: #fff;
-}
-
-/* Tooltip on hover */
-.vm-icon-btn::after {
-    content: attr(title);
-    position: absolute;
-    bottom: calc(100% + 8px);
-    left: 50%;
-    transform: translateX(-50%) scale(0.9);
-    background: #1f2937;
-    color: #fff;
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 11px;
-    font-weight: 500;
-    white-space: nowrap;
-    pointer-events: none;
-    opacity: 0;
-    transition: all 0.2s ease;
-    z-index: 100;
-}
-
-.vm-icon-btn::before {
-    content: '';
-    position: absolute;
-    bottom: calc(100% + 2px);
-    left: 50%;
-    transform: translateX(-50%);
-    border: 5px solid transparent;
-    border-top-color: #1f2937;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    z-index: 100;
-}
-
-.vm-icon-btn:hover::after,
-.vm-icon-btn:hover::before {
-    opacity: 1;
-    transform: translateX(-50%) scale(1);
-}
-
-/* ═══ Collection Modal Styles ═══ */
-.vm-collection-filter {
-    display: flex;
-    gap: 12px;
-    align-items: flex-end;
-    padding: 16px;
-    background: var(--surface-alt);
-    border-radius: 10px;
-    margin-bottom: 20px;
-}
-
-.vm-filter-group {
-    flex: 1;
-}
-
-.vm-filter-group label {
-    display: block;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--text-3);
-    margin-bottom: 6px;
-}
-
-.vm-filter-select {
-    width: 100%;
-    height: 38px;
-    padding: 0 12px;
-    border: 1.5px solid var(--border);
-    border-radius: 6px;
-    background: var(--surface);
-    color: var(--text-1);
-    font-size: 13px;
-    font-family: inherit;
-    outline: none;
-    transition: all 0.2s ease;
-}
-
-.vm-filter-select:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.vm-filter-btn {
-    height: 38px;
-    padding: 0 16px;
-    border: none;
-    border-radius: 6px;
-    background: var(--primary);
-    color: #fff;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: all 0.2s ease;
-}
-
-.vm-filter-btn:hover {
-    background: #2563eb;
-    transform: translateY(-1px);
-}
-
-.vm-filter-btn i {
-    font-size: 16px;
-}
-
-.vm-collection-loading {
-    text-align: center;
-    padding: 40px 20px;
-    color: var(--text-3);
-}
-
-.vm-spinner {
-    width: 40px;
-    height: 40px;
-    margin: 0 auto 16px;
-    border: 3px solid var(--border);
-    border-top-color: var(--primary);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-.vm-collection-stats {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 14px;
-    margin-bottom: 20px;
-}
-
-.vm-coll-card {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 16px;
-    border-radius: 10px;
-    border: 1.5px solid;
-}
-
-.vm-coll-card.blue {
-    background: #eff6ff;
-    border-color: #bfdbfe;
-}
-
-.vm-coll-card.amber {
-    background: #fffbeb;
-    border-color: #fde68a;
-}
-
-.vm-coll-card.green {
-    background: #ecfdf5;
-    border-color: #a7f3d0;
-}
-
-.vm-coll-card.red {
-    background: #fef2f2;
-    border-color: #fecaca;
-}
-
-.vm-coll-icon {
-    width: 48px;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    flex-shrink: 0;
-}
-
-.vm-coll-card.blue .vm-coll-icon {
-    background: #3b82f6;
-    color: #fff;
-}
-
-.vm-coll-card.amber .vm-coll-icon {
-    background: #f59e0b;
-    color: #fff;
-}
-
-.vm-coll-card.green .vm-coll-icon {
-    background: #10b981;
-    color: #fff;
-}
-
-.vm-coll-card.red .vm-coll-icon {
-    background: #ef4444;
-    color: #fff;
-}
-
-.vm-coll-icon i {
-    font-size: 22px;
-}
-
-.vm-coll-label {
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--text-3);
-    margin-bottom: 4px;
-}
-
-.vm-coll-value {
-    font-size: 20px;
-    font-weight: 700;
-    line-height: 1;
-}
-
-.vm-coll-card.blue .vm-coll-value {
-    color: #1e40af;
-}
-
-.vm-coll-card.amber .vm-coll-value {
-    color: #b45309;
-}
-
-.vm-coll-card.green .vm-coll-value {
-    color: #047857;
-}
-
-.vm-coll-card.red .vm-coll-value {
-    color: #b91c1c;
-}
-
-.vm-collection-note {
-    display: flex;
-    gap: 12px;
-    padding: 14px 16px;
-    background: #f8fafc;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 8px;
-    font-size: 12px;
-    line-height: 1.5;
-    color: var(--text-2);
-}
-
-.vm-collection-note i {
-    font-size: 18px;
-    color: #3b82f6;
-    flex-shrink: 0;
-    margin-top: 2px;
-}
-
-.vm-collection-note strong {
-    font-weight: 600;
-    color: var(--text-1);
-}
-
-@media (max-width: 640px) {
-    .vm-collection-stats {
-        grid-template-columns: 1fr;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        border: 1.5px solid var(--border);
+        border-radius: 6px;
+        background: var(--surface);
+        color: var(--text-2);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
     }
-    
+
+    .vm-icon-btn i {
+        font-size: 16px;
+        line-height: 1;
+    }
+
+    .vm-icon-btn:hover {
+        background: var(--surface-alt);
+        border-color: var(--primary);
+        color: var(--primary);
+        transform: translateY(-1px);
+    }
+
+    .vm-icon-btn.view {
+        border-color: #3b82f6;
+        color: #3b82f6;
+        background: #eff6ff;
+    }
+
+    .vm-icon-btn.view:hover {
+        background: #3b82f6;
+        color: #fff;
+    }
+
+    .vm-icon-btn.collection {
+        border-color: #10b981;
+        color: #10b981;
+        background: #ecfdf5;
+    }
+
+    .vm-icon-btn.collection:hover {
+        background: #10b981;
+        color: #fff;
+    }
+
+    .vm-icon-btn.edit {
+        border-color: #f59e0b;
+        color: #f59e0b;
+        background: #fffbeb;
+    }
+
+    .vm-icon-btn.edit:hover {
+        background: #f59e0b;
+        color: #fff;
+    }
+
+    .vm-icon-btn.delete {
+        border-color: #ef4444;
+        color: #ef4444;
+        background: #fef2f2;
+    }
+
+    .vm-icon-btn.delete:hover {
+        background: #ef4444;
+        color: #fff;
+    }
+
+    .vm-icon-btn.expenses {
+        border-color: #8b5cf6;
+        color: #8b5cf6;
+        background: #f5f3ff;
+    }
+
+    .vm-icon-btn.expenses:hover {
+        background: #8b5cf6;
+        color: #fff;
+    }
+
+    /* Expense list inside modal */
+    .vm-expense-list {
+        margin-top: 16px;
+    }
+
+    .vm-expense-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 8px;
+        background: var(--surface);
+        gap: 12px;
+    }
+
+    .vm-expense-item-left {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .vm-expense-item-name {
+        font-size: 13.5px;
+        font-weight: 600;
+        color: var(--text-1);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .vm-expense-item-date {
+        font-size: 11.5px;
+        color: var(--text-3);
+        margin-top: 2px;
+    }
+
+    .vm-expense-item-amount {
+        font-size: 14px;
+        font-weight: 700;
+        color: #dc2626;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .vm-expense-del-btn {
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        border: 1px solid #fecaca;
+        background: #fef2f2;
+        color: #dc2626;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: all .15s ease;
+        font-size: 14px;
+    }
+
+    .vm-expense-del-btn:hover {
+        background: #dc2626;
+        color: #fff;
+    }
+
+    .vm-expense-total {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 14px;
+        border-radius: 8px;
+        background: #fef2f2;
+        border: 1.5px solid #fecaca;
+        margin-top: 12px;
+        font-size: 14px;
+        font-weight: 700;
+        color: #b91c1c;
+    }
+
+    .vm-expense-empty {
+        text-align: center;
+        padding: 28px 16px;
+        color: var(--text-3);
+        font-size: 13px;
+    }
+
+    .vm-expense-form {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        padding: 16px;
+        background: var(--surface-alt);
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        margin-bottom: 16px;
+    }
+
+    .vm-expense-form .full {
+        grid-column: 1 / -1;
+    }
+
+    .vm-expense-form label {
+        display: block;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        color: var(--text-3);
+        margin-bottom: 5px;
+    }
+
+    .vm-expense-form input {
+        width: 100%;
+        padding: 8px 11px;
+        border-radius: 7px;
+        border: 1.5px solid var(--border);
+        background: var(--surface);
+        font: 400 13.5px var(--font);
+        color: var(--text-1);
+        transition: border-color .15s ease;
+    }
+
+    .vm-expense-form input:focus {
+        outline: none;
+        border-color: #8b5cf6;
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, .12);
+    }
+
+    .vm-expense-save-btn {
+        grid-column: 1 / -1;
+        padding: 9px 20px;
+        border: none;
+        border-radius: 8px;
+        background: #8b5cf6;
+        color: #fff;
+        font: 600 13.5px var(--font);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        transition: background .15s ease;
+    }
+
+    .vm-expense-save-btn:hover {
+        background: #7c3aed;
+    }
+
+    /* Tooltip on hover */
+    .vm-icon-btn::after {
+        content: attr(title);
+        position: absolute;
+        bottom: calc(100% + 8px);
+        left: 50%;
+        transform: translateX(-50%) scale(0.9);
+        background: #1f2937;
+        color: #fff;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 500;
+        white-space: nowrap;
+        pointer-events: none;
+        opacity: 0;
+        transition: all 0.2s ease;
+        z-index: 100;
+    }
+
+    .vm-icon-btn::before {
+        content: '';
+        position: absolute;
+        bottom: calc(100% + 2px);
+        left: 50%;
+        transform: translateX(-50%);
+        border: 5px solid transparent;
+        border-top-color: #1f2937;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        z-index: 100;
+    }
+
+    .vm-icon-btn:hover::after,
+    .vm-icon-btn:hover::before {
+        opacity: 1;
+        transform: translateX(-50%) scale(1);
+    }
+
+    /* ═══ Collection Modal Styles ═══ */
     .vm-collection-filter {
-        flex-direction: column;
-        align-items: stretch;
+        display: flex;
+        gap: 12px;
+        align-items: flex-end;
+        padding: 16px;
+        background: var(--surface-alt);
+        border-radius: 10px;
+        margin-bottom: 20px;
     }
-}
+
+    .vm-filter-group {
+        flex: 1;
+    }
+
+    .vm-filter-group label {
+        display: block;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-3);
+        margin-bottom: 6px;
+    }
+
+    .vm-filter-select {
+        width: 100%;
+        height: 38px;
+        padding: 0 12px;
+        border: 1.5px solid var(--border);
+        border-radius: 6px;
+        background: var(--surface);
+        color: var(--text-1);
+        font-size: 13px;
+        font-family: inherit;
+        outline: none;
+        transition: all 0.2s ease;
+    }
+
+    .vm-filter-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .vm-filter-btn {
+        height: 38px;
+        padding: 0 16px;
+        border: none;
+        border-radius: 6px;
+        background: var(--primary);
+        color: #fff;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s ease;
+    }
+
+    .vm-filter-btn:hover {
+        background: #2563eb;
+        transform: translateY(-1px);
+    }
+
+    .vm-filter-btn i {
+        font-size: 16px;
+    }
+
+    .vm-collection-loading {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--text-3);
+    }
+
+    .vm-spinner {
+        width: 40px;
+        height: 40px;
+        margin: 0 auto 16px;
+        border: 3px solid var(--border);
+        border-top-color: var(--primary);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .vm-collection-stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+
+    .vm-coll-card {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 16px;
+        border-radius: 10px;
+        border: 1.5px solid;
+    }
+
+    .vm-coll-card.blue {
+        background: #eff6ff;
+        border-color: #bfdbfe;
+    }
+
+    .vm-coll-card.amber {
+        background: #fffbeb;
+        border-color: #fde68a;
+    }
+
+    .vm-coll-card.green {
+        background: #ecfdf5;
+        border-color: #a7f3d0;
+    }
+
+    .vm-coll-card.red {
+        background: #fef2f2;
+        border-color: #fecaca;
+    }
+
+    .vm-coll-icon {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        flex-shrink: 0;
+    }
+
+    .vm-coll-card.blue .vm-coll-icon {
+        background: #3b82f6;
+        color: #fff;
+    }
+
+    .vm-coll-card.amber .vm-coll-icon {
+        background: #f59e0b;
+        color: #fff;
+    }
+
+    .vm-coll-card.green .vm-coll-icon {
+        background: #10b981;
+        color: #fff;
+    }
+
+    .vm-coll-card.red .vm-coll-icon {
+        background: #ef4444;
+        color: #fff;
+    }
+
+    .vm-coll-icon i {
+        font-size: 22px;
+    }
+
+    .vm-coll-label {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-3);
+        margin-bottom: 4px;
+    }
+
+    .vm-coll-value {
+        font-size: 20px;
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    .vm-coll-card.blue .vm-coll-value {
+        color: #1e40af;
+    }
+
+    .vm-coll-card.amber .vm-coll-value {
+        color: #b45309;
+    }
+
+    .vm-coll-card.green .vm-coll-value {
+        color: #047857;
+    }
+
+    .vm-coll-card.red .vm-coll-value {
+        color: #b91c1c;
+    }
+
+    .vm-collection-note {
+        display: flex;
+        gap: 12px;
+        padding: 14px 16px;
+        background: #f8fafc;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 12px;
+        line-height: 1.5;
+        color: var(--text-2);
+    }
+
+    .vm-collection-note i {
+        font-size: 18px;
+        color: #3b82f6;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    .vm-collection-note strong {
+        font-weight: 600;
+        color: var(--text-1);
+    }
+
+    @media (max-width: 640px) {
+        .vm-collection-stats {
+            grid-template-columns: 1fr;
+        }
+
+        .vm-collection-filter {
+            flex-direction: column;
+            align-items: stretch;
+        }
+    }
 </style>
 
 <div class="vm-wrap">
@@ -1495,52 +1658,58 @@
                                         <?php echo ucfirst(html_escape($vehicle['status'])); ?>
                                     </span>
                                 </td>
-                              <td>
-    <div class="vm-actions">
-        <?php if ($vehicle['status'] === 'booked'): ?>
-            <button class="vm-icon-btn view js-open-booking-view" type="button" title="View Active Booking"
-                data-detail="<?php echo html_escape(json_encode($booking_detail)); ?>">
-                <i class="ti ti-eye"></i>
-            </button>
-        <?php endif; ?>
-        
-        <button class="vm-icon-btn collection js-open-collection" type="button" title="View Collection Summary"
-            data-vehicle-id="<?php echo (int)$vehicle['id']; ?>"
-            data-vehicle-name="<?php echo html_escape($vehicle['name']); ?>"
-            data-registration="<?php echo html_escape($vehicle['registration_no']); ?>">
-            <i class="ti ti-report-money"></i>
-        </button>
-        
-        <button class="vm-icon-btn edit edit-vehicle-btn" type="button" title="Edit Vehicle"
-            data-id="<?php echo (int)$vehicle['id']; ?>"
-            data-name="<?php echo html_escape($vehicle['name']); ?>"
-            data-registration="<?php echo html_escape($vehicle['registration_no']); ?>"
-            data-type="<?php echo html_escape($vehicle['vehicle_type']); ?>"
-            data-fuel="<?php echo html_escape($vehicle['fuel_type']); ?>"
-            data-seats="<?php echo (int)$vehicle['seats']; ?>"
-            data-rate-km="<?php echo isset($vehicle['rate_per_day']) ? (float)$vehicle['rate_per_day'] : 0; ?>"
-            data-price-6-hours="<?php echo isset($vehicle['price_6_hours']) ? (float)$vehicle['price_6_hours'] : 0; ?>"
-            data-price-12-hours="<?php echo isset($vehicle['price_12_hours']) ? (float)$vehicle['price_12_hours'] : 0; ?>"
-            data-price-24-hours="<?php echo isset($vehicle['price_24_hours']) ? (float)$vehicle['price_24_hours'] : 0; ?>"
-            data-extra-hour-charge="<?php echo isset($vehicle['extra_hour_charge']) ? (float)$vehicle['extra_hour_charge'] : 0; ?>"
-            data-advance="<?php echo (float)$vehicle['advance_amount']; ?>"
-            data-status="<?php echo html_escape($vehicle['status']); ?>"
-            data-image="<?php echo html_escape($vehicle_image); ?>">
-            <i class="ti ti-edit"></i>
-        </button>
-        
-        <form method="post" action="<?php echo base_url('admin/vehicles/delete/' . (int)$vehicle['id']); ?>" 
-            class="js-swal-confirm-form" 
-            data-swal-title="Delete vehicle?" 
-            data-swal-text="This vehicle will be removed permanently." 
-            data-swal-confirm="Delete"
-            style="display:inline;">
-            <button class="vm-icon-btn delete" type="submit" title="Delete Vehicle">
-                <i class="ti ti-trash"></i>
-            </button>
-        </form>
-    </div>
-</td>
+                                <td>
+                                    <div class="vm-actions">
+                                        <?php if ($vehicle['status'] === 'booked'): ?>
+                                            <button class="vm-icon-btn view js-open-booking-view" type="button" title="View Active Booking"
+                                                data-detail="<?php echo html_escape(json_encode($booking_detail)); ?>">
+                                                <i class="ti ti-eye"></i>
+                                            </button>
+                                        <?php endif; ?>
+
+                                        <button class="vm-icon-btn expenses js-open-expenses" type="button" title="Add / View Expenses"
+                                            data-vehicle-id="<?php echo (int)$vehicle['id']; ?>"
+                                            data-vehicle-name="<?php echo html_escape($vehicle['name']); ?>"
+                                            data-registration="<?php echo html_escape($vehicle['registration_no']); ?>">
+                                            <i class="ti ti-receipt"></i>
+                                        </button>
+                                        <button class="vm-icon-btn collection js-open-collection" type="button" title="View Collection Summary"
+                                            data-vehicle-id="<?php echo (int)$vehicle['id']; ?>"
+                                            data-vehicle-name="<?php echo html_escape($vehicle['name']); ?>"
+                                            data-registration="<?php echo html_escape($vehicle['registration_no']); ?>">
+                                            <i class="ti ti-report-money"></i>
+                                        </button>
+
+                                        <button class="vm-icon-btn edit edit-vehicle-btn" type="button" title="Edit Vehicle"
+                                            data-id="<?php echo (int)$vehicle['id']; ?>"
+                                            data-name="<?php echo html_escape($vehicle['name']); ?>"
+                                            data-registration="<?php echo html_escape($vehicle['registration_no']); ?>"
+                                            data-type="<?php echo html_escape($vehicle['vehicle_type']); ?>"
+                                            data-fuel="<?php echo html_escape($vehicle['fuel_type']); ?>"
+                                            data-seats="<?php echo (int)$vehicle['seats']; ?>"
+                                            data-rate-km="<?php echo isset($vehicle['rate_per_day']) ? (float)$vehicle['rate_per_day'] : 0; ?>"
+                                            data-price-6-hours="<?php echo isset($vehicle['price_6_hours']) ? (float)$vehicle['price_6_hours'] : 0; ?>"
+                                            data-price-12-hours="<?php echo isset($vehicle['price_12_hours']) ? (float)$vehicle['price_12_hours'] : 0; ?>"
+                                            data-price-24-hours="<?php echo isset($vehicle['price_24_hours']) ? (float)$vehicle['price_24_hours'] : 0; ?>"
+                                            data-extra-hour-charge="<?php echo isset($vehicle['extra_hour_charge']) ? (float)$vehicle['extra_hour_charge'] : 0; ?>"
+                                            data-advance="<?php echo (float)$vehicle['advance_amount']; ?>"
+                                            data-status="<?php echo html_escape($vehicle['status']); ?>"
+                                            data-image="<?php echo html_escape($vehicle_image); ?>">
+                                            <i class="ti ti-edit"></i>
+                                        </button>
+
+                                        <form method="post" action="<?php echo base_url('admin/vehicles/delete/' . (int)$vehicle['id']); ?>"
+                                            class="js-swal-confirm-form"
+                                            data-swal-title="Delete vehicle?"
+                                            data-swal-text="This vehicle will be removed permanently."
+                                            data-swal-confirm="Delete"
+                                            style="display:inline;">
+                                            <button class="vm-icon-btn delete" type="submit" title="Delete Vehicle">
+                                                <i class="ti ti-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
@@ -1765,6 +1934,69 @@
         </form>
     </div>
 </div>
+
+<!-- ══ EXPENSES MODAL ══ -->
+<div class="vm-modal-overlay" id="vehicleExpensesModal">
+    <div class="vm-modal" style="max-width:560px;">
+        <div class="vm-modal-head">
+            <div>
+                <h3>Vehicle Expenses</h3>
+                <p id="expensesModalVehicle">Add and track expenses for this vehicle.</p>
+            </div>
+            <button class="vm-modal-close" type="button" id="closeExpensesModal" aria-label="Close">
+                <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 3l10 10M13 3 3 13" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+                </svg>
+            </button>
+        </div>
+        <div style="padding:0 2px 4px;">
+            <!-- Add Expense Form -->
+            <div class="vm-expense-form" id="expenseAddForm">
+                <div>
+                    <label>Expense Name</label>
+                    <input type="text" id="expInputName" placeholder="e.g. Fuel, Service, Tyre" maxlength="255">
+                </div>
+                <div>
+                    <label>Amount (₹)</label>
+                    <input type="number" id="expInputAmount" placeholder="0.00" min="0" step="0.01">
+                </div>
+                <div>
+                    <label>Date</label>
+                    <input type="date" id="expInputDate">
+                </div>
+                <div>
+                    <label>Notes (optional)</label>
+                    <input type="text" id="expInputNotes" placeholder="Short note..." maxlength="255">
+                </div>
+                <button class="vm-expense-save-btn" type="button" id="expSaveBtn">
+                    <i class="ti ti-plus"></i> Add Expense
+                </button>
+            </div>
+            <!-- Filter row -->
+            <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:14px;">
+                <div style="flex:1;">
+                    <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text-3);display:block;margin-bottom:5px;">Month</label>
+                    <select id="expFilterMonth" class="vm-filter-select"></select>
+                </div>
+                <div style="flex:1;">
+                    <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text-3);display:block;margin-bottom:5px;">Year</label>
+                    <select id="expFilterYear" class="vm-filter-select"></select>
+                </div>
+                <button class="vm-filter-btn" type="button" id="expApplyFilter" style="background:#8b5cf6;">
+                    <i class="ti ti-refresh"></i> Filter
+                </button>
+            </div>
+            <!-- Expense list -->
+            <div id="expenseListWrap">
+                <div class="vm-collection-loading" id="expenseLoading" style="display:none;">
+                    <div class="vm-spinner" style="border-top-color:#8b5cf6;"></div>
+                    <p>Loading expenses...</p>
+                </div>
+                <div class="vm-expense-list" id="expenseList"></div>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- ══ COLLECTION MODAL ══ -->
 <div class="vm-modal-overlay" id="vehicleCollectionModal">
     <div class="vm-modal">
@@ -1779,7 +2011,7 @@
                 </svg>
             </button>
         </div>
-        
+
         <div class="vm-modal-body">
             <!-- Month/Year Filter -->
             <div class="vm-collection-filter">
@@ -1811,13 +2043,13 @@
                     Apply
                 </button>
             </div>
-            
+
             <!-- Loading State -->
             <div class="vm-collection-loading" id="collectionLoading">
                 <div class="vm-spinner"></div>
                 <p>Loading collection data...</p>
             </div>
-            
+
             <!-- Collection Stats -->
             <div class="vm-collection-stats" id="collectionStats" style="display:none;">
                 <div class="vm-coll-card blue">
@@ -1829,7 +2061,7 @@
                         <div class="vm-coll-value" id="collTotalBookings">0</div>
                     </div>
                 </div>
-                
+
                 <div class="vm-coll-card amber">
                     <div class="vm-coll-icon">
                         <i class="ti ti-currency-rupee"></i>
@@ -1839,7 +2071,7 @@
                         <div class="vm-coll-value" id="collTotalAmount">₹0</div>
                     </div>
                 </div>
-                
+
                 <div class="vm-coll-card green">
                     <div class="vm-coll-icon">
                         <i class="ti ti-circle-check"></i>
@@ -1849,7 +2081,7 @@
                         <div class="vm-coll-value" id="collReceivedAmount">₹0</div>
                     </div>
                 </div>
-                
+
                 <div class="vm-coll-card red">
                     <div class="vm-coll-icon">
                         <i class="ti ti-alert-circle"></i>
@@ -1860,12 +2092,30 @@
                     </div>
                 </div>
             </div>
-           <div class="vm-collection-note" id="collectionNote" style="display:none;">
-    <i class="ti ti-info-circle"></i>
-    <div>
-        <strong>Note:</strong> All amounts shown are for bookings that started (pickup date) in the selected month only.
-    </div>
-</div>
+            <div class="vm-collection-note" id="collectionNote" style="display:none;">
+                <i class="ti ti-info-circle"></i>
+                <div>
+                    <strong>Note:</strong> All amounts shown are for bookings that started (pickup date) in the selected month only.
+                </div>
+            </div>
+
+            <!-- Expense breakdown in collection -->
+            <div id="collExpenseSection" style="display:none;margin-top:20px;">
+                <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);">
+                    <i class="ti ti-receipt" style="font-size:14px;vertical-align:middle;margin-right:5px;color:#8b5cf6;"></i>
+                    Expenses This Month
+                </div>
+                <div id="collExpenseList"></div>
+                <div class="vm-coll-card" style="background:#f5f3ff;border:1.5px solid #ddd6fe;margin-top:14px;">
+                    <div class="vm-coll-icon" style="background:#8b5cf6;">
+                        <i class="ti ti-trending-down"></i>
+                    </div>
+                    <div class="vm-coll-info">
+                        <div class="vm-coll-label">Net (Received − Expenses)</div>
+                        <div class="vm-coll-value" id="collNetCollection" style="color:#5b21b6;">₹0</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -2180,152 +2430,373 @@
                 openBookingViewModal();
             });
         });
-var collectionModal = document.getElementById('vehicleCollectionModal');
-var currentVehicleId = null;
-var currentVehicleName = '';
-var currentVehicleReg = '';
+        var collectionModal = document.getElementById('vehicleCollectionModal');
+        var currentVehicleId = null;
+        var currentVehicleName = '';
+        var currentVehicleReg = '';
 
-// Populate year dropdown
-function populateYearDropdown() {
-    var yearSelect = document.getElementById('collectionYear');
-    if (!yearSelect) return;
-    
-    var currentYear = new Date().getFullYear();
-    yearSelect.innerHTML = '';
-    
-    for (var i = currentYear; i >= currentYear - 5; i--) {
-        var option = document.createElement('option');
-        option.value = i;
-        option.textContent = i;
-        if (i === currentYear) option.selected = true;
-        yearSelect.appendChild(option);
-    }
-}
+        // Populate year dropdown
+        function populateYearDropdown() {
+            var yearSelect = document.getElementById('collectionYear');
+            if (!yearSelect) return;
 
-// Set current month
-function setCurrentMonth() {
-    var monthSelect = document.getElementById('collectionMonth');
-    if (monthSelect) {
-        monthSelect.value = new Date().getMonth() + 1;
-    }
-}
+            var currentYear = new Date().getFullYear();
+            yearSelect.innerHTML = '';
 
-// Format money
-function fmtCollMoney(value) {
-    var num = parseFloat(value || 0);
-    return '₹' + num.toLocaleString('en-IN', {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
-    });
-}
-
-// Month names
-var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-// Load collection data
-function loadCollectionData(vehicleId, year, month) {
-    document.getElementById('collectionLoading').style.display = 'block';
-    document.getElementById('collectionStats').style.display = 'none';
-    document.getElementById('collectionNote').style.display = 'none';
-    
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', '<?php echo base_url('admin/vehicle/get_collection_summary'); ?>', true);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-    
-    xhr.onload = function() {
-        document.getElementById('collectionLoading').style.display = 'none';
-        
-        if (xhr.status === 200) {
-            try {
-                var response = JSON.parse(xhr.responseText);
-                
-                if (response.success) {
-                    var data = response.data;
-                    
-                    document.getElementById('collTotalBookings').textContent = data.total_bookings || 0;
-                    document.getElementById('collTotalAmount').textContent = fmtCollMoney(data.total_amount);
-                    document.getElementById('collReceivedAmount').textContent = fmtCollMoney(data.received_amount);
-                    document.getElementById('collPendingAmount').textContent = fmtCollMoney(data.pending_amount);
-                    
-                    document.getElementById('collectionStats').style.display = 'grid';
-                    document.getElementById('collectionNote').style.display = 'flex';
-                    
-                    var monthName = monthNames[(data.month - 1)] || '';
-                    document.getElementById('collectionModalVehicle').textContent = 
-                        currentVehicleName + ' (' + currentVehicleReg + ') - ' + monthName + ' ' + data.year;
-                } else {
-                    alert(response.message || 'Failed to load collection data');
-                }
-            } catch (e) {
-                alert('Error parsing response');
-                console.error(e);
+            for (var i = currentYear; i >= currentYear - 5; i--) {
+                var option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                if (i === currentYear) option.selected = true;
+                yearSelect.appendChild(option);
             }
-        } else {
-            alert('Server error: ' + xhr.status);
         }
-    };
-    
-    xhr.onerror = function() {
-        document.getElementById('collectionLoading').style.display = 'none';
-        alert('Network error');
-    };
-    
-    xhr.send('vehicle_id=' + vehicleId + '&year=' + year + '&month=' + month);
-}
 
-// Open collection modal
-function openCollectionModal(vehicleId, vehicleName, vehicleReg) {
-    currentVehicleId = vehicleId;
-    currentVehicleName = vehicleName;
-    currentVehicleReg = vehicleReg;
-    
-    populateYearDropdown();
-    setCurrentMonth();
-    
-    var year = document.getElementById('collectionYear').value;
-    var month = document.getElementById('collectionMonth').value;
-    
-    loadCollectionData(vehicleId, year, month);
-    
-    collectionModal.classList.add('open');
-    document.body.style.overflow = 'hidden';
-}
+        // Set current month
+        function setCurrentMonth() {
+            var monthSelect = document.getElementById('collectionMonth');
+            if (monthSelect) {
+                monthSelect.value = new Date().getMonth() + 1;
+            }
+        }
 
-// Close collection modal
-function closeCollectionModal() {
-    collectionModal.classList.remove('open');
-    document.body.style.overflow = '';
-}
+        // Format money
+        function fmtCollMoney(value) {
+            var num = parseFloat(value || 0);
+            return '₹' + num.toLocaleString('en-IN', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            });
+        }
 
-// Event listeners
-document.getElementById('closeCollectionModal').addEventListener('click', closeCollectionModal);
+        // Month names
+        var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-collectionModal.addEventListener('click', function(e) {
-    if (e.target === collectionModal) closeCollectionModal();
-});
+        // Load collection data
+        function loadCollectionData(vehicleId, year, month) {
+            document.getElementById('collectionLoading').style.display = 'block';
+            document.getElementById('collectionStats').style.display = 'none';
+            document.getElementById('collectionNote').style.display = 'none';
 
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && collectionModal.classList.contains('open')) {
-        closeCollectionModal();
-    }
-});
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '<?php echo base_url('admin/vehicles/get_collection_summary'); ?>', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 
-document.getElementById('applyCollectionFilter').addEventListener('click', function() {
-    var year = document.getElementById('collectionYear').value;
-    var month = document.getElementById('collectionMonth').value;
-    loadCollectionData(currentVehicleId, year, month);
-});
+            xhr.onload = function() {
+                document.getElementById('collectionLoading').style.display = 'none';
 
-// Attach to collection buttons
-document.querySelectorAll('.js-open-collection').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-        var vehicleId = btn.getAttribute('data-vehicle-id');
-        var vehicleName = btn.getAttribute('data-vehicle-name');
-        var vehicleReg = btn.getAttribute('data-registration');
-        openCollectionModal(vehicleId, vehicleName, vehicleReg);
-    });
-});
+                if (xhr.status === 200) {
+                    try {
+                        var response = JSON.parse(xhr.responseText);
+
+                        if (response.success) {
+                            var data = response.data;
+
+                            document.getElementById('collTotalBookings').textContent = data.total_bookings || 0;
+                            document.getElementById('collTotalAmount').textContent = fmtCollMoney(data.total_amount);
+                            document.getElementById('collReceivedAmount').textContent = fmtCollMoney(data.received_amount);
+                            document.getElementById('collPendingAmount').textContent = fmtCollMoney(data.pending_amount);
+
+                            document.getElementById('collectionStats').style.display = 'grid';
+                            document.getElementById('collectionNote').style.display = 'flex';
+
+                            // Expenses in collection
+                            var expSection = document.getElementById('collExpenseSection');
+                            var expList = document.getElementById('collExpenseList');
+                            var netEl = document.getElementById('collNetCollection');
+                            if (expSection && expList && netEl) {
+                                var expenses = data.expenses || [];
+                                var expHtml = '';
+                                if (expenses.length) {
+                                    expenses.forEach(function(exp) {
+                                        expHtml += '<div class="vm-expense-item">' +
+                                            '<div class="vm-expense-item-left">' +
+                                            '<div class="vm-expense-item-name">' + (exp.expense_name || '') + '</div>' +
+                                            '<div class="vm-expense-item-date">' + (exp.expense_date || '') + (exp.notes ? ' · ' + exp.notes : '') + '</div>' +
+                                            '</div>' +
+                                            '<div class="vm-expense-item-amount">' + fmtCollMoney(exp.amount) + '</div>' +
+                                            '</div>';
+                                    });
+                                    expHtml += '<div class="vm-expense-total"><span>Total Expenses</span><span>' + fmtCollMoney(data.total_expenses || 0) + '</span></div>';
+                                } else {
+                                    expHtml = '<div class="vm-expense-empty" style="padding:14px;font-size:12.5px;">No expenses recorded this month.</div>';
+                                }
+                                expList.innerHTML = expHtml;
+                                netEl.textContent = fmtCollMoney(data.net_collection || 0);
+                                expSection.style.display = 'block';
+                            }
+
+                            var monthName = monthNames[(data.month - 1)] || '';
+                            document.getElementById('collectionModalVehicle').textContent =
+                                currentVehicleName + ' (' + currentVehicleReg + ') - ' + monthName + ' ' + data.year;
+                        } else {
+                            alert(response.message || 'Failed to load collection data');
+                        }
+                    } catch (e) {
+                        alert('Error parsing response');
+                        console.error(e);
+                    }
+                } else {
+                    alert('Server error: ' + xhr.status);
+                }
+            };
+
+            xhr.onerror = function() {
+                document.getElementById('collectionLoading').style.display = 'none';
+                alert('Network error');
+            };
+
+            xhr.send('vehicle_id=' + vehicleId + '&year=' + year + '&month=' + month);
+        }
+
+        // Open collection modal
+        function openCollectionModal(vehicleId, vehicleName, vehicleReg) {
+            currentVehicleId = vehicleId;
+            currentVehicleName = vehicleName;
+            currentVehicleReg = vehicleReg;
+
+            populateYearDropdown();
+            setCurrentMonth();
+
+            var year = document.getElementById('collectionYear').value;
+            var month = document.getElementById('collectionMonth').value;
+
+            loadCollectionData(vehicleId, year, month);
+
+            collectionModal.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Close collection modal
+        function closeCollectionModal() {
+            collectionModal.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        // Event listeners
+        document.getElementById('closeCollectionModal').addEventListener('click', closeCollectionModal);
+
+        collectionModal.addEventListener('click', function(e) {
+            if (e.target === collectionModal) closeCollectionModal();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && collectionModal.classList.contains('open')) {
+                closeCollectionModal();
+            }
+        });
+
+        document.getElementById('applyCollectionFilter').addEventListener('click', function() {
+            var year = document.getElementById('collectionYear').value;
+            var month = document.getElementById('collectionMonth').value;
+            loadCollectionData(currentVehicleId, year, month);
+        });
+
+        // Attach to collection buttons
+        document.querySelectorAll('.js-open-collection').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var vehicleId = btn.getAttribute('data-vehicle-id');
+                var vehicleName = btn.getAttribute('data-vehicle-name');
+                var vehicleReg = btn.getAttribute('data-registration');
+                openCollectionModal(vehicleId, vehicleName, vehicleReg);
+            });
+        });
+
+        /* ══ EXPENSES MODAL ══ */
+        (function() {
+            var expModal = document.getElementById('vehicleExpensesModal');
+            var currentExpVehicleId = null;
+            var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+            function fmtExp(n) {
+                return '₹' + parseFloat(n || 0).toLocaleString('en-IN', {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                });
+            }
+
+            function populateExpFilters() {
+                var ms = document.getElementById('expFilterMonth');
+                var ys = document.getElementById('expFilterYear');
+                if (!ms || !ys) return;
+                ms.innerHTML = '';
+                for (var m = 1; m <= 12; m++) {
+                    var o = document.createElement('option');
+                    o.value = m;
+                    o.textContent = monthNames[m - 1];
+                    if (m === new Date().getMonth() + 1) o.selected = true;
+                    ms.appendChild(o);
+                }
+                ys.innerHTML = '';
+                var cy = new Date().getFullYear();
+                for (var y = cy; y >= cy - 5; y--) {
+                    var oy = document.createElement('option');
+                    oy.value = y;
+                    oy.textContent = y;
+                    if (y === cy) oy.selected = true;
+                    ys.appendChild(oy);
+                }
+            }
+
+            function setExpDate() {
+                var d = document.getElementById('expInputDate');
+                if (d) d.value = new Date().toISOString().slice(0, 10);
+            }
+
+            function renderExpenses(data) {
+                var list = document.getElementById('expenseList');
+                if (!list) return;
+                var expenses = data.expenses || [];
+                if (!expenses.length) {
+                    list.innerHTML = '<div class="vm-expense-empty"><i class="ti ti-receipt-off" style="font-size:28px;display:block;margin-bottom:8px;"></i>No expenses found for this period.</div>';
+                    return;
+                }
+                var html = '';
+                expenses.forEach(function(exp) {
+                    html += '<div class="vm-expense-item">' +
+                        '<div class="vm-expense-item-left">' +
+                        '<div class="vm-expense-item-name">' + escHtml(exp.expense_name) + '</div>' +
+                        '<div class="vm-expense-item-date">' + (exp.expense_date || '') + (exp.notes ? ' · ' + escHtml(exp.notes) : '') + '</div>' +
+                        '</div>' +
+                        '<div class="vm-expense-item-amount">' + fmtExp(exp.amount) + '</div>' +
+                        '<button class="vm-expense-del-btn js-del-expense" data-id="' + exp.id + '" data-vehicle="' + exp.vehicle_id + '" title="Delete"><i class="ti ti-trash"></i></button>' +
+                        '</div>';
+                });
+                html += '<div class="vm-expense-total"><span>Total Expenses</span><span>' + fmtExp(data.total) + '</span></div>';
+                list.innerHTML = html;
+                // bind delete
+                list.querySelectorAll('.js-del-expense').forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        if (!confirm('Delete this expense?')) return;
+                        doDeleteExpense(btn.getAttribute('data-id'), btn.getAttribute('data-vehicle'));
+                    });
+                });
+            }
+
+            function escHtml(s) {
+                return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            }
+
+            function loadExpenses(vehicleId, year, month) {
+                document.getElementById('expenseLoading').style.display = 'block';
+                document.getElementById('expenseList').innerHTML = '';
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', '<?php echo base_url('admin/vehicles/get_expenses'); ?>', true);
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                xhr.onload = function() {
+                    document.getElementById('expenseLoading').style.display = 'none';
+                    try {
+                        var r = JSON.parse(xhr.responseText);
+                        if (r.success) renderExpenses(r.data);
+                        else document.getElementById('expenseList').innerHTML = '<div class="vm-expense-empty">' + escHtml(r.message) + '</div>';
+                    } catch (e) {
+                        document.getElementById('expenseList').innerHTML = '<div class="vm-expense-empty">Error loading data.</div>';
+                    }
+                };
+                xhr.onerror = function() {
+                    document.getElementById('expenseLoading').style.display = 'none';
+                    document.getElementById('expenseList').innerHTML = '<div class="vm-expense-empty">Network error.</div>';
+                };
+                xhr.send('vehicle_id=' + vehicleId + '&year=' + year + '&month=' + month);
+            }
+
+            function doDeleteExpense(expId, vehicleId) {
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', '<?php echo base_url('admin/vehicles/delete_expense'); ?>', true);
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                xhr.onload = function() {
+                    try {
+                        var r = JSON.parse(xhr.responseText);
+                        if (r.success) {
+                            loadExpenses(currentExpVehicleId, document.getElementById('expFilterYear').value, document.getElementById('expFilterMonth').value);
+                        } else alert(r.message || 'Delete failed.');
+                    } catch (e) {
+                        alert('Error.');
+                    }
+                };
+                xhr.send('expense_id=' + expId + '&vehicle_id=' + vehicleId);
+            }
+
+            document.getElementById('expSaveBtn').addEventListener('click', function() {
+                var name = (document.getElementById('expInputName').value || '').trim();
+                var amount = parseFloat(document.getElementById('expInputAmount').value || '0');
+                var date = document.getElementById('expInputDate').value || '';
+                var notes = (document.getElementById('expInputNotes').value || '').trim();
+                if (!name) {
+                    alert('Please enter an expense name.');
+                    return;
+                }
+                if (amount <= 0) {
+                    alert('Please enter a valid amount greater than 0.');
+                    return;
+                }
+                this.disabled = true;
+                this.textContent = 'Saving...';
+                var self = this;
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', '<?php echo base_url('admin/vehicles/add_expense'); ?>', true);
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                xhr.onload = function() {
+                    self.disabled = false;
+                    self.innerHTML = '<i class="ti ti-plus"></i> Add Expense';
+                    try {
+                        var r = JSON.parse(xhr.responseText);
+                        if (r.success) {
+                            document.getElementById('expInputName').value = '';
+                            document.getElementById('expInputAmount').value = '';
+                            document.getElementById('expInputNotes').value = '';
+                            setExpDate();
+                            loadExpenses(currentExpVehicleId, document.getElementById('expFilterYear').value, document.getElementById('expFilterMonth').value);
+                        } else alert(r.message || 'Failed to save.');
+                    } catch (e) {
+                        alert('Error saving expense.');
+                    }
+                };
+                xhr.onerror = function() {
+                    self.disabled = false;
+                    self.innerHTML = '<i class="ti ti-plus"></i> Add Expense';
+                    alert('Network error.');
+                };
+                var csrfMeta = document.querySelector('meta[name="csrf-token-name"]');
+                var csrfNameVal = csrfMeta ? csrfMeta.getAttribute('content') : '';
+                var csrfHashMeta = document.querySelector('meta[name="csrf-token-value"]');
+                var csrfHashVal = csrfHashMeta ? csrfHashMeta.getAttribute('content') : '';
+                var csrfParam = (csrfNameVal && csrfHashVal) ? '&' + csrfNameVal + '=' + csrfHashVal : '';
+                xhr.send('vehicle_id=' + currentExpVehicleId + '&expense_name=' + encodeURIComponent(name) + '&amount=' + amount + '&expense_date=' + date + '&notes=' + encodeURIComponent(notes) + csrfParam);
+            });
+
+            document.getElementById('expApplyFilter').addEventListener('click', function() {
+                loadExpenses(currentExpVehicleId, document.getElementById('expFilterYear').value, document.getElementById('expFilterMonth').value);
+            });
+
+            document.getElementById('closeExpensesModal').addEventListener('click', function() {
+                expModal.classList.remove('open');
+                document.body.style.overflow = '';
+            });
+            expModal.addEventListener('click', function(e) {
+                if (e.target === expModal) {
+                    expModal.classList.remove('open');
+                    document.body.style.overflow = '';
+                }
+            });
+
+            document.querySelectorAll('.js-open-expenses').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    currentExpVehicleId = btn.getAttribute('data-vehicle-id');
+                    document.getElementById('expensesModalVehicle').textContent = btn.getAttribute('data-vehicle-name') + ' (' + btn.getAttribute('data-registration') + ')';
+                    populateExpFilters();
+                    setExpDate();
+                    loadExpenses(currentExpVehicleId, new Date().getFullYear(), new Date().getMonth() + 1);
+                    expModal.classList.add('open');
+                    document.body.style.overflow = 'hidden';
+                });
+            });
+        })();
+        /* ══ END EXPENSES MODAL ══ */
         // Init pagination last
         initPagination();
     })();

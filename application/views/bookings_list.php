@@ -69,11 +69,8 @@ foreach ($bookings as $booking) {
                     <th>Vehicle</th>
                     <th>Trip Type</th>
                     <th>Route</th>
-
                     <th>Amount</th>
-                    <th>Payment</th>
                     <th>Status</th>
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -100,30 +97,13 @@ foreach ($bookings as $booking) {
 
                         <td>
                             <span class="table-title">&#8377;<?php echo number_format((float) $booking['amount'], 2); ?></span>
-                            <span class="table-note">Balance &#8377;<?php echo number_format((float) $booking['balance_amount'], 2); ?></span>
-                        </td>
-                        <td>
-                            <span class="badge badge-<?php echo html_escape($booking['payment_badge']); ?>"><?php echo html_escape($booking['payment_status']); ?></span>
-                            <span class="table-note">Paid &#8377;<?php echo number_format((float) $booking['paid_amount'], 2); ?></span>
-                            <?php if (!empty($booking['payment_request_status'])): ?>
-                                <span class="table-note">Receipt <?php echo ucfirst(html_escape($booking['payment_request_status'])); ?></span>
-                            <?php endif; ?>
                         </td>
                         <td><span class="badge badge-<?php echo html_escape($booking_status); ?>"><?php echo html_escape(ucfirst($booking_status)); ?></span></td>
-                        <td>
-                            <?php if (!empty($booking['requires_advance'])): ?>
-                                <a class="btn-secondary" href="<?php echo base_url('payments/pay/' . (int) $booking['id']); ?>">
-                                    <?php echo !empty($booking['payment_request_id']) ? 'Update Receipt' : 'Pay Advance'; ?>
-                                </a>
-                            <?php else: ?>
-                                <span class="table-note">No advance needed</span>
-                            <?php endif; ?>
-                        </td>
                     </tr>
                 <?php endforeach; ?>
             <?php else: ?>
                 <tr>
-                    <td colspan="8">
+                    <td colspan="6">
                         <div class="empty-state">You have not created any bookings yet. Start by choosing a car and submitting your trip details.</div>
                     </td>
                 </tr>

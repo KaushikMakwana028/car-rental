@@ -83,7 +83,8 @@
         border: 2px solid #f5c842;
         border-radius: 10px;
         padding: 14px 18px;
-        margin-bottom: 14px;
+        margin-top: 20px;
+        margin-bottom: 20px;
     }
 
     .extra-notice-banner-title {
@@ -458,13 +459,25 @@
             transform: translateY(0);
         }
     }
+    @media (max-width: 600px) {
+        .booking-actions {
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+        }
+        .booking-actions .btn,
+        .booking-actions .btn-secondary {
+            width: 100%;
+            min-width: unset;
+        }
+    }
 </style>
 
 <!-- ── Stepper ── -->
 <section class="section-card step-shell">
     <div class="stepper">
         <?php
-        $steps = array(1 => 'Booking', 2 => 'Document', 3 => 'Payment');
+        $steps = array(1 => 'Booking', 2 => 'Document');
         foreach ($steps as $step_no => $step_label):
             $is_active = $current_step === $step_no;
             $is_done   = $current_step > $step_no;
@@ -473,7 +486,7 @@
                 <div class="step-badge"><?php echo $is_done ? '&#10003;' : $step_no; ?></div>
                 <div class="step-label"><?php echo html_escape($step_label); ?></div>
             </div>
-            <?php if ($step_no < 3): ?>
+            <?php if ($step_no < count($steps)): ?>
                 <div class="step-line <?php echo $current_step > $step_no ? 'done' : ''; ?>"></div>
             <?php endif; ?>
         <?php endforeach; ?>
@@ -643,17 +656,7 @@
                         value="<?php echo !empty($booking_edit['drop_location']) ? html_escape($booking_edit['drop_location']) : ''; ?>" required>
                 </div>
 
-                <!-- ── 8. Advance Payment ── -->
-                <div>
-                    <label>Advance Payment</label>
-                    <?php $requires_advance = isset($booking_edit['requires_advance']) ? (int) $booking_edit['requires_advance'] : 0; ?>
-                    <label style="display:flex;align-items:center;gap:10px;text-transform:none;letter-spacing:0;font-size:14px;margin-bottom:8px;">
-                        <input type="checkbox" name="requires_advance" id="requires_advance" value="1" style="width:auto;min-height:auto;" <?php echo $requires_advance ? 'checked' : ''; ?>>
-                        I want to pay advance for this booking
-                    </label>
-                    <input type="text" id="required_advance" name="required_advance_display" readonly>
-                    <div class="helper" id="advance_helper">This amount will be paid on the next page only when advance payment is selected.</div>
-                </div>
+
 
             </div><!-- /.form-grid -->
 
@@ -678,8 +681,8 @@
         <div class="eyebrow">Next Steps</div>
         <div class="card-head">
             <div>
-                <h3>Booking first, then document, then payment.</h3>
-                <p>This page is step 1. After saving the booking, the next page opens for document upload and then payment.</p>
+                <h3>Booking first, then document upload.</h3>
+                <p>This page is step 1. After saving the booking, the next page opens for document upload to complete the booking request.</p>
             </div>
         </div>
         <div class="info-grid" style="grid-template-columns:1fr;">
@@ -690,10 +693,6 @@
             <div class="feature-card">
                 <strong>2. Document</strong>
                 <span>Upload Aadhaar Card and Driving License as image or PDF files.</span>
-            </div>
-            <div class="feature-card">
-                <strong>3. Payment</strong>
-                <span>Upload the advance receipt and your booking request will be completed.</span>
             </div>
         </div>
     </aside>
@@ -1063,7 +1062,9 @@
             }
 
             /* ── Advance field ── */
-            advanceInp.value = needsAdvance() && d.advance ? 'Rs. ' + d.advance.toFixed(2) : 'Not selected';
+            if (advanceInp) {
+                advanceInp.value = needsAdvance() && d.advance ? 'Rs. ' + d.advance.toFixed(2) : 'Not selected';
+            }
             if (advanceHelper) {
                 advanceHelper.textContent = needsAdvance() ?
                     'This amount will be paid on the next page.' :
@@ -1081,7 +1082,8 @@
                     h === '24' ? d.p24 : 0) * Math.max(1, packageCount || 1)
             );
 
-            amountInp.value = price > 0 ? price.toFixed(2) : '';
+            var showPrice = kmMode ? (km > 0) : (h !== '');
+            amountInp.value = showPrice ? price.toFixed(2) : '';
 
             if (kmMode) {
                 amountLabel.textContent = 'Estimated Amount (KM)';
